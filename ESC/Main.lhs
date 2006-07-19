@@ -4,6 +4,7 @@
 > import System.Directory
 > import System.Environment
 > import System.IO
+> import Monad
 
 > import EMachine.Compiler
 
@@ -18,7 +19,10 @@
 >           let cmd = "gcc -g -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
 >                     " -L"++libdir++" -I"++libdir ++ " -levm -lgc"
 >           exit <- system cmd
->           -- oveFile tmpn
+>           when (KeepC `elem` opts) $ do
+>              rawc <- readFile tmpn
+>              writeFile ((getRoot fn)++".c") rawc
+>           removeFile tmpn
 >           if (exit /= ExitSuccess) 
 >              then exitWith exit
 >              else return ()
@@ -27,10 +31,20 @@
 >     (stem,".e") -> stem
 >     (stem,_) -> fn ++ ".exe"
 
-> usage [fn] = return (fn, [])
+> getRoot fn = case span (/='.') fn of
+>     (stem,_) -> stem
+
+> usage (fn:args) = do let opts = parseArgs args
+>                      return (fn,opts)
 > usage _ = do putStrLn "Epigram Supercombinator Compiler version 0.1"
 >              putStrLn "Usage:\n\tesc <input file>"
 >              exitWith (ExitFailure 1)
+
+> data Option = KeepC -- Don't delete intermediate file
+>   deriving Eq
+
+> parseArgs [] = []
+> parseArgs ("-keepc":args) = KeepC:(parseArgs args)
 
 > tempfile :: IO (FilePath, Handle)
 > tempfile = do env <- environment "TMPDIR"
