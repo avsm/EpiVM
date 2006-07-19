@@ -12,6 +12,7 @@ ${TARGET} : ${OBJS}
 install:
 	mkdir -p ${INSTALLDIR}
 	install libevm.a closure.h ${INSTALLDIR}
+	ranlib ${INSTALLDIR}/libevm.a
 
 clean:
 	rm -f ${OBJS} ${TARGET}

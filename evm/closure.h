@@ -2,7 +2,6 @@
 #define _CLOSURE_H
 
 #include <gc/gc.h>
-#include <malloc.h>
 
 #define EMALLOC GC_MALLOC
 #define EREALLOC GC_REALLOC

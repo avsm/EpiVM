@@ -14,7 +14,7 @@
 >     mainDriver
 
 > fileHeader = "#include \"closure.h\"\n#include <assert.h>\n\n"
-> mainDriver = "int main() { _do__U_main(); return 0; }\n"
+> mainDriver = "int main() { GC_init(); _do__U_main(); return 0; }\n"
 
 > showarg _ i = "void* " ++ loc i
 
