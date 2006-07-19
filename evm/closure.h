@@ -43,6 +43,7 @@ typedef struct {
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
 #define ISCON(x) ((Closure*)x)->ty==CON
+#define ISINT(x) ((Closure*)x)->ty==INT
 
 // Evaluate x to head normal form
 void EVAL(void** x);

@@ -25,6 +25,7 @@ at this stage.
 >             | PROJ TmpVar TmpVar Int -- project into a register
 >             | PROJVAR Local TmpVar Int -- project into a local variable
 >             | CASE TmpVar [Bytecode]
+>             | IF TmpVar Bytecode Bytecode
 >             | OP TmpVar Op TmpVar TmpVar
 >             | LOCALS Int -- allocate space for locals
 >             | TMPS Int -- declare temporary variables
@@ -94,6 +95,12 @@ compile code to do just that.
 >            sccode <- ecomp scrutinee screg
 >            altcode <- altcomps alts screg reg
 >            return $ sccode ++ [EVAL screg, CASE screg altcode]
+>     ecomp (If a t e) reg =
+>         do areg <- new_tmp
+>            acode <- ecomp a areg
+>            tcode <- ecomp t reg
+>            ecode <- ecomp e reg
+>            return $ acode ++ [EVAL areg, IF areg tcode ecode]
 >     ecomp (Op op l r) reg =
 >         do lreg <- new_tmp
 >            rreg <- new_tmp

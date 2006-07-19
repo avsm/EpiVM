@@ -70,6 +70,11 @@
 >       | TokenTimes
 >       | TokenDivide
 >       | TokenEquals
+>       | TokenEQ
+>       | TokenGE
+>       | TokenLE
+>       | TokenGT
+>       | TokenLT
 >       | TokenArrow
 >       | TokenColon
 >       | TokenUnit
@@ -77,6 +82,9 @@
 >       | TokenLet
 >       | TokenCase
 >       | TokenOf
+>       | TokenIf
+>       | TokenThen
+>       | TokenElse
 >       | TokenIn
 >       | TokenError
 >       | TokenImpossible
@@ -109,6 +117,11 @@
 > lexer cont ('-':cs) = cont TokenMinus cs
 > lexer cont ('*':cs) = cont TokenTimes cs
 > lexer cont ('/':cs) = cont TokenDivide cs
+> lexer cont ('=':'=':cs) = cont TokenEQ cs
+> lexer cont ('>':'=':cs) = cont TokenGE cs
+> lexer cont ('<':'=':cs) = cont TokenLE cs
+> lexer cont ('>':cs) = cont TokenGT cs
+> lexer cont ('<':cs) = cont TokenLT cs
 > lexer cont ('=':cs) = cont TokenEquals cs
 > lexer cont (':':cs) = cont TokenColon cs
 > lexer cont ('!':cs) = cont TokenProj cs
@@ -183,6 +196,9 @@
 >       ("let",rest) -> cont TokenLet rest
 >       ("case",rest) -> cont TokenCase rest
 >       ("of",rest) -> cont TokenOf rest
+>       ("if",rest) -> cont TokenIf rest
+>       ("then",rest) -> cont TokenThen rest
+>       ("else",rest) -> cont TokenElse rest
 >       ("in",rest) -> cont TokenIn rest
 >       ("error",rest) -> cont TokenError rest
 >       ("impossible",rest) -> cont TokenImpossible rest

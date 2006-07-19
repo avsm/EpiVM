@@ -106,6 +106,12 @@
 >                   "switch(TAG(" ++ tmp v ++")) {\n" ++
 >                   altscode
 >                   ++ "}"
+>    cg (IF v t e) = do
+>        tcode <- cgs t
+>        ecode <- cgs e
+>        return $ "assert(ISINT("++tmp v++"));\n" ++
+>                 "if (GETINT("++tmp v++")) {\n" ++ tcode ++ "} else {\n" ++
+>                 ecode ++ "}"
 >    cg (EVAL v) = return $ "EVAL(&"++tmp v++");"
 >    cg (RETURN t) = return $ "return "++tmp t++";"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
@@ -147,4 +153,9 @@
 > doOp t Minus l r = tmp t ++ " = INTOP(-,"++tmp l ++ ", "++tmp r++");"
 > doOp t Times l r = tmp t ++ " = INTOP(*,"++tmp l ++ ", "++tmp r++");"
 > doOp t Divide l r = tmp t ++ " = INTOP(/,"++tmp l ++ ", "++tmp r++");"
+> doOp t OpEQ l r = tmp t ++ " = INTOP(==,"++tmp l ++ ", "++tmp r++");"
+> doOp t OpGT l r = tmp t ++ " = INTOP(>,"++tmp l ++ ", "++tmp r++");"
+> doOp t OpLT l r = tmp t ++ " = INTOP(<,"++tmp l ++ ", "++tmp r++");"
+> doOp t OpGE l r = tmp t ++ " = INTOP(>=,"++tmp l ++ ", "++tmp r++");"
+> doOp t OpLE l r = tmp t ++ " = INTOP(<=,"++tmp l ++ ", "++tmp r++");"
 

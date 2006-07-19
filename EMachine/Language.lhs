@@ -49,6 +49,7 @@ Get the arity of a definition in the context
 >           | Const Const -- a constant
 >           | Proj Expr Int -- Project argument, say what type it is
 >           | Case Expr [CaseAlt]
+>           | If Expr Expr Expr
 >           | Op Op Expr Expr -- Infix operator
 >           | Let Name Type Expr Expr -- Let binding
 >           | Error String -- Exit with error message
@@ -62,7 +63,7 @@ Get the arity of a definition in the context
 >                    }
 >   deriving Show
 
-> data Op = Plus | Minus | Times | Divide | EQ | LT | LE | GT | GE
+> data Op = Plus | Minus | Times | Divide | OpEQ | OpLT | OpLE | OpGT | OpGE
 >   deriving Show
 
 Supercombinator definitions

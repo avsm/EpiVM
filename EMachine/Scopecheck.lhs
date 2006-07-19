@@ -49,6 +49,11 @@ checking we do.
 >                v' <- tc env v
 >                alts' <- tcalts env alts
 >                return $ Case v' alts'
+>    tc env (If a t e) = do
+>                a' <- tc env a
+>                t' <- tc env t
+>                e' <- tc env e
+>                return $ If a' t' e'
 >    tc env (App f as) = do
 >                f' <- tc env f
 >                as' <- mapM (tc env) as

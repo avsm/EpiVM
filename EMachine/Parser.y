@@ -38,6 +38,9 @@ import EMachine.Lexer
       let             { TokenLet }
       case            { TokenCase }
       of              { TokenOf }
+      if              { TokenIf }
+      then            { TokenThen }
+      else            { TokenElse }
       in              { TokenIn }
       foreign         { TokenForeign }
       errorcode       { TokenError }
@@ -51,6 +54,11 @@ import EMachine.Lexer
       '*'             { TokenTimes }
       '/'             { TokenDivide }
       '='             { TokenEquals }
+      eq              { TokenEQ }
+      le              { TokenLE }
+      ge              { TokenGE }
+      '<'             { TokenLT }
+      '>'             { TokenGT }
       ':'             { TokenColon }
       '!'             { TokenProj }
       ';'             { TokenSemi }
@@ -60,6 +68,9 @@ import EMachine.Lexer
       include         { TokenCInclude }
 
 %left LET
+%left IF
+%left eq
+%left '<' '>' le ge
 %left '+' '-'
 %left '*' '/'
 %nonassoc '!'
@@ -102,6 +113,7 @@ Expr : name { R $1 }
      | Const { Const $1 }
      | Expr '!' int { Proj $1 $3 }
      | let name ':' Type '=' Expr in Expr %prec LET { Let $2 $4 $6 $8 }
+     | if Expr then Expr else Expr %prec IF { If $2 $4 $6 }
      | CaseExpr { $1 }
      | MathExpr { $1 }
      | errorcode string { Error $2 }
@@ -126,6 +138,11 @@ MathExpr : Expr '+' Expr { Op Plus $1 $3 }
          | Expr '-' Expr { Op Minus $1 $3 }
          | Expr '*' Expr { Op Times $1 $3 }
          | Expr '/' Expr { Op Divide $1 $3 }
+         | Expr '<' Expr { Op OpLT $1 $3 }
+         | Expr '>' Expr { Op OpGT $1 $3 }
+         | Expr le Expr { Op OpLE $1 $3 }
+         | Expr ge Expr { Op OpGE $1 $3 }
+         | Expr eq Expr { Op OpEQ $1 $3 }
 
 ExprList :: { [Expr] }
 ExprList : { [] }
