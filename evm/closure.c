@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 VAL CLOSURE(func x, int arity, int args, void** block)
 {
@@ -108,6 +109,51 @@ int GETINT(void* x)
     return (int)(((VAL)x)->info);
 }
 
+void* MKSTR(char* x)
+{
+    VAL c = MKCLOSURE;
+    c->ty = STRING;
+    c->info = (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
+    strcpy(c->info,x);
+    return c;
+}
+
+char* GETSTR(void* x)
+{
+    return (char*)(((VAL)x)->info);
+}
+
 
 void printInt(int x) { printf("%d\n",x); }
+void putStr(char* s) { printf("%s",s); }
 
+int readInt() {
+    return atoi(readStr());
+}
+
+char* readStr() {
+    char* buf = EMALLOC(512); // yeah, right...
+    fgets(buf,512,stdin);
+    char *loc = strchr(buf,'\n');
+    *loc = '\0';
+    return buf;       
+}
+
+int strToInt(char* str)
+{
+    return atoi(str);
+}
+
+char* intToStr(int x)
+{
+    char* buf = EMALLOC(16);
+    sprintf(buf,"%d",x);
+    return buf;
+}
+
+char* append(char* x, char* y) {
+    char* buf = EMALLOC((strlen(x)+strlen(y))*sizeof(char));
+    strcpy(buf,x);
+    strcat(buf,y);
+    return buf;
+}

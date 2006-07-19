@@ -8,8 +8,6 @@
 
 > import EMachine.Compiler
 
-> import Prefix
-
 > libdir = prefix ++ "/lib/evm"
 
 > main = do args <- getArgs

@@ -27,6 +27,7 @@
 >     "void* " ++ thunk fname ++ "(void** block);\n" ++
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ");\n" ++
 >     headers xs
+> headers ((Include h):xs) = "#include <"++h++">\n" ++ headers xs
 > headers (_:xs) = headers xs
 
 > wrappers [] = ""
@@ -79,8 +80,9 @@
 >                                           show (length args) ++ 
 >                                           ", block);"
 >    cg (FOREIGN ty t fn args) = return $ 
->                                castFrom t ty ++
->                                fn ++ "(" ++ foreignArgs args ++ ");"
+>                                castFrom t ty 
+>                                   (fn ++ "(" ++ foreignArgs args ++ ")")
+>                                   ++ ";"
 >    cg (VAR t l) = return $ tmp t ++ " = " ++ loc l ++ ";"
 >    cg (ASSIGN l t) = return $ loc l ++ " = " ++ tmp t ++ ";"
 >    cg (CON t tag args) = do put True
@@ -92,7 +94,7 @@
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
 >    cg (INT t i) = return $ tmp t ++ " = MKINT("++show i++");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
->    cg (STRING t s) = return $ tmp t ++ " = MKSTRING("++show s++");"
+>    cg (STRING t s) = return $ tmp t ++ " = MKSTR("++show s++");"
 >    cg (PROJ t1 t2 i) = return $ tmp t1 ++ " = PROJECT((Closure*)"++tmp t2++", "++show i++");"
 >    cg (PROJVAR l t i) = return $ loc l ++ " = PROJECT((Closure*)"++tmp t++", "++show i++");"
 >    cg (OP t op l r) = return $ doOp t op l r 
@@ -133,10 +135,13 @@
 > foreignArgs [x] = foreignArg x
 > foreignArgs (x:xs) = foreignArg x ++ ", " ++ foreignArgs xs
 
-> castFrom t TyUnit = ""
-> castFrom t _ = tmp t ++ " = (void*)"
+> castFrom t TyUnit x = x
+> castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
+> castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
+> castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
 
 > foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
+> foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
 
 > doOp t Plus l r = tmp t ++ " = INTOP(+,"++tmp l ++ ", "++tmp r++");"
 > doOp t Minus l r = tmp t ++ " = INTOP(-,"++tmp l ++ ", "++tmp r++");"

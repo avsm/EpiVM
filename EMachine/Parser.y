@@ -57,6 +57,7 @@ import EMachine.Lexer
       ','             { TokenComma }
       '|'             { TokenBar }
       arrow           { TokenArrow }
+      include         { TokenCInclude }
 
 %left LET
 %left '+' '-'
@@ -85,6 +86,7 @@ Type : inttype { TyInt }
 Declaration :: { Decl }
 Declaration: name '(' TypeList ')' arrow Type '=' Expr ';' 
                { mkBind $1 (map snd $3) $6 (map fst $3) $8 }
+           | include string { Include $2 }
 
 
 TypeList :: { [(Name,Type)] }

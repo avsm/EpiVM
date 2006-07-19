@@ -7,7 +7,7 @@ package: rts
 
 configure:
 	runhaskell Setup.lhs configure --user --ghc --prefix=$(PREFIX)
-	cd ESC; echo "module Prefix where prefix=\"$(PREFIX)\"" > Prefix.hs
+	cd EMachine; echo "module EMachine.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
 
 rts:
 	$(MAKE) -C evm

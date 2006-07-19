@@ -9,7 +9,7 @@
 > -- 
 > -- Public interface for Epigram Supercombinator Compiler
 
-> module EMachine.Compiler(compile) where
+> module EMachine.Compiler(compile, prefix) where
 
 Brings everything together; parsing, checking, code generation
 
@@ -19,6 +19,7 @@ Brings everything together; parsing, checking, code generation
 > import EMachine.Parser
 > import EMachine.Scopecheck
 > import EMachine.CodegenC
+> import EMachine.Prefix
 
 > -- |Compile a source file in supercombinator language to C
 > compile :: FilePath -- ^ Input file
@@ -37,3 +38,6 @@ Brings everything together; parsing, checking, code generation
 
 > compileDecls (Failure err _ _) _ = putStrLn err
 
+> -- |Get the path where the required C libraries and include files are stored
+> prefix :: FilePath
+> prefix = libprefix

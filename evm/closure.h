@@ -59,12 +59,22 @@ VAL CLOSURE_ADDN(VAL x, int args, void** block);
 // Project an argument from a constructor
 void* PROJECT(VAL x, int arg);
 
-// Create a new integer
+// Create new primitive values
 void* MKINT(int x);
+void* MKSTR(char* str);
 // Get an integer from a closure
 int GETINT(void* x);
+char* GETSTR(void* x);
 
+// Some basic communication with the outside world
+
+void putStr(char* str);
 void printInt(int x);
 
+int readInt();
+char* readStr();
+
+int strToInt(char* str);
+char* intToStr(int x);
 
 #endif

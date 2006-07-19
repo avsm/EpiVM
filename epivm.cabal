@@ -14,3 +14,4 @@ Synopsis:	Compiler for Supercombinator language
 Exposed-modules: EMachine.Compiler
 Other-modules: EMachine.Bytecode EMachine.Parser EMachine.Scopecheck
                EMachine.Language EMachine.Lexer EMachine.CodegenC
+	       EMachine.Prefix
