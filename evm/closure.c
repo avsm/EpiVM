@@ -80,6 +80,7 @@ void EVAL(void** xin) {
 	    result = fn->fn(fn->args);
 	    CLOSURE_ADDN(result, excess, fn->args + fn->arity);
 	    UPDATE(xin,result);
+	    EVAL(xin);
 	}
 	break;
     default:
@@ -99,6 +100,7 @@ void* MKINT(int x)
     VAL c = MKCLOSURE;
     c->ty = INT;
     c->info = (void*)x;
+    return c;
 }
 
 int GETINT(void* x)

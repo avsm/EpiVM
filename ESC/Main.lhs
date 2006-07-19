@@ -15,10 +15,10 @@
 >           (fn, opts) <- usage args
 >           (tmpn,tmph) <- tempfile
 >           compile fn tmph
->           let cmd = "gcc -O2 -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
+>           let cmd = "gcc -g -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
 >                     " -L"++libdir++" -I"++libdir ++ " -levm -lgc"
 >           exit <- system cmd
->           removeFile tmpn
+>           -- oveFile tmpn
 >           if (exit /= ExitSuccess) 
 >              then exitWith exit
 >              else return ()
