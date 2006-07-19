@@ -1,0 +1,16 @@
+Name:		epivm
+Version:	0.1
+Author:		Edwin Brady
+License:	BSD3
+License-file:	LICENSE
+Maintainer:	eb@dcs.st-and.ac.uk
+Homepage:	http://www.dcs.st-and.ac.uk/~eb/
+Stability:	experimental
+Build-depends:	base, haskell98, util, mtl, Cabal
+Extensions:	MultiParamTypeClasses, FunctionalDependencies,
+		ExistentialQuantification, OverlappingInstances
+ghc-prof-options: -auto-all
+Synopsis:	Compiler for Supercombinator language
+Exposed-modules: EMachine.Compiler
+Other-modules: EMachine.Bytecode EMachine.Parser EMachine.Scopecheck
+               EMachine.Language EMachine.Lexer EMachine.CodegenC
