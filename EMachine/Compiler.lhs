@@ -9,7 +9,7 @@
 > -- 
 > -- Public interface for Epigram Supercombinator Compiler
 
-> module EMachine.Compiler(compile, prefix) where
+> module EMachine.Compiler(compile, libdir) where
 
 Brings everything together; parsing, checking, code generation
 
@@ -39,5 +39,5 @@ Brings everything together; parsing, checking, code generation
 > compileDecls (Failure err _ _) _ = putStrLn err
 
 > -- |Get the path where the required C libraries and include files are stored
-> prefix :: FilePath
-> prefix = libprefix
+> libdir :: FilePath
+> libdir = libprefix ++ "/lib/evm"

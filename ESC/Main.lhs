@@ -8,8 +8,6 @@
 
 > import EMachine.Compiler
 
-> libdir = prefix ++ "/lib/evm"
-
 > main = do args <- getArgs
 >           (fn, opts) <- usage args
 >           (tmpn,tmph) <- tempfile

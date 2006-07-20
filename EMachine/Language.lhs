@@ -48,7 +48,7 @@ Get the arity of a definition in the context
 >           | LazyApp Expr [Expr] -- Lazy function application
 >           | Con Int [Expr] -- Constructor, tags, arguments (fully applied)
 >           | Const Const -- a constant
->           | Proj Expr Int -- Project argument, say what type it is
+>           | Proj Expr Int -- Project argument
 >           | Case Expr [CaseAlt]
 >           | If Expr Expr Expr
 >           | Op Op Expr Expr -- Infix operator

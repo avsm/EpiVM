@@ -1,8 +1,8 @@
 print (x:Int) -> Unit =
-  let foo:Unit = foreign Unit "printInt" (x:Int) in unit;
+  let foo:Unit = foreign Unit "printInt" (x:Int) in unit
 
 main () -> Unit =
-    print(foo(12));
+    print(foo(12))
 
 foo (x:Int) -> Int =
-    if x<=0 then 1 else x*foo(x-1);
+    if x<=0 then 1 else x*foo(x-1)

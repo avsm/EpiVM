@@ -72,6 +72,7 @@ import EMachine.Lexer
 %left LET
 %left IF
 %left eq
+%left ';'
 %left '<' '>' le ge
 %left '+' '-'
 %left '*' '/'
@@ -97,7 +98,7 @@ Type : inttype { TyInt }
      | funtype { TyFun }
 
 Declaration :: { Decl }
-Declaration: name '(' TypeList ')' arrow Type '=' Expr ';' 
+Declaration: name '(' TypeList ')' arrow Type '=' Expr
                { mkBind $1 (map snd $3) $6 (map fst $3) $8 }
            | include string { Include $2 }
 
@@ -117,6 +118,7 @@ Expr : name { R $1 }
      | Const { Const $1 }
      | Expr '!' int { Proj $1 $3 }
      | let name ':' Type '=' Expr in Expr %prec LET { Let $2 $4 $6 $8 }
+     | Expr ';' Expr { Let (MN "unused" 0) TyUnit $1 $3 }
      | if Expr then Expr else Expr %prec IF { If $2 $4 $6 }
      | CaseExpr { $1 }
      | MathExpr { $1 }
