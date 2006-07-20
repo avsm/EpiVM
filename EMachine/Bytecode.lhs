@@ -80,8 +80,9 @@ compile code to do just that.
 >     ecomp :: Expr -> TmpVar -> State CompileState Bytecode
 >     ecomp (V v) reg = 
 >         do return [VAR reg v]
->     ecomp (R x) reg = acomp (R x) [] reg 
->     ecomp (App f as) reg = acomp f as reg
+>     ecomp (R x) reg = acomp False (R x) [] reg 
+>     ecomp (App f as) reg = acomp False f as reg
+>     ecomp (LazyApp f as) reg = acomp True f as reg
 >     ecomp (Con t as) reg = 
 >         do (argcode, argregs) <- ecomps as
 >            return $ argcode ++ [CON reg t argregs]
@@ -160,15 +161,15 @@ a default inserted (i.e., tag can be ignored).
 
 Compile an application of a function to arguments
 
->     acomp :: Expr -> [Expr] -> TmpVar -> State CompileState Bytecode
->     acomp (R x) args reg
->           | arity x ctxt == length args =
+>     acomp :: Bool -> Expr -> [Expr] -> TmpVar -> State CompileState Bytecode
+>     acomp lazy (R x) args reg
+>           | lazy == False && arity x ctxt == length args =
 >               do (argcode, argregs) <- ecomps args
 >                  return $ argcode ++ [CALL reg x argregs]
 >           | otherwise =
 >               do (argcode, argregs) <- ecomps args
 >                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs]
->     acomp f args reg
+>     acomp _ f args reg
 >           = do (argcode, argregs) <- ecomps args
 >                reg' <- new_tmp
 >                fcode <- ecomp f reg'

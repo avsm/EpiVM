@@ -86,6 +86,7 @@
 >       | TokenThen
 >       | TokenElse
 >       | TokenIn
+>       | TokenLazy
 >       | TokenError
 >       | TokenImpossible
 >       | TokenProj
@@ -200,6 +201,7 @@
 >       ("then",rest) -> cont TokenThen rest
 >       ("else",rest) -> cont TokenElse rest
 >       ("in",rest) -> cont TokenIn rest
+>       ("lazy",rest) -> cont TokenLazy rest
 >       ("error",rest) -> cont TokenError rest
 >       ("impossible",rest) -> cont TokenImpossible rest
 >       ("foreign",rest) -> cont TokenForeign rest

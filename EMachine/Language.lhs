@@ -45,6 +45,7 @@ Get the arity of a definition in the context
 > data Expr = V Int -- Locally bound name
 >           | R Name -- Global reference
 >           | App Expr [Expr] -- Function application
+>           | LazyApp Expr [Expr] -- Lazy function application
 >           | Con Int [Expr] -- Constructor, tags, arguments (fully applied)
 >           | Const Const -- a constant
 >           | Proj Expr Int -- Project argument, say what type it is
