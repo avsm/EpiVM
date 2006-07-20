@@ -67,6 +67,9 @@ void* MKSTR(char* str);
 int GETINT(void* x);
 char* GETSTR(void* x);
 
+// Exit with fatal error
+void ERROR(char* msg);
+
 // Some basic communication with the outside world
 
 void putStr(char* str);

@@ -123,6 +123,11 @@ char* GETSTR(void* x)
     return (char*)(((VAL)x)->info);
 }
 
+void ERROR(char* msg)
+{
+    printf("*** error : %s ***\n",msg);
+    exit(1);
+}
 
 void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }

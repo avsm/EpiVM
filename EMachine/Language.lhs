@@ -21,7 +21,7 @@ Raw data types. Int, Char, Bool are unboxed.
 >            | MkString String
 >            | MkBool Bool
 >            | MkUnit
->   deriving Show
+>   deriving (Show, Eq)
 
 > data Name = UN String  -- user name
 >           | MN String Int -- machine generated name
@@ -56,16 +56,19 @@ Get the arity of a definition in the context
 >           | Error String -- Exit with error message
 >           | Impossible -- Claimed impossible to reach code
 >           | ForeignCall Type String [(Expr, Type)] -- Foreign function call
->   deriving Show
+>   deriving (Show, Eq)
 
 > data CaseAlt = Alt { alt_tag :: Int,
 >                      alt_args :: [(Name, Type)], -- bound arguments
 >                      alt_expr :: Expr -- what to do
 >                    }
->   deriving Show
+>   deriving (Show, Eq)
+
+> instance Ord CaseAlt where -- only the tag matters
+>    compare (Alt t1 _ _) (Alt t2 _ _) = compare t1 t2
 
 > data Op = Plus | Minus | Times | Divide | OpEQ | OpLT | OpLE | OpGT | OpGE
->   deriving Show
+>   deriving (Show, Eq)
 
 Supercombinator definitions
 

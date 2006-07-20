@@ -19,10 +19,10 @@ ones () -> Data
 
 printList (x:Data) -> Data
   = case x of {
-	Con 0 () -> putStrLn("nil")
-      | Con 1 (y:Int, ys:Data) -> 
+        Con 1 (y:Int, ys:Data) -> 
 	   let foo:Unit = putStr(append(intToStr(y),", ")) in
 	   printList(ys)
+      | Con 0 () -> putStrLn("nil")
     };
 
 putStr (x:String) -> Unit =

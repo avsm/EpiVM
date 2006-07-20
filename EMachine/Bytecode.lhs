@@ -1,6 +1,8 @@
 > module EMachine.Bytecode where
 
 > import Control.Monad.State
+> import List
+
 > import EMachine.Language
 
 > type Local = Int
@@ -94,7 +96,7 @@ compile code to do just that.
 >     ecomp (Case scrutinee alts) reg =
 >         do screg <- new_tmp
 >            sccode <- ecomp scrutinee screg
->            altcode <- altcomps alts screg reg
+>            altcode <- altcomps (order alts) screg reg
 >            return $ sccode ++ [EVAL screg, CASE screg altcode]
 >     ecomp (If a t e) reg =
 >         do areg <- new_tmp
@@ -131,8 +133,14 @@ compile code to do just that.
 >            ecomps' (code++ecode) (tmps++[reg]) es
 
 Compile case alternatives.
-FIXME: Reorder so that the tags are in order and gaps are filled with error
-case.
+
+>     order :: [CaseAlt] -> [CaseAlt]
+>     order xs = insertError 0 (sort xs)
+>     insertError t [] = []
+>     insertError t (a@(Alt tn _ _):xs)
+>         = (errors t tn) ++ a:(insertError (tn+1) xs)
+>     errors x end | x == end = []
+>                  | otherwise = (Alt x [] Impossible):(errors (x+1) end)
 
 >     altcomps :: [CaseAlt] -> TmpVar -> TmpVar -> 
 >                 State CompileState [Bytecode]
