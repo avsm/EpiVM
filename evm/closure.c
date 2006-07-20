@@ -40,9 +40,16 @@ VAL CONSTRUCTOR(int tag, int arity, void** block)
     return c;
 }
 
-VAL CLOSURE_ADDN(VAL x, int args, void** block)
+// Argh, this needs to make a copy
+VAL CLOSURE_ADDN(VAL xin, int args, void** block)
 {
-    assert(x->ty == FUN);
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
@@ -54,10 +61,33 @@ VAL CLOSURE_ADDN(VAL x, int args, void** block)
     return x;
 }
 
-void EVAL(void** xin) {
+VAL CLOSURE_APPLY(VAL f, int args, void** block)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADDN(f,args,block);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = args;
+    if (args==0) {
+	fn->args = 0;
+    } else {
+	fn->args = MKARGS(args);
+	memcpy((void*)(fn->args), (void*)block, args*sizeof(VAL));
+    }
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+void EVAL(VAL x) {
     VAL result;
-    VAL x = (VAL)(*xin);
+//    VAL x = (VAL)(*xin);
     fun* fn;
+    thunk* th;
     int excess;
 
     switch(x->ty) {
@@ -73,16 +103,31 @@ void EVAL(void** xin) {
 	excess = (fn->arg_end - fn->args) - fn->arity;
 	if (excess == 0) {
 	    result = fn->fn(fn->args);
-	    UPDATE(xin,result);
+	    // If the result is still a function, better eval again to make
+	    // more progress
+	    if (result->ty==FUN) {
+		EVAL(result);
+	    }
+	    UPDATE(x,result);
 	}
 	// If there are too many arguments, run it with the right number
 	// then apply the remaining arguments to the resulting closure
 	else if (excess > 0) {
 	    result = fn->fn(fn->args);
-	    CLOSURE_ADDN(result, excess, fn->args + fn->arity);
-	    UPDATE(xin,result);
-	    EVAL(xin);
+	    result = CLOSURE_APPLY(result, excess, fn->args + fn->arity);
+	    EVAL(result);
+	    UPDATE(x,result);
 	}
+	break;
+    case THUNK:
+	th = (thunk*)(x->info);
+	// Evaluate inner thunk, which should give us a function
+	EVAL((VAL)(th->fn));
+	// Add this thunk's arguments to it
+	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
+	// And off we go again...
+	EVAL((VAL)(th->fn));
+	UPDATE(x,((VAL)(th->fn)));
 	break;
     default:
 	assert(0); // Can't happen

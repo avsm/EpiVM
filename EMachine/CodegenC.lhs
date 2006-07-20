@@ -75,7 +75,7 @@
 >           ", block);"
 >    cg (ADDARGS t th args) = do put True
 >                                return $ argblock "block" args ++ tmp t ++ 
->                                           " = CLOSURE_ADDN((VAL)" ++ 
+>                                           " = CLOSURE_APPLY((VAL)" ++ 
 >                                           tmp th ++ ", " ++ 
 >                                           show (length args) ++ 
 >                                           ", block);"
@@ -112,7 +112,7 @@
 >        return $ "assert(ISINT("++tmp v++"));\n" ++
 >                 "if (GETINT("++tmp v++")) {\n" ++ tcode ++ "} else {\n" ++
 >                 ecode ++ "}"
->    cg (EVAL v) = return $ "EVAL(&"++tmp v++");"
+>    cg (EVAL v) = return $ "EVAL((VAL)"++tmp v++");"
 >    cg (RETURN t) = return $ "return "++tmp t++";"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
 >    -- cg x = return $ "NOP; // not done " ++ show x

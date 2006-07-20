@@ -8,6 +8,7 @@
 
 #define MKCON (con*)EMALLOC(sizeof(con))
 #define MKFUN (fun*)EMALLOC(sizeof(fun))
+#define MKTHUNK (thunk*)EMALLOC(sizeof(thunk))
 #define MKCLOSURE (Closure*)EMALLOC(sizeof(Closure))
 #define MKUNIT (void*)0
 
@@ -16,7 +17,7 @@
 #define MKARGS(x) (void**)EMALLOC(sizeof(Closure)*x);
 #define MOREARGS(args,x) (void**)EREALLOC(args,sizeof(Closure)*x);
 
-typedef enum { FUN, CON, INT, FLOAT, STRING, UNIT } ClosureType;
+typedef enum { FUN, THUNK, CON, INT, FLOAT, STRING, UNIT } ClosureType;
 
 typedef struct {
     ClosureType ty;
@@ -35,27 +36,36 @@ typedef struct {
 } fun;
 
 typedef struct {
+    void* fn;
+    void** args;
+    int numargs;
+} thunk;
+
+typedef struct {
     int tag;
     void** args;
 } con;
 
-#define UPDATE(x,res) *x = res; // x->ty = res->ty; x->info=res->info;
+#define UPDATE(x,res) x->ty = res->ty; x->info=res->info;
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
 #define ISCON(x) ((Closure*)x)->ty==CON
 #define ISINT(x) ((Closure*)x)->ty==INT
 
 // Evaluate x to head normal form
-void EVAL(void** x);
+void EVAL(VAL x);
 
 // Return a new constructor
 VAL CONSTRUCTOR(int tag, int arity, void** block);
 
-// Return a new thunk
+// Return a new function node
 VAL CLOSURE(func x, int arity, int args, void** block);
 
 // Add arguments to an already existing thunk
 VAL CLOSURE_ADDN(VAL x, int args, void** block);
+
+// Apply a closure to some arguments
+VAL CLOSURE_APPLY(VAL x, int args, void** block);
 
 // Project an argument from a constructor
 void* PROJECT(VAL x, int arg);
