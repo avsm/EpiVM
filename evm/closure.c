@@ -105,7 +105,7 @@ void EVAL(VAL x) {
 	    result = fn->fn(fn->args);
 	    // If the result is still a function, better eval again to make
 	    // more progress
-	    if (result->ty==FUN) {
+	    if (result->ty==FUN || result->ty==THUNK) {
 		EVAL(result);
 	    }
 	    UPDATE(x,result);
@@ -172,6 +172,14 @@ void ERROR(char* msg)
 {
     printf("*** error : %s ***\n",msg);
     exit(1);
+}
+
+void* MKFREE(int x)
+{
+    VAL c = MKCLOSURE;
+    c->ty = FREEVAR;
+    c->info = (void*)x;
+    return c;
 }
 
 void printInt(int x) { printf("%d\n",x); }

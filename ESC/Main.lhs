@@ -12,7 +12,7 @@
 >           (fn, opts) <- usage args
 >           (tmpn,tmph) <- tempfile
 >           compile fn tmph
->           let cmd = "gcc -g -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
+>           let cmd = "gcc -pg -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
 >                     " -L"++libdir++" -I"++libdir ++ " -levm -lgc"
 >           exit <- system cmd
 >           when (KeepC `elem` opts) $ do

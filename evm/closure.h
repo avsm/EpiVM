@@ -2,6 +2,7 @@
 #define _CLOSURE_H
 
 #include <gc/gc.h>
+#include <stdio.h>
 
 #define EMALLOC GC_MALLOC
 #define EREALLOC GC_REALLOC
@@ -13,11 +14,22 @@
 #define MKUNIT (void*)0
 
 #define INTOP(op,x,y) MKINT((int)(((VAL)x)->info) op (int)(((VAL)y)->info))
+#define CHECKEVALUATED(x) if(((VAL)x)->ty==FUN || ((VAL)x)->ty==THUNK \
+    || ((VAL)x)->ty==FREEVAR) return 0;
 
 #define MKARGS(x) (void**)EMALLOC(sizeof(Closure)*x);
 #define MOREARGS(args,x) (void**)EREALLOC(args,sizeof(Closure)*x);
 
-typedef enum { FUN, THUNK, CON, INT, FLOAT, STRING, UNIT } ClosureType;
+typedef enum { 
+    FUN, 
+    THUNK, 
+    CON, 
+    INT, 
+    FLOAT, 
+    STRING, 
+    UNIT, 
+    FREEVAR 
+} ClosureType;
 
 typedef struct {
     ClosureType ty;
@@ -76,6 +88,8 @@ void* MKSTR(char* str);
 // Get an integer from a closure
 int GETINT(void* x);
 char* GETSTR(void* x);
+
+void* MKFREE(int x);
 
 // Exit with fatal error
 void ERROR(char* msg);

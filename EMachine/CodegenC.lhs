@@ -67,6 +67,8 @@
 
 >    cg (CALL t fn args) = return $ tmp t ++ " = " ++ quickcall fn ++ 
 >                          targs "(" args ++ ");"
+>    cg (TAILCALL t fn args) = return $ "return " ++ quickcall fn ++ 
+>                          targs "(" args ++ ");"
 >    cg (THUNK t ar fn args) = do
 >        put True
 >        return $ argblock "block" args ++ tmp t ++ 
