@@ -263,7 +263,7 @@ VAL CLOSURE_APPLY(VAL f, int args, void** block)
     return c;
 }
 
-VAL CLOSURE_APPLY1(VAL f, VAL a1)
+VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
 {
     VAL c = MKCLOSURE;
     thunk* fn = MKTHUNK;
@@ -281,7 +281,7 @@ VAL CLOSURE_APPLY1(VAL f, VAL a1)
     return c;
 }
 
-VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
+VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 {
     VAL c = MKCLOSURE;
     thunk* fn = MKTHUNK;
@@ -300,7 +300,7 @@ VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     return c;
 }
 
-VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
+VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 {
     VAL c = MKCLOSURE;
     thunk* fn = MKTHUNK;
@@ -320,7 +320,7 @@ VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
     return c;
 }
 
-VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
+VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 {
     VAL c = MKCLOSURE;
     thunk* fn = MKTHUNK;
@@ -341,7 +341,7 @@ VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
     return c;
 }
 
-VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
     VAL c = MKCLOSURE;
     thunk* fn = MKTHUNK;
@@ -361,6 +361,96 @@ VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     c->ty = THUNK;
     c->info = (void*)fn;
     return c;
+}
+
+VAL CLOSURE_APPLY1(VAL f, VAL a1)
+{
+    if (f->ty==FUN) {
+	fun* finf = (fun*)(f->info);
+	int got = finf->arg_end-finf->args;
+	if (finf->arity == (got+1)) {
+	    void** block = MKARGS(finf->arity);
+	    memcpy(block, finf->args, got*sizeof(VAL));
+	    block[got] = a1;
+	    return (VAL)(finf->fn(block));
+	}
+	else return CLOSURE_ADD1(f,a1);
+    }
+    else return aux_CLOSURE_APPLY1(f,a1);
+}
+
+VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
+{
+    if (f->ty==FUN) {
+	fun* finf = (fun*)(f->info);
+	int got = finf->arg_end-finf->args;
+	if (finf->arity == (got+2)) {
+	    void** block = MKARGS(finf->arity);
+	    memcpy(block, finf->args, got*sizeof(VAL));
+	    block[got] = a1;
+	    block[got+1] = a2;
+	    return (VAL)(finf->fn(block));
+	}
+	else return CLOSURE_ADD2(f,a1,a2);
+    }
+    else return aux_CLOSURE_APPLY2(f,a1,a2);
+}
+
+VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
+{
+    if (f->ty==FUN) {
+	fun* finf = (fun*)(f->info);
+	int got = finf->arg_end-finf->args;
+	if (finf->arity == (got+3)) {
+	    void** block = MKARGS(finf->arity);
+	    memcpy(block, finf->args, got*sizeof(VAL));
+	    block[got] = a1;
+	    block[got+1] = a2;
+	    block[got+2] = a3;
+	    return (VAL)(finf->fn(block));
+	}
+	else return CLOSURE_ADD3(f,a1,a2,a3);
+    }
+    else return aux_CLOSURE_APPLY3(f,a1,a2,a3);
+}
+
+VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
+{
+    if (f->ty==FUN) {
+	fun* finf = (fun*)(f->info);
+	int got = finf->arg_end-finf->args;
+	if (finf->arity == (got+4)) {
+	    void** block = MKARGS(finf->arity);
+	    memcpy(block, finf->args, got*sizeof(VAL));
+	    block[got] = a1;
+	    block[got+1] = a2;
+	    block[got+2] = a3;
+	    block[got+3] = a4;
+	    return (VAL)(finf->fn(block));
+	}
+	else return CLOSURE_ADD4(f,a1,a2,a3,a4);
+    }
+    else return aux_CLOSURE_APPLY4(f,a1,a2,a3,a4);
+}
+
+VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+{
+    if (f->ty==FUN) {
+	fun* finf = (fun*)(f->info);
+	int got = finf->arg_end-finf->args;
+	if (finf->arity == (got+5)) {
+	    void** block = MKARGS(finf->arity);
+	    memcpy(block, finf->args, got*sizeof(VAL));
+	    block[got] = a1;
+	    block[got+1] = a2;
+	    block[got+2] = a3;
+	    block[got+3] = a4;
+	    block[got+4] = a5;
+	    return (VAL)(finf->fn(block));
+	}
+	else return CLOSURE_ADD5(f,a1,a2,a3,a4,a5);
+    }
+    else return aux_CLOSURE_APPLY5(f,a1,a2,a3,a4,a5);
 }
 
 void EVAL(VAL x) {
