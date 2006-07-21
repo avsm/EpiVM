@@ -40,6 +40,76 @@ VAL CONSTRUCTOR(int tag, int arity, void** block)
     return c;
 }
 
+VAL CONSTRUCTOR1(int tag, VAL a1)
+{
+    VAL c = MKCLOSURE;
+    con* cn = MKCON;
+    cn->tag = tag;
+    cn->args = MKARGS(1);
+    cn->args[0] = a1;
+    c->ty = CON;
+    c->info = (void*)cn;
+    return c;
+}
+
+VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
+{
+    VAL c = MKCLOSURE;
+    con* cn = MKCON;
+    cn->tag = tag;
+    cn->args = MKARGS(2);
+    cn->args[0] = a1;
+    cn->args[1] = a2;
+    c->ty = CON;
+    c->info = (void*)cn;
+    return c;
+}
+
+VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
+{
+    VAL c = MKCLOSURE;
+    con* cn = MKCON;
+    cn->tag = tag;
+    cn->args = MKARGS(3);
+    cn->args[0] = a1;
+    cn->args[1] = a2;
+    cn->args[2] = a3;
+    c->ty = CON;
+    c->info = (void*)cn;
+    return c;
+}
+
+VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
+{
+    VAL c = MKCLOSURE;
+    con* cn = MKCON;
+    cn->tag = tag;
+    cn->args = MKARGS(2);
+    cn->args[0] = a1;
+    cn->args[1] = a2;
+    cn->args[2] = a3;
+    cn->args[3] = a4;
+    c->ty = CON;
+    c->info = (void*)cn;
+    return c;
+}
+
+VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+{
+    VAL c = MKCLOSURE;
+    con* cn = MKCON;
+    cn->tag = tag;
+    cn->args = MKARGS(5);
+    cn->args[0] = a1;
+    cn->args[1] = a2;
+    cn->args[2] = a3;
+    cn->args[3] = a4;
+    cn->args[4] = a5;
+    c->ty = CON;
+    c->info = (void*)cn;
+    return c;
+}
+
 // Argh, this needs to make a copy
 VAL CLOSURE_ADDN(VAL xin, int args, void** block)
 {
@@ -61,6 +131,116 @@ VAL CLOSURE_ADDN(VAL xin, int args, void** block)
     return x;
 }
 
+VAL CLOSURE_ADD1(VAL xin, VAL a1)
+{
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
+    fun* fn = (fun*)(x->info);
+    int diff = fn->arg_end - fn->args;
+
+    fn->args = MOREARGS(fn->args, 1);
+    fn->arg_end = fn->args + diff;
+    fn->arg_end[0] = a1;
+    fn->arg_end+=1;
+
+    return x;
+}
+
+VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
+{
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
+    fun* fn = (fun*)(x->info);
+    int diff = fn->arg_end - fn->args;
+
+    fn->args = MOREARGS(fn->args, 2);
+    fn->arg_end = fn->args + diff;
+    fn->arg_end[0] = a1;
+    fn->arg_end[1] = a2;
+    fn->arg_end+=2;
+
+    return x;
+}
+
+VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
+{
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
+    fun* fn = (fun*)(x->info);
+    int diff = fn->arg_end - fn->args;
+
+    fn->args = MOREARGS(fn->args, 3);
+    fn->arg_end = fn->args + diff;
+    fn->arg_end[0] = a1;
+    fn->arg_end[1] = a2;
+    fn->arg_end[2] = a3;
+    fn->arg_end+=3;
+
+    return x;
+}
+
+VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
+{
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
+    fun* fn = (fun*)(x->info);
+    int diff = fn->arg_end - fn->args;
+
+    fn->args = MOREARGS(fn->args, 2);
+    fn->arg_end = fn->args + diff;
+    fn->arg_end[0] = a1;
+    fn->arg_end[1] = a2;
+    fn->arg_end[2] = a3;
+    fn->arg_end[3] = a4;
+    fn->arg_end+=4;
+
+    return x;
+}
+
+VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+{
+    assert(xin->ty == FUN);
+
+    fun* finf = (fun*)xin->info;
+
+    VAL x = CLOSURE(finf->fn, finf->arity, 
+		    finf->arg_end-finf->args, finf->args);
+
+    fun* fn = (fun*)(x->info);
+    int diff = fn->arg_end - fn->args;
+
+    fn->args = MOREARGS(fn->args, 2);
+    fn->arg_end = fn->args + diff;
+    fn->arg_end[0] = a1;
+    fn->arg_end[1] = a2;
+    fn->arg_end[2] = a3;
+    fn->arg_end[3] = a4;
+    fn->arg_end[4] = a5;
+    fn->arg_end+=2;
+
+    return x;
+}
+
 VAL CLOSURE_APPLY(VAL f, int args, void** block)
 {
     VAL c = MKCLOSURE;
@@ -77,6 +257,106 @@ VAL CLOSURE_APPLY(VAL f, int args, void** block)
 	fn->args = MKARGS(args);
 	memcpy((void*)(fn->args), (void*)block, args*sizeof(VAL));
     }
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+VAL CLOSURE_APPLY1(VAL f, VAL a1)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADD1(f,a1);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = 1;
+    fn->args = MKARGS(1);
+    fn->args[0] = a1;
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADD2(f,a1,a2);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = 2;
+    fn->args = MKARGS(2);
+    fn->args[0] = a1;
+    fn->args[1] = a2;
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADD3(f,a1,a2,a3);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = 2;
+    fn->args = MKARGS(2);
+    fn->args[0] = a1;
+    fn->args[1] = a2;
+    fn->args[2] = a3;
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADD4(f,a1,a2,a3,a4);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = 2;
+    fn->args = MKARGS(2);
+    fn->args[0] = a1;
+    fn->args[1] = a2;
+    fn->args[2] = a3;
+    fn->args[3] = a4;
+
+    c->ty = THUNK;
+    c->info = (void*)fn;
+    return c;
+}
+
+VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+{
+    VAL c = MKCLOSURE;
+    thunk* fn = MKTHUNK;
+    if (f->ty==FUN) {
+	return CLOSURE_ADD5(f,a1,a2,a3,a4,a5);
+    }
+
+    fn->fn = (void*)f;
+    fn->numargs = 2;
+    fn->args = MKARGS(2);
+    fn->args[0] = a1;
+    fn->args[1] = a2;
+    fn->args[2] = a3;
+    fn->args[3] = a4;
+    fn->args[4] = a5;
 
     c->ty = THUNK;
     c->info = (void*)fn;

@@ -69,15 +69,30 @@ void EVAL(VAL x);
 
 // Return a new constructor
 VAL CONSTRUCTOR(int tag, int arity, void** block);
+VAL CONSTRUCTOR1(int tag, VAL a1);
+VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2);
+VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3);
+VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4);
+VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Return a new function node
 VAL CLOSURE(func x, int arity, int args, void** block);
 
 // Add arguments to an already existing thunk
 VAL CLOSURE_ADDN(VAL x, int args, void** block);
+VAL CLOSURE_ADD1(VAL xin, VAL a1);
+VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2);
+VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3);
+VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4);
+VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Apply a closure to some arguments
 VAL CLOSURE_APPLY(VAL x, int args, void** block);
+VAL CLOSURE_APPLY1(VAL x, VAL a1);
+VAL CLOSURE_APPLY2(VAL x, VAL a1, VAL a2);
+VAL CLOSURE_APPLY3(VAL x, VAL a1, VAL a2, VAL a3);
+VAL CLOSURE_APPLY4(VAL x, VAL a1, VAL a2, VAL a3, VAL a4);
+VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Project an argument from a constructor
 void* PROJECT(VAL x, int arg);

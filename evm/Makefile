@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -pg -O2 -Wall
+CFLAGS = -O2 -Wall
 OBJS = closure.o
 INSTALLDIR = ${PREFIX}/lib/evm
 

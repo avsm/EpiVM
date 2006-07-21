@@ -76,11 +76,7 @@
 >           show ar ++ "," ++ show (length args) ++ 
 >           ", block);"
 >    cg (ADDARGS t th args) = do put True
->                                return $ argblock "block" args ++ tmp t ++ 
->                                           " = CLOSURE_APPLY((VAL)" ++ 
->                                           tmp th ++ ", " ++ 
->                                           show (length args) ++ 
->                                           ", block);"
+>                                return $ closureApply t th args
 >    cg (FOREIGN ty t fn args) = return $ 
 >                                castFrom t ty 
 >                                   (fn ++ "(" ++ foreignArgs args ++ ")")
@@ -88,11 +84,7 @@
 >    cg (VAR t l) = return $ tmp t ++ " = " ++ loc l ++ ";"
 >    cg (ASSIGN l t) = return $ loc l ++ " = " ++ tmp t ++ ";"
 >    cg (CON t tag args) = do put True
->                             return $ argblock "block" args ++ tmp t ++
->                                        " = (void*)CONSTRUCTOR(" ++ 
->                                        show tag ++ ", " ++ 
->                                        show (length args) ++
->                                        ", block);"
+>                             return $ constructor t tag args
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
 >    cg (INT t i) = return $ tmp t ++ " = MKINT("++show i++");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
@@ -129,10 +121,31 @@
 >    targs st [x] = st ++ tmp x
 >    targs st (x:xs) = st ++ tmp x ++ targs ", " xs
 
+>    argblock name [] = name ++ " = 0;\n"
 >    argblock name args = name ++ " = EMALLOC(sizeof(void*)*" ++ show (length args) ++ ");\n" ++ ab name args 0
 >    ab nm [] i = ""
 >    ab nm (x:xs) i = nm ++ "[" ++ show i ++ "] = " ++ tmp x ++";\n" ++ 
 >                     ab nm xs (i+1)
+
+>    constructor t tag args 
+>        | length args < 3 && length args > 0
+>          = tmp t ++ " = CONSTRUCTOR" ++ show (length args) ++ "(" ++
+>            show tag ++ targs ", " args ++ ");"
+>    constructor t tag args = argblock "block" args ++ tmp t ++
+>                             " = (void*)CONSTRUCTOR(" ++ 
+>                             show tag ++ ", " ++ 
+>                             show (length args) ++
+>                             ", block);"
+
+>    closureApply t th args 
+>        | length args < 3 && length args > 0
+>          = tmp t ++ " = CLOSURE_APPLY" ++ show (length args) ++ "((VAL)" ++
+>            tmp th ++ targs ", " args ++ ");"
+>    closureApply t th args = argblock "block" args ++ tmp t ++ 
+>                        " = CLOSURE_APPLY((VAL)" ++ 
+>                           tmp th ++ ", " ++ 
+>                           show (length args) ++ 
+>                           ", block);"
 
 > declare decl fn start end 
 >     | start == end = ""
