@@ -57,9 +57,13 @@
 
 > compileBody :: FunCode -> String
 > compileBody (Code args bytecode) = 
->     let (code, b) = runState (cgs bytecode) False in
->         if b then "void** block;\n"++code else code
+>     let (code, b) = runState (cgs bytecode) 0 in
+>         if (b>0) then "void* block["++show b++"];\n"++code else code
 >   where
+>    sizeneeded x = do
+>       max <- get
+>       if (x>max) then put x else return ()
+
 >    cgs [] = return ""
 >    cgs (x:xs) = do xc <- cg x
 >                    xsc <- cgs xs
@@ -69,13 +73,17 @@
 >                          targs "(" args ++ ");"
 >    cg (TAILCALL t fn args) = return $ "return " ++ quickcall fn ++ 
 >                          targs "(" args ++ ");"
+>    cg (THUNK t ar fn []) = do
+>        return $ tmp t ++ 
+>           " = (void*)CLOSURE(" ++ thunk fn ++ ", " ++ 
+>           show ar ++ ", 0, 0);"
 >    cg (THUNK t ar fn args) = do
->        put True
+>        sizeneeded (length args)
 >        return $ argblock "block" args ++ tmp t ++ 
 >           " = (void*)CLOSURE(" ++ thunk fn ++ ", " ++ 
 >           show ar ++ "," ++ show (length args) ++ 
 >           ", block);"
->    cg (ADDARGS t th args) = do put True
+>    cg (ADDARGS t th args) = do sizeneeded (length args)
 >                                return $ closureApply t th args
 >    cg (FOREIGN ty t fn args) = return $ 
 >                                castFrom t ty 
@@ -83,7 +91,7 @@
 >                                   ++ ";"
 >    cg (VAR t l) = return $ tmp t ++ " = " ++ loc l ++ ";"
 >    cg (ASSIGN l t) = return $ loc l ++ " = " ++ tmp t ++ ";"
->    cg (CON t tag args) = do put True
+>    cg (CON t tag args) = do sizeneeded (length args)
 >                             return $ constructor t tag args
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
 >    cg (INT t i) = return $ tmp t ++ " = MKINT("++show i++");"
@@ -121,12 +129,16 @@
 >    targs st [x] = st ++ tmp x
 >    targs st (x:xs) = st ++ tmp x ++ targs ", " xs
 
->    argblock name [] = name ++ " = 0;\n"
->    argblock name args = name ++ " = EMALLOC(sizeof(void*)*" ++ show (length args) ++ ");\n" ++ ab name args 0
+>    argblock name [] = "" -- name ++ " = 0;\n"
+>    argblock name args = -- name ++ " = EMALLOC(sizeof(void*)*" ++ show (length args) ++ ");\n" ++ 
+>                         ab name args 0
 >    ab nm [] i = ""
 >    ab nm (x:xs) i = nm ++ "[" ++ show i ++ "] = " ++ tmp x ++";\n" ++ 
 >                     ab nm xs (i+1)
 
+>    constructor t tag []
+>          = tmp t ++ " = CONSTRUCTOR(" ++
+>            show tag ++ ", 0, 0);"
 >    constructor t tag args 
 >        | length args < 3 && length args > 0
 >          = tmp t ++ " = CONSTRUCTOR" ++ show (length args) ++ "(" ++
@@ -137,6 +149,9 @@
 >                             show (length args) ++
 >                             ", block);"
 
+>    closureApply t th []
+>          = tmp t ++ " = CLOSURE_APPLY((VAL)" ++
+>            tmp th ++ ", 0, 0);"
 >    closureApply t th args 
 >        | length args < 3 && length args > 0
 >          = tmp t ++ " = CLOSURE_APPLY" ++ show (length args) ++ "((VAL)" ++

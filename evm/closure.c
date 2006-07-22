@@ -369,7 +369,7 @@ VAL CLOSURE_APPLY1(VAL f, VAL a1)
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+1)) {
-	    void** block = MKARGS(finf->arity);
+	    void*block[1];
 	    memcpy(block, finf->args, got*sizeof(VAL));
 	    block[got] = a1;
 	    return (VAL)(finf->fn(block));
@@ -385,7 +385,7 @@ VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+2)) {
-	    void** block = MKARGS(finf->arity);
+	    void*block[2];
 	    memcpy(block, finf->args, got*sizeof(VAL));
 	    block[got] = a1;
 	    block[got+1] = a2;
@@ -402,7 +402,7 @@ VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+3)) {
-	    void** block = MKARGS(finf->arity);
+	    void*block[3];
 	    memcpy(block, finf->args, got*sizeof(VAL));
 	    block[got] = a1;
 	    block[got+1] = a2;
@@ -420,7 +420,7 @@ VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+4)) {
-	    void** block = MKARGS(finf->arity);
+	    void*block[4];
 	    memcpy(block, finf->args, got*sizeof(VAL));
 	    block[got] = a1;
 	    block[got+1] = a2;
@@ -439,7 +439,7 @@ VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+5)) {
-	    void** block = MKARGS(finf->arity);
+	    void*block[5];
 	    memcpy(block, finf->args, got*sizeof(VAL));
 	    block[got] = a1;
 	    block[got+1] = a2;
