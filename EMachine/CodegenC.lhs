@@ -14,7 +14,7 @@
 >     mainDriver
 
 > fileHeader = "#include \"closure.h\"\n#include <assert.h>\n\n"
-> mainDriver = "int main() { GC_init(); _do__U_main(); return 0; }\n"
+> mainDriver = "int main() {\nGC_init();\ninit_evm();\n_do__U_main(); return 0; }\n"
 
 > showarg _ i = "void* " ++ loc i
 
@@ -58,7 +58,7 @@
 > compileBody :: FunCode -> String
 > compileBody (Code args bytecode) = 
 >     let (code, b) = runState (cgs bytecode) 0 in
->         if (b>0) then "void* block["++show b++"];\n"++code else code
+>         if (b>0) then "void** block;\n" ++ code else code --  = EMALLOC("++show b++"*sizeof(void*));\n"++code else code
 >   where
 >    sizeneeded x = do
 >       max <- get
@@ -94,7 +94,7 @@
 >    cg (CON t tag args) = do sizeneeded (length args)
 >                             return $ constructor t tag args
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
->    cg (INT t i) = return $ tmp t ++ " = MKINT("++show i++");"
+>    cg (INT t i) = return $ "ASSIGNINT("++tmp t ++ ", " ++show i++");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
 >    cg (STRING t s) = return $ tmp t ++ " = MKSTR("++show s++");"
 >    cg (PROJ t1 t2 i) = return $ tmp t1 ++ " = PROJECT((Closure*)"++tmp t2++", "++show i++");"
@@ -129,8 +129,8 @@
 >    targs st [x] = st ++ tmp x
 >    targs st (x:xs) = st ++ tmp x ++ targs ", " xs
 
->    argblock name [] = "" -- name ++ " = 0;\n"
->    argblock name args = -- name ++ " = EMALLOC(sizeof(void*)*" ++ show (length args) ++ ");\n" ++ 
+>    argblock name [] = name ++ " = 0;\n"
+>    argblock name args = name ++ " = EMALLOC(sizeof(void*)*" ++ show (length args) ++ ");\n" ++ 
 >                         ab name args 0
 >    ab nm [] i = ""
 >    ab nm (x:xs) i = nm ++ "[" ++ show i ++ "] = " ++ tmp x ++";\n" ++ 

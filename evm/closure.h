@@ -63,9 +63,14 @@ typedef struct {
 
 #define ISCON(x) ((Closure*)x)->ty==CON
 #define ISINT(x) ((Closure*)x)->ty==INT
+#define ISTHUNK(x) ((Closure*)x)->ty==THUNK
+#define ISFUN(x) ((Closure*)x)->ty==FUN
 
 // Evaluate x to head normal form
-void EVAL(VAL x);
+void DO_EVAL(VAL x);
+
+//#define EVAL(x) DO_EVAL(x)
+#define EVAL(x) if (ISTHUNK(x) || ISFUN(x)) DO_EVAL(x)
 
 // Return a new constructor
 VAL CONSTRUCTOR(int tag, int arity, void** block);
@@ -95,9 +100,16 @@ VAL CLOSURE_APPLY4(VAL x, VAL a1, VAL a2, VAL a3, VAL a4);
 VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Project an argument from a constructor
-void* PROJECT(VAL x, int arg);
+#define PROJECT(x,arg) (((con*)((x)->info))->args[arg])
+void* DO_PROJECT(VAL x, int arg);
 
 // Create new primitive values
+// Treating one specially is temporary -- actually, the compiler should
+// make a special value for each integer that's used.
+#define ASSIGNINT(t, x) if (x==1) t=one; else t=MKINT(x);
+
+extern VAL one; 
+
 void* MKINT(int x);
 void* MKSTR(char* str);
 // Get an integer from a closure
@@ -108,6 +120,9 @@ void* MKFREE(int x);
 
 // Exit with fatal error
 void ERROR(char* msg);
+
+// Initialise everything
+void init_evm();
 
 // Some basic communication with the outside world
 

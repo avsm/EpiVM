@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-VAL CLOSURE(func x, int arity, int args, void** block)
+VAL one;
+
+inline VAL CLOSURE(func x, int arity, int args, void** block)
 {
-    VAL c = MKCLOSURE;
-    fun* fn = MKFUN;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(fun)); // MKCLOSURE;
+    fun* fn = (fun*)(c+1);
     fn->fn = x;
     fn->arity = arity;
     if (args==0) {
@@ -24,10 +26,10 @@ VAL CLOSURE(func x, int arity, int args, void** block)
     return c;
 }
 
-VAL CONSTRUCTOR(int tag, int arity, void** block)
+inline VAL CONSTRUCTOR(int tag, int arity, void** block)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     if (arity==0) {
 	cn->args = 0;
@@ -40,10 +42,10 @@ VAL CONSTRUCTOR(int tag, int arity, void** block)
     return c;
 }
 
-VAL CONSTRUCTOR1(int tag, VAL a1)
+inline VAL CONSTRUCTOR1(int tag, VAL a1)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     cn->args = MKARGS(1);
     cn->args[0] = a1;
@@ -52,10 +54,10 @@ VAL CONSTRUCTOR1(int tag, VAL a1)
     return c;
 }
 
-VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
+inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     cn->args = MKARGS(2);
     cn->args[0] = a1;
@@ -65,10 +67,10 @@ VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
     return c;
 }
 
-VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
+inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     cn->args = MKARGS(3);
     cn->args[0] = a1;
@@ -79,10 +81,10 @@ VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
     return c;
 }
 
-VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
+inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     cn->args = MKARGS(2);
     cn->args[0] = a1;
@@ -94,10 +96,10 @@ VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
     return c;
 }
 
-VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
-    VAL c = MKCLOSURE;
-    con* cn = MKCON;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    con* cn = (con*)(c+1);
     cn->tag = tag;
     cn->args = MKARGS(5);
     cn->args[0] = a1;
@@ -110,8 +112,8 @@ VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     return c;
 }
 
-// Argh, this needs to make a copy
-VAL CLOSURE_ADDN(VAL xin, int args, void** block)
+// This needs to make a copy
+inline VAL CLOSURE_ADDN(VAL xin, int args, void** block)
 {
     assert(xin->ty == FUN);
 
@@ -131,7 +133,21 @@ VAL CLOSURE_ADDN(VAL xin, int args, void** block)
     return x;
 }
 
-VAL CLOSURE_ADD1(VAL xin, VAL a1)
+/*
+VAL CLOSURE_ADDN(VAL xin, int args, void** block)
+{
+    switch(args) {
+    case 1: return CLOSURE_ADD1(xin,block[0]);
+    case 2: return CLOSURE_ADD2(xin,block[0],block[1]);
+    case 3: return CLOSURE_ADD3(xin,block[0],block[1],block[2]);
+    case 4: return CLOSURE_ADD4(xin,block[0],block[1],block[2],block[3]);
+    case 5: return CLOSURE_ADD5(xin,block[0],block[1],block[2],block[3],block[4]);
+    default: return aux_CLOSURE_ADDN(xin,args,block);
+    }
+}
+*/
+
+inline VAL CLOSURE_ADD1(VAL xin, VAL a1)
 {
     assert(xin->ty == FUN);
 
@@ -151,7 +167,7 @@ VAL CLOSURE_ADD1(VAL xin, VAL a1)
     return x;
 }
 
-VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
+inline VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
 {
     assert(xin->ty == FUN);
 
@@ -172,7 +188,7 @@ VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
     return x;
 }
 
-VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
+inline VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
 {
     assert(xin->ty == FUN);
 
@@ -194,7 +210,7 @@ VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
     return x;
 }
 
-VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
+inline VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
 {
     assert(xin->ty == FUN);
 
@@ -217,7 +233,7 @@ VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
     return x;
 }
 
-VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+inline VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
     assert(xin->ty == FUN);
 
@@ -241,10 +257,11 @@ VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     return x;
 }
 
-VAL CLOSURE_APPLY(VAL f, int args, void** block)
+inline VAL CLOSURE_APPLY(VAL f, int args, void** block)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADDN(f,args,block);
     }
@@ -263,10 +280,11 @@ VAL CLOSURE_APPLY(VAL f, int args, void** block)
     return c;
 }
 
-VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
+inline VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADD1(f,a1);
     }
@@ -281,10 +299,11 @@ VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
     return c;
 }
 
-VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
+inline VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADD2(f,a1,a2);
     }
@@ -300,10 +319,11 @@ VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     return c;
 }
 
-VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
+inline VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADD3(f,a1,a2,a3);
     }
@@ -320,10 +340,11 @@ VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
     return c;
 }
 
-VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
+inline VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADD4(f,a1,a2,a3,a4);
     }
@@ -341,10 +362,11 @@ VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
     return c;
 }
 
-VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+inline VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
-    VAL c = MKCLOSURE;
-    thunk* fn = MKTHUNK;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
+    thunk* fn = (thunk*)(c+1);
+
     if (f->ty==FUN) {
 	return CLOSURE_ADD5(f,a1,a2,a3,a4,a5);
     }
@@ -363,7 +385,7 @@ VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     return c;
 }
 
-VAL CLOSURE_APPLY1(VAL f, VAL a1)
+inline VAL CLOSURE_APPLY1(VAL f, VAL a1)
 {
     if (f->ty==FUN) {
 	fun* finf = (fun*)(f->info);
@@ -379,7 +401,7 @@ VAL CLOSURE_APPLY1(VAL f, VAL a1)
     else return aux_CLOSURE_APPLY1(f,a1);
 }
 
-VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
+inline VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 {
     if (f->ty==FUN) {
 	fun* finf = (fun*)(f->info);
@@ -396,7 +418,7 @@ VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     else return aux_CLOSURE_APPLY2(f,a1,a2);
 }
 
-VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
+inline VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 {
     if (f->ty==FUN) {
 	fun* finf = (fun*)(f->info);
@@ -414,7 +436,7 @@ VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
     else return aux_CLOSURE_APPLY3(f,a1,a2,a3);
 }
 
-VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
+inline VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 {
     if (f->ty==FUN) {
 	fun* finf = (fun*)(f->info);
@@ -433,7 +455,7 @@ VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
     else return aux_CLOSURE_APPLY4(f,a1,a2,a3,a4);
 }
 
-VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
+inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
     if (f->ty==FUN) {
 	fun* finf = (fun*)(f->info);
@@ -453,7 +475,7 @@ VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     else return aux_CLOSURE_APPLY5(f,a1,a2,a3,a4,a5);
 }
 
-void EVAL(VAL x) {
+void DO_EVAL(VAL x) {
     VAL result;
 //    VAL x = (VAL)(*xin);
     fun* fn;
@@ -476,7 +498,7 @@ void EVAL(VAL x) {
 	    // If the result is still a function, better eval again to make
 	    // more progress
 	    if (result->ty==FUN || result->ty==THUNK) {
-		EVAL(result);
+		DO_EVAL(result);
 	    }
 	    UPDATE(x,result);
 	}
@@ -485,18 +507,18 @@ void EVAL(VAL x) {
 	else if (excess > 0) {
 	    result = fn->fn(fn->args);
 	    result = CLOSURE_APPLY(result, excess, fn->args + fn->arity);
-	    EVAL(result);
+	    DO_EVAL(result);
 	    UPDATE(x,result);
 	}
 	break;
     case THUNK:
 	th = (thunk*)(x->info);
 	// Evaluate inner thunk, which should give us a function
-	EVAL((VAL)(th->fn));
+	DO_EVAL((VAL)(th->fn));
 	// Add this thunk's arguments to it
 	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
 	// And off we go again...
-	EVAL((VAL)(th->fn));
+	DO_EVAL((VAL)(th->fn));
 	UPDATE(x,((VAL)(th->fn)));
 	break;
     default:
@@ -504,7 +526,7 @@ void EVAL(VAL x) {
     }
 }
 
-void* PROJECT(VAL x, int arg)
+void* DO_PROJECT(VAL x, int arg)
 {
     assert(x->ty == CON);
     con* cn = (con*)x->info;
@@ -584,4 +606,9 @@ char* append(char* x, char* y) {
     strcpy(buf,x);
     strcat(buf,y);
     return buf;
+}
+
+void init_evm()
+{
+    one = MKINT(1);
 }
