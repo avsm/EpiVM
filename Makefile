@@ -27,6 +27,9 @@ clean:
 	$(MAKE) -C evm clean
 	cd ESC; rm -f *.o *.hi esc
 
+test:
+	make -C tests
+
 esc: .PHONY package install
 	cd ESC; ghc $(GHCOPTS) --make Main.lhs -o esc -package epivm
 
