@@ -9,7 +9,7 @@ closedir DIR;
 
 system("echo \"\" > output");
 
-foreach $file (@files) {
+foreach $file (sort @files) {
     if ($file=~/([^\.]+)\.e/) {
 	print "$file...\n";
 	system("esc $file >> output");
