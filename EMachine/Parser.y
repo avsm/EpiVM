@@ -21,13 +21,17 @@ import EMachine.Lexer
       name            { TokenName $$ }
       string          { TokenString $$ }
       int             { TokenInt $$ }
+      bigint          { TokenBigInt $$ }
       bool            { TokenBool $$ }
       float           { TokenFloat $$ }
+      bigfloat        { TokenBigFloat $$ }
       char            { TokenChar $$ }
       inttype         { TokenIntType }
+      biginttype      { TokenBigIntType }
       chartype        { TokenCharType }
       booltype        { TokenBoolType }
       floattype       { TokenFloatType }
+      bigfloattype    { TokenBigFloatType }
       stringtype      { TokenStringType }
       unittype        { TokenUnitType }
       funtype         { TokenFunType }
@@ -88,9 +92,11 @@ Program: Declaration { [$1] }
 
 Type :: { Type }
 Type : inttype { TyInt }
+     | biginttype { TyBigInt }
      | chartype { TyChar }
      | booltype { TyBool }
      | floattype { TyFloat }
+     | bigfloattype { TyBigFloat }
      | stringtype { TyString }
      | unittype { TyUnit }
      | anytype { TyAny }
@@ -162,9 +168,11 @@ ExprTypeList : { [] }
 
 Const :: { Const }
 Const : int { MkInt $1 }
+      | bigint { MkBigInt $1 }
       | char { MkChar $1 }
       | bool { MkBool $1 }
       | float { MkFloat $1 }
+      | bigfloat { MkBigFloat $1 }
       | string { MkString $1 }
       | unit { MkUnit }
 

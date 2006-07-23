@@ -1,7 +1,7 @@
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 
-    print(natToInt(fact(nine)))
+    print(natToInt(fact(ten)))
 
 readStr () -> String =
     foreign String "readStr" ()

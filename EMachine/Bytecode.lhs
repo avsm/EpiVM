@@ -23,7 +23,9 @@ at this stage.
 >             | CON TmpVar Tag [TmpVar]
 >             | UNIT TmpVar
 >             | INT TmpVar Int
+>             | BIGINT TmpVar Integer
 >             | FLOAT TmpVar Float
+>             | BIGFLOAT TmpVar Double
 >             | STRING TmpVar String
 >             | PROJ TmpVar TmpVar Int -- project into a register
 >             | PROJVAR Local TmpVar Int -- project into a local variable
@@ -192,8 +194,10 @@ Compile an application of a function to arguments
 >                return $ fcode ++ argcode ++ [ADDARGS reg reg' argregs]
 
 >     ccomp (MkInt i) reg = return [INT reg i]
+>     ccomp (MkBigInt i) reg = return [BIGINT reg i]
 >     ccomp (MkChar c) reg = return [INT reg (fromEnum c)]
 >     ccomp (MkFloat f) reg = return [FLOAT reg f]
+>     ccomp (MkBigFloat f) reg = return [BIGFLOAT reg f]
 >     ccomp (MkBool b) reg = return [INT reg (if b then 1 else 0)]
 >     ccomp (MkString s) reg = return [STRING reg s]
 >     ccomp (MkUnit) reg = return [UNIT reg]

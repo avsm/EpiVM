@@ -8,6 +8,8 @@ Raw data types. Int, Char, Bool are unboxed.
 >           | TyChar
 >           | TyBool
 >           | TyFloat
+>           | TyBigInt
+>           | TyBigFloat
 >           | TyString
 >           | TyUnit
 >           | TyAny -- unchecked, polymorphic
@@ -16,8 +18,10 @@ Raw data types. Int, Char, Bool are unboxed.
 >   deriving (Show, Eq)
 
 > data Const = MkInt Int
+>            | MkBigInt Integer
 >            | MkChar Char
 >            | MkFloat Float
+>            | MkBigFloat Double
 >            | MkString String
 >            | MkBool Bool
 >            | MkUnit

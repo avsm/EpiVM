@@ -95,7 +95,9 @@
 >                             return $ constructor t tag args
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
 >    cg (INT t i) = return $ "ASSIGNINT("++tmp t ++ ", " ++show i++");"
+>    cg (BIGINT t i) = return $ tmp t ++ " = NEWBIGINT(\"" ++show i++"\");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
+>    cg (BIGFLOAT t i) = return $ tmp t ++ " = NEWBIGFLOAT(\""++show i++"\");"
 >    cg (STRING t s) = return $ tmp t ++ " = MKSTR("++show s++");"
 >    cg (PROJ t1 t2 i) = return $ tmp t1 ++ " = PROJECT((Closure*)"++tmp t2++", "++show i++");"
 >    cg (PROJVAR l t i) = return $ loc l ++ " = PROJECT((Closure*)"++tmp t++", "++show i++");"
@@ -174,9 +176,11 @@
 > castFrom t TyUnit x = x
 > castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
 > castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
+> castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"
 > castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
 
 > foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
+> foreignArg (t, TyBigInt) = "*(GETBIGINT("++ tmp t ++"))"
 > foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
 
 > doOp t Plus l r = tmp t ++ " = INTOP(+,"++tmp l ++ ", "++tmp r++");"

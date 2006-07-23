@@ -47,12 +47,16 @@
 >       | TokenString String
 >       | TokenInt Int
 >       | TokenFloat Float
+>       | TokenBigInt Integer
+>       | TokenBigFloat Double
 >       | TokenChar Char
 >       | TokenBool Bool
 >       | TokenIntType
+>       | TokenBigIntType
 >       | TokenCharType
 >       | TokenBoolType
 >       | TokenFloatType
+>       | TokenBigFloatType
 >       | TokenStringType
 >       | TokenUnitType
 >       | TokenAnyType
@@ -143,10 +147,15 @@
 >    = \fn line -> lexer cont cs fn (line+1)
 > lexerEatToNewline cont (c:cs) = lexerEatToNewline cont cs
 
-> lexNum cont cs = cont tok rest
->   where (num,rest,isreal) = readNum cs
->         tok | isreal = TokenFloat (read num)
->             | otherwise = TokenInt (read num)
+> lexNum cont cs = case readNum cs of
+>                     (num,'L':rest,isreal) ->
+>                         cont (tok True num isreal) rest
+>                     (num,rest,isreal) ->
+>                         cont (tok False num isreal) rest
+>   where tok False num isreal | isreal = TokenFloat (read num)
+>                              | otherwise = TokenInt (read num)
+>         tok True num isreal | isreal = TokenBigFloat (read num)
+>                             | otherwise = TokenBigInt (read num)
 
 > readNum :: String -> (String,String,Bool)
 > readNum x = rn' False "" x
@@ -183,6 +192,8 @@
 >       ("Char",rest) -> cont TokenCharType rest
 >       ("Bool",rest) -> cont TokenBoolType rest
 >       ("Float",rest) -> cont TokenFloatType rest
+>       ("BigInt",rest) -> cont TokenBigIntType rest
+>       ("BigFloat",rest) -> cont TokenBigFloatType rest
 >       ("String",rest) -> cont TokenStringType rest
 >       ("Unit",rest) -> cont TokenUnitType rest
 >       ("Data",rest) -> cont TokenDataType rest

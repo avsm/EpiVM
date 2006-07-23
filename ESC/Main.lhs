@@ -13,7 +13,7 @@
 >           (tmpn,tmph) <- tempfile
 >           compile fn tmph
 >           let cmd = "gcc -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -o " ++ (mkExecname fn) ++
->                     " -L"++libdir++" -I"++libdir ++ " -levm -lgc"
+>                     " -L"++libdir++" -I"++libdir ++ " -levm -lgc -lgmp"
 >           exit <- system cmd
 >           when (KeepC `elem` opts) $ do
 >              rawc <- readFile tmpn

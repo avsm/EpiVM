@@ -2,6 +2,7 @@
 #define _CLOSURE_H
 
 #include <gc/gc.h>
+#include <gmp.h>
 #include <stdio.h>
 
 #define EMALLOC GC_MALLOC
@@ -25,7 +26,9 @@ typedef enum {
     THUNK, 
     CON, 
     INT, 
-    FLOAT, 
+    BIGINT,
+    FLOAT,
+    BIGFLOAT,
     STRING, 
     UNIT, 
     FREEVAR 
@@ -101,7 +104,7 @@ VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Project an argument from a constructor
 #define PROJECT(x,arg) (((con*)((x)->info))->args[arg])
-void* DO_PROJECT(VAL x, int arg);
+//void* DO_PROJECT(VAL x, int arg);
 
 // Create new primitive values
 // Treating one specially is temporary -- actually, the compiler should
@@ -111,9 +114,14 @@ void* DO_PROJECT(VAL x, int arg);
 extern VAL one; 
 
 void* MKINT(int x);
+void* NEWBIGINT(char* bigint);
+void* MKBIGINT(mpz_t* bigint);
+
 void* MKSTR(char* str);
-// Get an integer from a closure
+
+// Get values from a closure
 int GETINT(void* x);
+mpz_t* GETBIGINT(void* x);
 char* GETSTR(void* x);
 
 void* MKFREE(int x);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <gmp.h>
 
 VAL one;
 
@@ -515,7 +516,7 @@ void DO_EVAL(VAL x) {
 	th = (thunk*)(x->info);
 	// Evaluate inner thunk, which should give us a function
 	DO_EVAL((VAL)(th->fn));
-	// Add this thunk's arguments to it
+	// Apply this thunk's arguments to it
 	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
 	// And off we go again...
 	DO_EVAL((VAL)(th->fn));
@@ -526,12 +527,14 @@ void DO_EVAL(VAL x) {
     }
 }
 
+/*
 void* DO_PROJECT(VAL x, int arg)
 {
     assert(x->ty == CON);
     con* cn = (con*)x->info;
     return cn->args[arg];
 }
+*/
 
 void* MKINT(int x)
 {
@@ -541,10 +544,42 @@ void* MKINT(int x)
     return c;
 }
 
+void* NEWBIGINT(char* intstr)
+{
+    mpz_t* bigint;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(mpz_t));
+    bigint = (mpz_t*)(c+1);
+    mpz_init(*bigint);
+    mpz_set_str(*bigint, intstr, 10);
+
+    c->ty = BIGINT;
+    c->info = (void*)bigint;
+    return c;
+}
+
+void* MKBIGINT(mpz_t* big)
+{
+    mpz_t* bigint;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(mpz_t));
+    bigint = (mpz_t*)(c+1);
+    mpz_init(*bigint);
+    mpz_set(*bigint, *big);
+
+    c->ty = BIGINT;
+    c->info = (void*)bigint;
+    return c;
+}
+
 int GETINT(void* x)
 {
     return (int)(((VAL)x)->info);
 }
+
+mpz_t* GETBIGINT(void* x)
+{
+    return ((mpz_t*)(((VAL)x)->info));
+}
+
 
 void* MKSTR(char* x)
 {
@@ -576,6 +611,7 @@ void* MKFREE(int x)
 
 void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
+void printBigInt(mpz_t x) { printf("%s\n",mpz_get_str(NULL,10,x)); }
 
 int readInt() {
     return atoi(readStr());
@@ -607,6 +643,36 @@ char* append(char* x, char* y) {
     strcat(buf,y);
     return buf;
 }
+
+mpz_t* addBigInt(mpz_t x, mpz_t y) {
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_add(*answer, x, y);
+    return answer;
+}
+
+mpz_t* subBigInt(mpz_t x, mpz_t y) {
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_sub(*answer, x, y);
+    return answer;
+}
+
+mpz_t* mulBigInt(mpz_t x, mpz_t y) {
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_mul(*answer, x, y);
+    return answer;
+}
+
+mpz_t* divBigInt(mpz_t x, mpz_t y) {
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_cdiv_q(*answer, x, y);
+    return answer;
+}
+
+int eqBigInt(mpz_t x, mpz_t y) {
+    return mpz_cmp(x,y)==0;
+}
+
+
 
 void init_evm()
 {
