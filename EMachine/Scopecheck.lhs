@@ -24,6 +24,8 @@ checking we do.
 >          mkContext [] = []
 >          mkContext ((Decl nm rt (Bind args _ _)):xs) =
 >              (nm,(map snd args, rt)):(mkContext xs)
+>          mkContext ((Extern nm rt args):xs) =
+>              (nm,(args, rt)):(mkContext xs)
 >          mkContext (_:xs) = mkContext xs
 
 > scopecheck :: Monad m => Context -> Func -> m Func
