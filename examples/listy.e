@@ -1,6 +1,6 @@
 %include "string.h"
 
-main () -> Unit = let foo:Unit = printList(take(3,ones)) in unit
+main () -> Unit = printList(take(3,ones))
 
 take (i:Int, x:Data) -> Data
   = if (i==0) then Con 0 () else
@@ -20,26 +20,8 @@ ones () -> Data
 printList (x:Data) -> Data
   = case x of {
         Con 1 (y:Int, ys:Data) -> 
-	   let foo:Unit = putStr(append(intToStr(y),", ")) in
+	   putStr(append(intToStr(y),", "));
 	   printList(ys)
       | Con 0 () -> putStrLn("nil")
     }
-
-putStr (x:String) -> Unit =
-    foreign Unit "putStr" (x:String)
-
-putStrLn (x:String) -> Unit =
-    putStr(append(x,"\n"))
-
-readStr () -> String =
-    foreign String "readStr" ()
-
-append (x:String, y:String) -> String =
-    foreign String "append" (x:String, y:String)
-
-length (x:String) -> String =
-    foreign Int "strlen" (x:String)
-
-intToStr (x:Int) -> String =
-    foreign String "intToStr" (x:Int)
 

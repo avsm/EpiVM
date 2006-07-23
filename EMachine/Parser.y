@@ -181,6 +181,7 @@ Const : int { MkInt $1 }
 mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Decl
 mkBind n tys ret ns expr = Decl n ret (Bind (zip ns tys) 0 expr)
 
+parse :: String -> FilePath -> Result [Decl]
 parse s fn = mkparse s fn 1
 
 parseFile :: FilePath -> IO (Result [Decl])

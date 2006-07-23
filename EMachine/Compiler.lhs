@@ -26,7 +26,9 @@ Brings everything together; parsing, checking, code generation
 >            -> Handle -- ^ Output C filehandle
 >            -> IO ()
 > compile fn outh
->     = do s <- parseFile fn
+>     = do prelude <- readFile $ libdir ++ "/Prelude.e"
+>          input <- readFile fn
+>          let s = parse (prelude ++ input) fn
 >          case s of
 >              Failure err _ _ -> fail err
 >              Success ds -> compileDecls (checkAll ds) outh

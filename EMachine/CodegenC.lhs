@@ -13,7 +13,9 @@
 >     workers ctxt decs ++
 >     mainDriver
 
-> fileHeader = "#include \"closure.h\"\n#include <assert.h>\n\n"
+> fileHeader = "#include \"closure.h\"\n" ++ 
+>              "#include \"stdfuns.h\"\n" ++ 
+>              "#include <assert.h>\n\n"
 > mainDriver = "int main() {\nGC_init();\ninit_evm();\n_do__U_main(); return 0; }\n"
 
 > showarg _ i = "void* " ++ loc i

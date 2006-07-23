@@ -1,5 +1,5 @@
 main () -> Unit = 
-  print(natToInt(adder(three, two, three, four, five)))
+  printInt(natToInt(adder(three, two, three, four, five)))
 
 adder (arity:Data, acc:Data) -> Any =
   case arity of {
@@ -21,9 +21,6 @@ seven () -> Data = Con 1 (six)
 eight () -> Data = Con 1 (seven)
 nine () -> Data = Con 1 (eight)
 ten () -> Data = Con 1 (nine)
-
-print (x:Int) -> Unit =
-  let foo:Unit = foreign Unit "printInt" (x:Int) in unit
 
 natToInt (x:Data) -> Int =
   case x of {

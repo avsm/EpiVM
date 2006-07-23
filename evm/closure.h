@@ -132,15 +132,5 @@ void ERROR(char* msg);
 // Initialise everything
 void init_evm();
 
-// Some basic communication with the outside world
-
-void putStr(char* str);
-void printInt(int x);
-
-int readInt();
-char* readStr();
-
-int strToInt(char* str);
-char* intToStr(int x);
 
 #endif

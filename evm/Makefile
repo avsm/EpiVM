@@ -1,9 +1,10 @@
 CC = gcc
 CFLAGS = -O2 -Wall
-OBJS = closure.o
+OBJS = closure.o stdfuns.o
 INSTALLDIR = ${PREFIX}/lib/evm
 
 TARGET = libevm.a
+INSTALLHDRS = closure.h stdfuns.h
 
 ${TARGET} : ${OBJS}
 	ar r ${TARGET} ${OBJS}
@@ -11,7 +12,7 @@ ${TARGET} : ${OBJS}
 
 install:
 	mkdir -p ${INSTALLDIR}
-	install libevm.a closure.h ${INSTALLDIR}
+	install libevm.a ${INSTALLHDRS} ${INSTALLDIR}
 	ranlib ${INSTALLDIR}/libevm.a
 
 clean:

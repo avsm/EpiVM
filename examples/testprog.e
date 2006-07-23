@@ -1,7 +1,7 @@
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 
-  print(natToInt(fact(nine))) 
+  printInt(natToInt(fact(nine))) 
 
 zero () -> Data = Con 0 ()
 one () -> Data = Con 1 (zero)
@@ -14,9 +14,6 @@ seven () -> Data = Con 1 (six)
 eight () -> Data = Con 1 (seven)
 nine () -> Data = Con 1 (eight)
 ten () -> Data = Con 1 (nine)
-
-print (x:Int) -> Unit =
-  let foo:Unit = foreign Unit "printInt" (x:Int) in unit
 
 natToInt (x:Data) -> Int =
   case x of {

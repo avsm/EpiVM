@@ -1,11 +1,7 @@
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 
-    print(natToInt(fact(ten)))
-
-readStr () -> String =
-    foreign String "readStr" ()
-
+    printInt(natToInt(fact(nine)))
 
 natrec (x:Data, z:Any, s:Fun) -> Any = natrectail(x,s,z)
 
@@ -26,9 +22,6 @@ seven () -> Data = Con 1 (six)
 eight () -> Data = Con 1 (seven)
 nine () -> Data = Con 1 (eight)
 ten () -> Data = Con 1 (nine)
-
-print (x:Int) -> Unit =
-  let foo:Unit = foreign Unit "printInt" (x:Int) in unit
 
 {-
 natToInt (x:Data) -> Int =

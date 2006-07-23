@@ -1,23 +1,3 @@
-%include "string.h"
-
-putStr (x:String) -> Unit =
-    foreign Unit "putStr" (x:String)
-
-putStrLn (x:String) -> Unit =
-    putStr(append(x,"\n"))
-
-readStr () -> String =
-    foreign String "readStr" ()
-
-append (x:String, y:String) -> String =
-    foreign String "append" (x:String, y:String)
-
-length (x:String) -> String =
-    foreign Int "strlen" (x:String)
-
-intToStr (x:Int) -> String =
-    foreign String "intToStr" (x:Int)
-
 main () -> Unit = 
     putStr("What is your name? ");
     let name:String = readStr() in

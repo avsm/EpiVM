@@ -14,6 +14,7 @@ rts:
 
 install: .PHONY rts
 	$(MAKE) -C evm install PREFIX=$(PREFIX)
+	$(MAKE) -C lib install PREFIX=$(PREFIX)
 	runhaskell Setup.lhs install $(DB)
 
 unregister:
