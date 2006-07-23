@@ -17,8 +17,13 @@ char* readStr();
 int strToInt(char* str);
 char* intToStr(int x);
 
-int strToBigInt(char* str);
+mpz_t* strToBigInt(char* str);
 char* bigIntToStr(mpz_t x);
+
+// String operations
+
+int strIndex(char* str, int i);
+char* append(char* x, char* y);
 
 // Big integer arithmetic
 
@@ -28,6 +33,10 @@ mpz_t* mulBigInt(mpz_t x, mpz_t y);
 mpz_t* divBigInt(mpz_t x, mpz_t y);
 
 int eqBigInt(mpz_t x, mpz_t y);
+int ltBigInt(mpz_t x, mpz_t y);
+int gtBigInt(mpz_t x, mpz_t y);
+int leBigInt(mpz_t x, mpz_t y);
+int geBigInt(mpz_t x, mpz_t y);
 
 #endif
 

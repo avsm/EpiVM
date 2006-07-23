@@ -32,6 +32,11 @@ char* intToStr(int x)
     return buf;
 }
 
+int strIndex(char* str, int i)
+{
+    return (int)(str[i]);
+}
+
 char* append(char* x, char* y) {
     char* buf = EMALLOC((strlen(x)+strlen(y))*sizeof(char));
     strcpy(buf,x);
@@ -65,5 +70,42 @@ mpz_t* divBigInt(mpz_t x, mpz_t y) {
 
 int eqBigInt(mpz_t x, mpz_t y) {
     return mpz_cmp(x,y)==0;
+}
+
+int ltBigInt(mpz_t x, mpz_t y)
+{
+    return mpz_cmp(x,y)<0;
+}
+
+int gtBigInt(mpz_t x, mpz_t y)
+{
+    return mpz_cmp(x,y)>0;
+}
+
+int leBigInt(mpz_t x, mpz_t y)
+{
+    return mpz_cmp(x,y)<=0;
+}
+
+int geBigInt(mpz_t x, mpz_t y)
+{
+    return mpz_cmp(x,y)>=0;
+}
+
+mpz_t* strToBigInt(char* str)
+{
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_init(*answer);
+    mpz_set_str(*answer, str, 10);
+    return answer;
+}
+
+char* bigIntToStr(mpz_t x)
+{
+    char* str = mpz_get_str(NULL,10,x);
+    char* buf = EMALLOC(strlen(str)+1);
+    strcpy(buf,str);
+    free(str);
+    return buf;
 }
 

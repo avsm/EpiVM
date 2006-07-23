@@ -1,7 +1,9 @@
-main () -> Unit = printBig(fact(120L))
+main () -> Unit = putStrLn(bigIntToStr(fact(10000L)))
 
-fact (x:BigInt) -> BigInt = 
+fact (x:BigInt) -> BigInt = factAux(x,1L)
+
+factAux (x:BigInt, acc:BigInt) -> BigInt = 
      if (eqBig(x,0L)) 
-       then 1L
-       else mulBig(x,fact(subBig(x,1L)))
+       then acc
+       else factAux(subBig(x,1L), mulBig(x,acc))
 
