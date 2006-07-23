@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 main () -> Unit = printBig(fact(120L))
 
 fact (x:BigInt) -> BigInt = 

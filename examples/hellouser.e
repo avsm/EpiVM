@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 main () -> Unit = 
     putStr("What is your name? ");
     let name:String = readStr() in

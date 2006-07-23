@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 

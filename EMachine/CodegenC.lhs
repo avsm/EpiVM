@@ -10,12 +10,25 @@
 >     fileHeader ++
 >     headers decs ++ "\n" ++
 >     wrappers decs ++
->     workers ctxt decs ++
->     mainDriver
+>     workers ctxt decs
+>     -- ++ mainDriver
+
+> writeIFace :: [Decl] -> String
+> writeIFace [] = ""
+> writeIFace ((Decl name ret (Bind args _ _)):xs) =
+>     "extern " ++ showuser name ++ " ("++ showextargs (args) ++ ")" ++
+>               " -> " ++ show ret ++ "\n" ++ writeIFace xs
+> writeIFace (_:xs) = writeIFace xs
+
+> showextargs [] = ""
+> showextargs [(n,ty)] = showuser n ++ ":" ++ show ty
+> showextargs ((n,ty):xs) = showuser n ++ ":" ++ show ty ++ ", " ++ 
+>                           showextargs xs
 
 > fileHeader = "#include \"closure.h\"\n" ++ 
 >              "#include \"stdfuns.h\"\n" ++ 
 >              "#include <assert.h>\n\n"
+
 > mainDriver = "int main() {\nGC_init();\ninit_evm();\n_do__U_main(); return 0; }\n"
 
 > showarg _ i = "void* " ++ loc i
@@ -29,6 +42,11 @@
 >     "void* " ++ thunk fname ++ "(void** block);\n" ++
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ");\n" ++
 >     headers xs
+> headers ((Extern fname ret tys):xs) =
+>     "void* " ++ thunk fname ++ "(void** block);\n" ++
+>     "void* " ++ quickcall fname ++ "(" ++ showargs (zip (names 0) tys) 0 ++ ");\n" ++
+>     headers xs
+>   where names i = (MN "arg" i):(names (i+1))
 > headers ((Include h):xs) = "#include <"++h++">\n" ++ headers xs
 > headers (_:xs) = headers xs
 

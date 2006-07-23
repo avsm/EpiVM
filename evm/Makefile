@@ -4,7 +4,7 @@ OBJS = closure.o stdfuns.o
 INSTALLDIR = ${PREFIX}/lib/evm
 
 TARGET = libevm.a
-INSTALLHDRS = closure.h stdfuns.h
+INSTALLHDRS = closure.h stdfuns.h mainprog.c
 
 ${TARGET} : ${OBJS}
 	ar r ${TARGET} ${OBJS}

@@ -1,4 +1,4 @@
-%include "string.h"
+include "Prelude.e"
 
 main () -> Unit = printList(take(3,ones))
 

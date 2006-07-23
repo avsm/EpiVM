@@ -4,6 +4,7 @@
 module EMachine.Parser where
 
 import Char
+import System.IO.Unsafe
 
 import EMachine.Language
 import EMachine.Lexer
@@ -70,8 +71,11 @@ import EMachine.Lexer
       ','             { TokenComma }
       '|'             { TokenBar }
       arrow           { TokenArrow }
-      include         { TokenCInclude }
+      cinclude         { TokenCInclude }
+      extern          { TokenExtern }
+      include         { TokenInclude }
 
+%nonassoc NONE
 %nonassoc lazy
 %left LET
 %left IF
@@ -89,6 +93,13 @@ import EMachine.Lexer
 Program :: { [Decl] }
 Program: Declaration { [$1] }
        | Declaration Program { $1:$2 }
+       | include string Program File {%
+ 	   let rest = $3 in
+	   let pt = unsafePerformIO (readFile $2) in
+		case (parse pt $4) of
+		   Success x -> returnP (x ++ rest)
+		   Failure err file ln -> failP err
+         }
 
 Type :: { Type }
 Type : inttype { TyInt }
@@ -106,7 +117,9 @@ Type : inttype { TyInt }
 Declaration :: { Decl }
 Declaration: name '(' TypeList ')' arrow Type '=' Expr
                { mkBind $1 (map snd $3) $6 (map fst $3) $8 }
-           | include string { Include $2 }
+           | extern name '(' TypeList ')' arrow Type
+               { mkExtern $2 (map snd $4) $7 (map fst $4) }
+           | cinclude string { Include $2 }
 
 
 TypeList :: { [(Name,Type)] }
@@ -176,10 +189,19 @@ Const : int { MkInt $1 }
       | string { MkString $1 }
       | unit { MkUnit }
 
+Line :: { LineNumber }
+     : {- empty -}      {% getLineNo }
+
+File :: { String } 
+     : {- empty -} %prec NONE  {% getFileName }
+
 {
 
 mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Decl
 mkBind n tys ret ns expr = Decl n ret (Bind (zip ns tys) 0 expr)
+
+mkExtern :: Name -> [Type] -> Type -> [Name] -> Decl
+mkExtern n tys ret ns = Extern n ret tys
 
 parse :: String -> FilePath -> Result [Decl]
 parse s fn = mkparse s fn 1

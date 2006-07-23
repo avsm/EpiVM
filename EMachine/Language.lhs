@@ -15,7 +15,20 @@ Raw data types. Int, Char, Bool are unboxed.
 >           | TyAny -- unchecked, polymorphic
 >           | TyData -- generic data type
 >           | TyFun -- any function
->   deriving (Show, Eq)
+>   deriving Eq
+
+> instance Show Type where
+>     show TyInt = "Int"
+>     show TyChar = "Char"
+>     show TyBool = "Bool"
+>     show TyFloat = "Float"
+>     show TyBigInt = "BigInt"
+>     show TyBigFloat = "BigFloat"
+>     show TyString = "String"
+>     show TyUnit = "Unit"
+>     show TyAny = "Any"
+>     show TyData = "Data"
+>     show TyFun = "Fun"
 
 > data Const = MkInt Int
 >            | MkBigInt Integer
@@ -86,6 +99,9 @@ Programs
 > data Decl = Decl { fname :: Name,
 >                    frettype :: Type,
 >                    fdef :: Func }
+>           | Extern { fname :: Name, 
+>                      frettype :: Type,
+>                      fargs :: [Type] }
 >           | Include String
 >           | Link String
 >   deriving Show

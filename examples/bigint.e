@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 main () -> Unit = putStrLn(bigIntToStr(fact(10000L)))
 
 fact (x:BigInt) -> BigInt = factAux(x,1L)

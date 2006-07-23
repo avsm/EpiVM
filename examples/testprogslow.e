@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 main () -> Unit = 
   printInt(apply(natToInt, fact(nine())))
 

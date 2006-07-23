@@ -1,3 +1,5 @@
+include "Prelude.e"
+
 main () -> Unit = 
   printInt(natToInt(adder(three, two, three, four, five)))
 

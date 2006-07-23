@@ -10,9 +10,9 @@ closedir DIR;
 system("echo \"\" > output");
 
 foreach $file (sort @files) {
-    if ($file=~/([^\.]+)\.e/) {
+    if ($file=~/([^\.]+)\.e$/ && $file ne "Prelude.e") {
 	print "$file...\n";
-	system("esc $file >> output");
+	system("esc $file -o $1 >> output");
 	system("./$1 >> output");
 	system("rm $1");
     }

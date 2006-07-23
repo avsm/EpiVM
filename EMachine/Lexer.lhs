@@ -97,6 +97,8 @@
 >       | TokenSemi
 >       | TokenComma
 >       | TokenBar
+>       | TokenExtern
+>       | TokenInclude
 >       | TokenEOF
 >  deriving (Show, Eq)
 > 
@@ -216,6 +218,9 @@
 >       ("error",rest) -> cont TokenError rest
 >       ("impossible",rest) -> cont TokenImpossible rest
 >       ("foreign",rest) -> cont TokenForeign rest
+> -- declarations
+>       ("extern",rest) -> cont TokenExtern rest
+>       ("include",rest) -> cont TokenInclude rest
 >       (var,rest)   -> cont (mkname var) rest
  
 > lexSpecial cont cs =
