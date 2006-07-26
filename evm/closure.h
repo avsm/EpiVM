@@ -15,8 +15,8 @@
 #define MKUNIT (void*)0
 
 #define INTOP(op,x,y) MKINT((int)(((VAL)x)->info) op (int)(((VAL)y)->info))
-#define CHECKEVALUATED(x) if(((VAL)x)->ty==FUN || ((VAL)x)->ty==THUNK \
-    || ((VAL)x)->ty==FREEVAR) return 0;
+#define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
+    || ISFV(x)) return 0;
 
 #define MKARGS(x) (void**)EMALLOC(sizeof(Closure)*x);
 #define MOREARGS(args,x) (void**)EREALLOC(args,sizeof(Closure)*x);
@@ -41,6 +41,9 @@ typedef struct {
 
 typedef Closure* VAL;
 
+#define GETTY(x) x->ty
+#define SETTY(x,t) x->ty = t;
+
 typedef void*(*func)(void**);
 
 typedef struct {
@@ -61,13 +64,14 @@ typedef struct {
     void** args;
 } con;
 
-#define UPDATE(x,res) x->ty = res->ty; x->info=res->info;
+#define UPDATE(x,res) SETTY(x, GETTY(res)); x->info=res->info;
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
-#define ISCON(x) ((Closure*)x)->ty==CON
-#define ISINT(x) ((Closure*)x)->ty==INT
-#define ISTHUNK(x) ((Closure*)x)->ty==THUNK
-#define ISFUN(x) ((Closure*)x)->ty==FUN
+#define ISCON(x) GETTY(((Closure*)(x)))==CON
+#define ISINT(x) GETTY(((Closure*)(x)))==INT
+#define ISTHUNK(x) GETTY(((Closure*)(x)))==THUNK
+#define ISFUN(x) GETTY(((Closure*)(x)))==FUN
+#define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR
 
 // Evaluate x to head normal form
 void DO_EVAL(VAL x);

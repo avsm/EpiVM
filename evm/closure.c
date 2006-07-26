@@ -22,7 +22,7 @@ inline VAL CLOSURE(func x, int arity, int args, void** block)
 	memcpy((void*)(fn->args), (void*)block, args*sizeof(VAL));
     }
 
-    c->ty = FUN;
+    SETTY(c, FUN);
     c->info = (void*)fn;
     return c;
 }
@@ -38,7 +38,7 @@ inline VAL CONSTRUCTOR(int tag, int arity, void** block)
 	cn->args = MKARGS(arity);
 	memcpy((void*)(cn->args), (void*)block, arity*sizeof(VAL));
     }
-    c->ty = CON;
+    SETTY(c, CON);
     c->info = (void*)cn;
     return c;
 }
@@ -50,7 +50,7 @@ inline VAL CONSTRUCTOR1(int tag, VAL a1)
     cn->tag = tag;
     cn->args = MKARGS(1);
     cn->args[0] = a1;
-    c->ty = CON;
+    SETTY(c,CON);
     c->info = (void*)cn;
     return c;
 }
@@ -63,7 +63,7 @@ inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
     cn->args = MKARGS(2);
     cn->args[0] = a1;
     cn->args[1] = a2;
-    c->ty = CON;
+    SETTY(c,CON);
     c->info = (void*)cn;
     return c;
 }
@@ -77,7 +77,7 @@ inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
     cn->args[0] = a1;
     cn->args[1] = a2;
     cn->args[2] = a3;
-    c->ty = CON;
+    SETTY(c,CON);
     c->info = (void*)cn;
     return c;
 }
@@ -92,7 +92,7 @@ inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
     cn->args[1] = a2;
     cn->args[2] = a3;
     cn->args[3] = a4;
-    c->ty = CON;
+    SETTY(c,CON);
     c->info = (void*)cn;
     return c;
 }
@@ -108,7 +108,7 @@ inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     cn->args[2] = a3;
     cn->args[3] = a4;
     cn->args[4] = a5;
-    c->ty = CON;
+    SETTY(c,CON);
     c->info = (void*)cn;
     return c;
 }
@@ -116,7 +116,7 @@ inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 // This needs to make a copy
 inline VAL CLOSURE_ADDN(VAL xin, int args, void** block)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin) == FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -150,7 +150,7 @@ VAL CLOSURE_ADDN(VAL xin, int args, void** block)
 
 inline VAL CLOSURE_ADD1(VAL xin, VAL a1)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin)==FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -170,7 +170,7 @@ inline VAL CLOSURE_ADD1(VAL xin, VAL a1)
 
 inline VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin)==FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -191,7 +191,7 @@ inline VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
 
 inline VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin)==FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -213,7 +213,7 @@ inline VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
 
 inline VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin)==FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -236,7 +236,7 @@ inline VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
 
 inline VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
-    assert(xin->ty == FUN);
+    assert(GETTY(xin)==FUN);
 
     fun* finf = (fun*)xin->info;
 
@@ -263,7 +263,7 @@ inline VAL CLOSURE_APPLY(VAL f, int args, void** block)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADDN(f,args,block);
     }
 
@@ -276,7 +276,7 @@ inline VAL CLOSURE_APPLY(VAL f, int args, void** block)
 	memcpy((void*)(fn->args), (void*)block, args*sizeof(VAL));
     }
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
@@ -286,7 +286,7 @@ inline VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADD1(f,a1);
     }
 
@@ -295,7 +295,7 @@ inline VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
     fn->args = MKARGS(1);
     fn->args[0] = a1;
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
@@ -305,7 +305,7 @@ inline VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADD2(f,a1,a2);
     }
 
@@ -315,7 +315,7 @@ inline VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     fn->args[0] = a1;
     fn->args[1] = a2;
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
@@ -325,7 +325,7 @@ inline VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADD3(f,a1,a2,a3);
     }
 
@@ -336,7 +336,7 @@ inline VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
     fn->args[1] = a2;
     fn->args[2] = a3;
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
@@ -346,7 +346,7 @@ inline VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADD4(f,a1,a2,a3,a4);
     }
 
@@ -358,7 +358,7 @@ inline VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
     fn->args[2] = a3;
     fn->args[3] = a4;
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
@@ -368,7 +368,7 @@ inline VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     VAL c = EMALLOC(sizeof(Closure)+sizeof(thunk)); // MKCLOSURE;
     thunk* fn = (thunk*)(c+1);
 
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	return CLOSURE_ADD5(f,a1,a2,a3,a4,a5);
     }
 
@@ -381,14 +381,14 @@ inline VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     fn->args[3] = a4;
     fn->args[4] = a5;
 
-    c->ty = THUNK;
+    SETTY(c,THUNK);
     c->info = (void*)fn;
     return c;
 }
 
 inline VAL CLOSURE_APPLY1(VAL f, VAL a1)
 {
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+1)) {
@@ -404,7 +404,7 @@ inline VAL CLOSURE_APPLY1(VAL f, VAL a1)
 
 inline VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 {
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+2)) {
@@ -421,7 +421,7 @@ inline VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 
 inline VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 {
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+3)) {
@@ -439,7 +439,7 @@ inline VAL CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 
 inline VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 {
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+4)) {
@@ -458,7 +458,7 @@ inline VAL CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 
 inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
-    if (f->ty==FUN) {
+    if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+5)) {
@@ -483,7 +483,7 @@ void DO_EVAL(VAL x) {
     thunk* th;
     int excess;
 
-    switch(x->ty) {
+    switch(GETTY(x)) {
     case CON:
     case INT:
     case FLOAT:
@@ -498,7 +498,7 @@ void DO_EVAL(VAL x) {
 	    result = fn->fn(fn->args);
 	    // If the result is still a function, better eval again to make
 	    // more progress
-	    if (result->ty==FUN || result->ty==THUNK) {
+	    if (GETTY(result)==FUN || GETTY(result)==THUNK) {
 		DO_EVAL(result);
 	    }
 	    UPDATE(x,result);
@@ -539,7 +539,7 @@ void* DO_PROJECT(VAL x, int arg)
 void* MKINT(int x)
 {
     VAL c = MKCLOSURE;
-    c->ty = INT;
+    SETTY(c, INT);
     c->info = (void*)x;
     return c;
 }
@@ -552,7 +552,7 @@ void* NEWBIGINT(char* intstr)
     mpz_init(*bigint);
     mpz_set_str(*bigint, intstr, 10);
 
-    c->ty = BIGINT;
+    SETTY(c, BIGINT);
     c->info = (void*)bigint;
     return c;
 }
@@ -565,7 +565,7 @@ void* MKBIGINT(mpz_t* big)
     mpz_init(*bigint);
     mpz_set(*bigint, *big);
 
-    c->ty = BIGINT;
+    SETTY(c, BIGINT);
     c->info = (void*)bigint;
     return c;
 }
@@ -584,7 +584,7 @@ mpz_t* GETBIGINT(void* x)
 void* MKSTR(char* x)
 {
     VAL c = MKCLOSURE;
-    c->ty = STRING;
+    SETTY(c, STRING);
     c->info = (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
     strcpy(c->info,x);
     return c;
@@ -604,7 +604,7 @@ void ERROR(char* msg)
 void* MKFREE(int x)
 {
     VAL c = MKCLOSURE;
-    c->ty = FREEVAR;
+    SETTY(c, FREEVAR);
     c->info = (void*)x;
     return c;
 }
