@@ -35,14 +35,16 @@ typedef enum {
 } ClosureType;
 
 typedef struct {
-    ClosureType ty;
+    int ty;
     void* info;
 } Closure;
 
 typedef Closure* VAL;
 
-#define GETTY(x) x->ty
-#define SETTY(x,t) x->ty = t;
+#define GETTY(x) ((ClosureType)(((x)->ty) >> 24))
+#define SETTY(x,t) (x)->ty = (((int)t) << 24)
+
+
 
 typedef void*(*func)(void**);
 
