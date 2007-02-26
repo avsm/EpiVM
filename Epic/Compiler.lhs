@@ -9,11 +9,11 @@
 > -- 
 > -- Public interface for Epigram Supercombinator Compiler
 
-> module EMachine.Compiler(CompileOptions(..),
->                          compile, 
->                          compileOpts, 
->                          link, 
->                          libdir) where
+> module Epic.Compiler(CompileOptions(..),
+>                      compile, 
+>                      compileOpts, 
+>                      link, 
+>                      libdir) where
 
 Brings everything together; parsing, checking, code generation
 
@@ -22,11 +22,11 @@ Brings everything together; parsing, checking, code generation
 > import System.Directory
 > import System.Environment
 
-> import EMachine.Language
-> import EMachine.Parser
-> import EMachine.Scopecheck
-> import EMachine.CodegenC
-> import EMachine.Prefix
+> import Epic.Language
+> import Epic.Parser
+> import Epic.Scopecheck
+> import Epic.CodegenC
+> import Epic.Prefix
 
 > -- | (Debugging) options to give to compiler
 > data CompileOptions = KeepC -- ^ Keep intermediate C file

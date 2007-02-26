@@ -7,6 +7,7 @@
 
 #define EMALLOC GC_MALLOC
 #define EREALLOC GC_REALLOC
+#define EFREE GC_FREE
 
 #define MKCON (con*)EMALLOC(sizeof(con))
 #define MKFUN (fun*)EMALLOC(sizeof(fun))
@@ -44,7 +45,8 @@ typedef Closure* VAL;
 #define GETTY(x) ((ClosureType)(((x)->ty) >> 24))
 #define SETTY(x,t) (x)->ty = (((int)t) << 24)
 
-
+#define REF(x) x
+#define DEREF(x) 
 
 typedef void*(*func)(void**);
 

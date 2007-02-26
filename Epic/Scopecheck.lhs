@@ -1,12 +1,12 @@
-> module EMachine.Scopecheck where
+> module Epic.Scopecheck where
 
 Check that an expression has all its names in scope. This is the only
-checking we do.
+checking we do (for now).
 
 > import Control.Monad.State
 
-> import EMachine.Language
-> import EMachine.Parser
+> import Epic.Language
+> import Epic.Parser
 
 > checkAll :: Monad m => [Decl] -> m (Context, [Decl])
 > checkAll xs = do let ctxt = mkContext xs

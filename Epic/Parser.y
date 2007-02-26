@@ -1,13 +1,13 @@
 { -- -*-Haskell-*-
 {-# OPTIONS_GHC -fglasgow-exts #-}
 
-module EMachine.Parser where
+module Epic.Parser where
 
 import Char
 import System.IO.Unsafe
 
-import EMachine.Language
-import EMachine.Lexer
+import Epic.Language
+import Epic.Lexer
 
 }
 

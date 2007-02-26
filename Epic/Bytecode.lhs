@@ -1,9 +1,9 @@
-> module EMachine.Bytecode where
+> module Epic.Bytecode where
 
 > import Control.Monad.State
 > import List
 
-> import EMachine.Language
+> import Epic.Language
 
 > type Local = Int
 > type Tag = Int

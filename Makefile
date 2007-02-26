@@ -7,7 +7,7 @@ package: rts
 
 configure:
 	runhaskell Setup.lhs configure --user --ghc --prefix=$(PREFIX)
-	cd EMachine; echo "module EMachine.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
+	cd Epic; echo "module Epic.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
 
 rts:
 	$(MAKE) -C evm
@@ -26,15 +26,15 @@ doc:
 clean:
 	runhaskell Setup.lhs clean
 	$(MAKE) -C evm clean
-	cd ESC; rm -f *.o *.hi esc
+	cd compiler; rm -f *.o *.hi epic
 
 test:
 	make -C tests
 
-esc: .PHONY package install
-	cd ESC; ghc $(GHCOPTS) --make Main.lhs -o esc -package epivm
+epic: .PHONY package install
+	cd compiler; ghc $(GHCOPTS) --make Main.lhs -o epic -package epic
 
-esc_install: esc
-	install ESC/esc $(PREFIX)/bin
+epic_install: epic
+	install compiler/epic $(PREFIX)/bin
 
 .PHONY:

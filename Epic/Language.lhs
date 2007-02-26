@@ -1,4 +1,4 @@
-> module EMachine.Language where
+> module Epic.Language where
 
 > import Control.Monad
 

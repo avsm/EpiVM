@@ -1,4 +1,4 @@
-Name:		epivm
+Name:		epic
 Version:	0.1
 Author:		Edwin Brady
 License:	BSD3
@@ -9,9 +9,8 @@ Stability:	experimental
 Build-depends:	base, haskell98, util, mtl, Cabal
 Extensions:	MultiParamTypeClasses, FunctionalDependencies,
 		ExistentialQuantification, OverlappingInstances
-ghc-prof-options: -auto-all
 Synopsis:	Compiler for Supercombinator language
-Exposed-modules: EMachine.Compiler
-Other-modules: EMachine.Bytecode EMachine.Parser EMachine.Scopecheck
-               EMachine.Language EMachine.Lexer EMachine.CodegenC
-	       EMachine.Prefix
+Exposed-modules: Epic.Compiler
+Other-modules: Epic.Bytecode Epic.Parser Epic.Scopecheck
+               Epic.Language Epic.Lexer Epic.CodegenC
+	       Epic.Prefix Epic.OTTLang

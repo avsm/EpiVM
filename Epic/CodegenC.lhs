@@ -1,9 +1,9 @@
-> module EMachine.CodegenC where
+> module Epic.CodegenC where
 
 > import Control.Monad.State
 
-> import EMachine.Language
-> import EMachine.Bytecode
+> import Epic.Language
+> import Epic.Bytecode
 
 > codegenC :: Context -> [Decl] -> String
 > codegenC ctxt decs =

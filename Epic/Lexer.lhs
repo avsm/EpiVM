@@ -1,8 +1,8 @@
-> module EMachine.Lexer where
+> module Epic.Lexer where
 
 > import Char
 
-> import EMachine.Language
+> import Epic.Language
 
 > type LineNumber = Int
 > type P a = String -> String -> LineNumber -> Result a

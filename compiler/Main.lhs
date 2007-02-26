@@ -6,7 +6,7 @@
 > import System.IO
 > import Monad
 
-> import EMachine.Compiler
+> import Epic.Compiler
 
 > main = do args <- getArgs
 >           (fns, opts) <- getInput args
