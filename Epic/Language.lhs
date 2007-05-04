@@ -59,11 +59,13 @@ Get the arity of a definition in the context
 >                   Nothing -> error $ "No such function " ++ show x
 >                   (Just (args,ret)) -> length args
 
+> type Tag = Int
+
 > data Expr = V Int -- Locally bound name
 >           | R Name -- Global reference
 >           | App Expr [Expr] -- Function application
 >           | LazyApp Expr [Expr] -- Lazy function application
->           | Con Int [Expr] -- Constructor, tags, arguments (fully applied)
+>           | Con Tag [Expr] -- Constructor, tags, arguments (fully applied)
 >           | Const Const -- a constant
 >           | Proj Expr Int -- Project argument
 >           | Case Expr [CaseAlt]
@@ -75,7 +77,7 @@ Get the arity of a definition in the context
 >           | ForeignCall Type String [(Expr, Type)] -- Foreign function call
 >   deriving (Show, Eq)
 
-> data CaseAlt = Alt { alt_tag :: Int,
+> data CaseAlt = Alt { alt_tag :: Tag,
 >                      alt_args :: [(Name, Type)], -- bound arguments
 >                      alt_expr :: Expr -- what to do
 >                    }

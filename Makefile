@@ -31,7 +31,7 @@ clean:
 test:
 	make -C tests
 
-epic: .PHONY package install
+epic: .PHONY configure package install
 	cd compiler; ghc $(GHCOPTS) --make Main.lhs -o epic -package epic
 
 epic_install: epic

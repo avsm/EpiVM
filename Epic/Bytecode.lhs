@@ -6,7 +6,6 @@
 > import Epic.Language
 
 > type Local = Int
-> type Tag = Int
 > type TmpVar = Int
 
 Register based - most operations do an action, then put the result in a

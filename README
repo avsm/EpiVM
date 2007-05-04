@@ -1,0 +1,17 @@
+
+Build instructions:
+
+    * Edit the Makefile to set an appopriate prefix;
+      the default is to install in ~/bin and ~/lib.
+    * make configure
+    * make install, to install just the API, or make epic_install to
+      install the command line compiler, 'epic'. 
+
+The command line tool, epic takes a source file and produces executable
+code, via C. Separate compilation is supported, in a fairly simple
+way, e.g. to compile a main program main.e which includes some
+functions defined in lib.e:
+
+    * Build lib.o with the command epic -c lib.e.
+    * Import functions in main.e with the line include "lib.ei" in the source.
+    * Build the executable with epic main.e lib.o -o main
