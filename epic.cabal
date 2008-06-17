@@ -6,7 +6,7 @@ License-file:	LICENSE
 Maintainer:	eb@dcs.st-and.ac.uk
 Homepage:	http://www.dcs.st-and.ac.uk/~eb/
 Stability:	experimental
-Build-depends:	base, haskell98, util, mtl, Cabal
+Build-depends:	base, haskell98, mtl, Cabal, array, directory
 Extensions:	MultiParamTypeClasses, FunctionalDependencies,
 		ExistentialQuantification, OverlappingInstances
 Synopsis:	Compiler for Supercombinator language

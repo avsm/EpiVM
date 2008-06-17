@@ -28,7 +28,7 @@ at this stage.
 >             | STRING TmpVar String
 >             | PROJ TmpVar TmpVar Int -- project into a register
 >             | PROJVAR Local TmpVar Int -- project into a local variable
->             | CASE TmpVar [Bytecode]
+>             | CASE TmpVar [Bytecode] (Maybe Bytecode)
 >             | IF TmpVar Bytecode Bytecode
 >             | OP TmpVar Op TmpVar TmpVar
 >             | LOCALS Int -- allocate space for locals
@@ -61,7 +61,7 @@ at this stage.
 >     do -- put (CS args (length args) 1)
 >        code <- ecomp Tail def 0
 >        cs <- get
->        return $ (LOCALS locals):(TMPS (next_tmp cs)):code++[RETURN 0]
+>        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code++[RETURN 0]
 
 >   where
 
@@ -100,8 +100,8 @@ compile code to do just that.
 >     ecomp tcall (Case scrutinee alts) reg =
 >         do screg <- new_tmp
 >            sccode <- ecomp Middle scrutinee screg
->            altcode <- altcomps tcall (order alts) screg reg
->            return $ sccode ++ [EVAL screg, CASE screg altcode]
+>            (altcode, def) <- altcomps tcall (order alts) screg reg
+>            return $ sccode ++ [EVAL screg, CASE screg altcode def]
 >     ecomp tcall (If a t e) reg =
 >         do areg <- new_tmp
 >            acode <- ecomp Middle a areg
@@ -144,28 +144,36 @@ Compile case alternatives.
 >     insertError t [] = []
 >     insertError t (a@(Alt tn _ _):xs)
 >         = (errors t tn) ++ a:(insertError (tn+1) xs)
+>     insertError t rest@((DefaultCase _):xs)
+>         = rest -- End at defaul case
 >     errors x end | x == end = []
 >                  | otherwise = (Alt x [] Impossible):(errors (x+1) end)
 
 >     altcomps :: TailCall -> [CaseAlt] -> TmpVar -> TmpVar -> 
->                 State CompileState [Bytecode]
->     altcomps tc [] _ _ = return []
+>                 State CompileState ([Bytecode], Maybe Bytecode)
+>     altcomps tc [] _ _ = return ([], Nothing)
 >     altcomps tc (a:as) scrutinee reg = 
->         do acode <- altcomp tc a scrutinee reg
->            ascode <- altcomps tc as scrutinee reg
->            return (acode:ascode)
+>         do (acode, d) <- altcomp tc a scrutinee reg
+>            (ascode, def) <- altcomps tc as scrutinee reg
+>            if d then return (ascode, Just acode)
+>                 else return (acode:ascode, def)
 
 Assume that all the tags are in order, and unused constructors have 
 a default inserted (i.e., tag can be ignored).
 
+Bool is true if this is the default case branch.
+
 >     altcomp :: TailCall -> CaseAlt -> TmpVar -> TmpVar -> 
->                State CompileState Bytecode
+>                State CompileState (Bytecode, Bool)
 >     altcomp tc (Alt tag nmargs expr) scrutinee reg =
 >         do let args = map snd nmargs
 >            local <- new_locals (length args)
 >            projcode <- project args scrutinee local 0
 >            exprcode <- ecomp tc expr reg
->            return (projcode++exprcode)
+>            return (projcode++exprcode, False)
+>     altcomp tc (DefaultCase expr) scrutinee reg =
+>         do exprcode <- ecomp tc expr reg
+>            return (exprcode, True)
 
 >     project [] _ _ _ = return []
 >     project (_:as) scr loc arg = 

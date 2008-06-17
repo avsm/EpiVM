@@ -124,8 +124,8 @@
 >    cg (OP t op l r) = return $ doOp t op l r 
 >    cg (LOCALS n) = return $ declare "void* " loc (length args) n
 >    cg (TMPS n) = return $ declare "void* " tmp 0 n
->    cg (CASE v alts) = do
->        altscode <- cgalts alts 0
+>    cg (CASE v alts def) = do
+>        altscode <- cgalts alts def 0
 >        return $ "assert(ISCON("++tmp v++"));\n" ++
 >                   "switch(TAG(" ++ tmp v ++")) {\n" ++
 >                   altscode
@@ -141,11 +141,16 @@
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
 >    -- cg x = return $ "NOP; // not done " ++ show x
 
->    cgalts [] _ = return $ ""
->    cgalts (bc:alts) tag = do bcode <- cgs bc
->                              altscode <- cgalts alts (tag+1)
->                              return $ "case "++show tag++":\n" ++
->                                     bcode ++ "break;\n" ++ altscode
+>    cgalts [] def _ = 
+>       case def of 
+>         Nothing -> return $ ""
+>         (Just bc) -> do bcode <- cgs bc
+>                         return $ "default:\n" ++ bcode ++ "break;\n"
+>    cgalts (bc:alts) def tag
+>                    = do bcode <- cgs bc
+>                         altscode <- cgalts alts def (tag+1)
+>                         return $ "case "++show tag++":\n" ++
+>                                bcode ++ "break;\n" ++ altscode
 
 >    targs st [] = st
 >    targs st [x] = st ++ tmp x

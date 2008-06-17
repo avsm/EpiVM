@@ -88,6 +88,10 @@ checking we do (for now).
 >                        else maxlen)
 >                alts' <- tcalts env alts
 >                return $ (Alt tag args expr'):alts'
+>    tcalts env ((DefaultCase expr):alts) = do
+>                expr' <- tc (env++(v_ise args (length env))) expr
+>                alts' <- tcalts env alts
+>                return $ (DefaultCase expr'):alts'
 
 Turn the argument list into a mapping from names to argument position
 

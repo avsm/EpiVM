@@ -40,6 +40,7 @@ import Epic.Lexer
       anytype         { TokenAnyType }
       unit            { TokenUnit }
       con             { TokenCon }
+      default         { TokenDefault }
       let             { TokenLet }
       case            { TokenCase }
       of              { TokenOf }
@@ -157,6 +158,7 @@ Alts : { [] }
 Alt :: { CaseAlt }
 Alt : con int '(' TypeList ')' arrow Expr 
          { Alt $2 $4 $7 }
+    | default arrow Expr { DefaultCase $3 }
 
 MathExpr :: { Expr }
 MathExpr : Expr '+' Expr { Op Plus $1 $3 }

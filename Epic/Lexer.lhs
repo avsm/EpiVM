@@ -83,6 +83,7 @@
 >       | TokenColon
 >       | TokenUnit
 >       | TokenCon
+>       | TokenDefault
 >       | TokenLet
 >       | TokenCase
 >       | TokenOf
@@ -189,6 +190,7 @@
 > lexVar cont cs =
 >    case span isAllowed cs of
 > -- Keywords
+>       ("Default",rest) -> cont TokenDefault rest
 > -- Types
 >       ("Int",rest) -> cont TokenIntType rest
 >       ("Char",rest) -> cont TokenCharType rest

@@ -81,10 +81,14 @@ Get the arity of a definition in the context
 >                      alt_args :: [(Name, Type)], -- bound arguments
 >                      alt_expr :: Expr -- what to do
 >                    }
+>              | DefaultCase { alt_expr :: Expr }
 >   deriving (Show, Eq)
 
 > instance Ord CaseAlt where -- only the tag matters
 >    compare (Alt t1 _ _) (Alt t2 _ _) = compare t1 t2
+>    compare (Alt _ _ _) (DefaultCase _) = LT
+>    compare (DefaultCase _) (Alt _ _ _) = GT
+>    compare _ _ = EQ
 
 > data Op = Plus | Minus | Times | Divide | OpEQ | OpLT | OpLE | OpGT | OpGE
 >   deriving (Show, Eq)
