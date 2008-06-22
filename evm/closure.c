@@ -7,6 +7,50 @@
 
 VAL one;
 
+void dumpCon(con* c) {
+    printf("%d", c->tag);
+}
+
+void dumpClosure(Closure* c) {
+    switch(GETTY(c)) {
+    case FUN:
+	printf("FUN[");
+	break;
+    case THUNK:
+	printf("THUNK[");
+	break;
+    case CON:
+	printf("CON[");
+	dumpCon((con*)c->info);
+	break;
+    case INT:
+	printf("INT[%d", (int)c->info);
+	break;
+    case BIGINT:
+	printf("BIGINT[");
+	break;
+    case FLOAT:
+	printf("FLOAT[");
+	break;
+    case BIGFLOAT:
+	printf("BIGFLOAT[");
+	break;
+    case STRING:
+	printf("STRING[");
+	break;
+    case UNIT:
+	printf("UNIT[");
+	break;
+    case FREEVAR:
+	printf("FREEVAR[");
+	break;
+    default:
+	printf("[%d,%d", GETTY(c), (int)c->info);
+    }
+    printf("]\n");
+}
+
+
 inline VAL CLOSURE(func x, int arity, int args, void** block)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(fun)); // MKCLOSURE;
@@ -482,6 +526,8 @@ void DO_EVAL(VAL x) {
     fun* fn;
     thunk* th;
     int excess;
+
+//    dumpClosure(x);
 
     switch(GETTY(x)) {
     case CON:

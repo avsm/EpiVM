@@ -4,6 +4,7 @@
 
 > import Epic.Language
 > import Epic.Bytecode
+> import Debug.Trace
 
 > codegenC :: Context -> [Decl] -> String
 > codegenC ctxt decs =
@@ -64,6 +65,7 @@
 
 > workers _ [] = ""
 > workers ctxt ((Decl fname ret func@(Bind args locals defn)):xs) =
+>     -- trace (show fname ++ ": " ++ show defn) $
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ") {\n" ++
 >      compileBody (compile ctxt func) ++ "\n}\n\n" ++
 >     workers ctxt xs
@@ -146,10 +148,10 @@
 >         Nothing -> return $ ""
 >         (Just bc) -> do bcode <- cgs bc
 >                         return $ "default:\n" ++ bcode ++ "break;\n"
->    cgalts (bc:alts) def tag
+>    cgalts ((t,bc):alts) def tag
 >                    = do bcode <- cgs bc
 >                         altscode <- cgalts alts def (tag+1)
->                         return $ "case "++show tag++":\n" ++
+>                         return $ "case "++ show t ++":\n" ++
 >                                bcode ++ "break;\n" ++ altscode
 
 >    targs st [] = st

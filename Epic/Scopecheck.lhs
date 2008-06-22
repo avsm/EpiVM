@@ -81,15 +81,16 @@ checking we do (for now).
 
 >    tcalts env [] = return []
 >    tcalts env ((Alt tag args expr):alts) = do
->                expr' <- tc (env++(v_ise args (length env))) expr
+>                let env' = env++(v_ise args (length env))
+>                expr' <- tc env' expr
 >                maxlen <- get
->                put (if (length env + length args)>maxlen 
->                        then (length env + length args)
+>                put (if (length env')>maxlen 
+>                        then (length env')
 >                        else maxlen)
 >                alts' <- tcalts env alts
 >                return $ (Alt tag args expr'):alts'
 >    tcalts env ((DefaultCase expr):alts) = do
->                expr' <- tc (env++(v_ise args (length env))) expr
+>                expr' <- tc env expr
 >                alts' <- tcalts env alts
 >                return $ (DefaultCase expr'):alts'
 

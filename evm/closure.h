@@ -4,10 +4,11 @@
 #include <gc/gc.h>
 #include <gmp.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define EMALLOC GC_MALLOC
-#define EREALLOC GC_REALLOC
-#define EFREE GC_FREE
+#define EMALLOC malloc
+#define EREALLOC realloc
+#define EFREE free
 
 #define MKCON (con*)EMALLOC(sizeof(con))
 #define MKFUN (fun*)EMALLOC(sizeof(fun))
@@ -39,6 +40,8 @@ typedef struct {
     int ty;
     void* info;
 } Closure;
+
+void dumpClosure(Closure* c);
 
 typedef Closure* VAL;
 
@@ -81,7 +84,7 @@ typedef struct {
 void DO_EVAL(VAL x);
 
 //#define EVAL(x) DO_EVAL(x)
-#define EVAL(x) if (ISTHUNK(x) || ISFUN(x)) DO_EVAL(x)
+#define EVAL(x) if (x && (ISTHUNK(x) || ISFUN(x))) DO_EVAL(x)
 
 // Return a new constructor
 VAL CONSTRUCTOR(int tag, int arity, void** block);

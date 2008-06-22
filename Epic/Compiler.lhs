@@ -56,7 +56,7 @@ Brings everything together; parsing, checking, code generation
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 checked <- compileDecls (checkAll ds) tmph
->                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf
+>                 let cmd = "gcc -c -g -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf
 >                 -- putStrLn $ cmd
 >                 exit <- system cmd
 >                 if (elem KeepC opts)
@@ -64,7 +64,7 @@ Brings everything together; parsing, checking, code generation
 >                                       (getRoot fn) ++ ".c"
 >                            return ()
 >                    else return ()
->                 removeFile tmpn
+>                 -- removeFile tmpn
 >                 if (exit /= ExitSuccess) 
 >                    then fail $ "gcc failed"
 >                    else return ()
