@@ -32,7 +32,7 @@ test:
 	make -C tests
 
 epic: .PHONY configure package install
-	cd compiler; ghc $(GHCOPTS) --make Main.lhs -o epic -package epic
+	cd compiler; ghc $(GHCOPTS) Main.lhs -o epic -package epic
 
 epic_install: epic
 	install compiler/epic $(PREFIX)/bin

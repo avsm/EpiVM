@@ -140,6 +140,7 @@
 >                 ecode ++ "}"
 >    cg (EVAL v) = return $ "EVAL((VAL)"++tmp v++");"
 >    cg (RETURN t) = return $ "return "++tmp t++";"
+>    cg DRETURN = return $ "return NULL;"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
 >    -- cg x = return $ "NOP; // not done " ++ show x
 
@@ -200,7 +201,7 @@
 > foreignArgs [x] = foreignArg x
 > foreignArgs (x:xs) = foreignArg x ++ ", " ++ foreignArgs xs
 
-> castFrom t TyUnit x = x
+> castFrom t TyUnit x = tmp t ++ " = NULL; " ++ x
 > castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
 > castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
 > castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"

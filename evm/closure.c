@@ -521,6 +521,8 @@ inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 }
 
 void DO_EVAL(VAL x) {
+    if (x==NULL) return; // dummy value we'll never inspect, leave it alone.
+
     VAL result;
 //    VAL x = (VAL)(*xin);
     fun* fn;

@@ -37,6 +37,7 @@ at this stage.
 >             | EVAL TmpVar
 >             -- | LET TmpVar Local TmpVar
 >             | RETURN TmpVar
+>             | DRETURN -- return dummy value
 >             | ERROR String -- Fatal error, exit
 >   deriving Show
 
@@ -125,8 +126,8 @@ place.
 >         do loc <- new_locals 1
 >            reg' <- new_tmp
 >            valcode <- ecomp Middle val reg' vs
->            scopecode <- ecomp tcall scope reg vs
->            return $ valcode ++ (ASSIGN loc reg'):scopecode
+>            scopecode <- ecomp tcall scope reg (vs+1)
+>            return $ valcode ++ (ASSIGN vs reg'):scopecode
 >     ecomp tcall (Error str) reg vs = return [ERROR str]
 >     ecomp tcall Impossible reg vs = return [ERROR "The impossible happened."]
 >     ecomp tcall (ForeignCall ty fn argtypes) reg vs = do
