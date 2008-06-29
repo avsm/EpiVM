@@ -170,7 +170,7 @@ inline VAL CLOSURE_ADDN(VAL xin, int args, void** block)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, args);
+    fn->args = MOREARGS(fn->args, args + diff);
     fn->arg_end = fn->args + diff;
 
     memcpy((void*)(fn->arg_end), (void*)block, args*sizeof(VAL));
@@ -204,7 +204,7 @@ inline VAL CLOSURE_ADD1(VAL xin, VAL a1)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, 1);
+    fn->args = MOREARGS(fn->args, diff + 1);
     fn->arg_end = fn->args + diff;
     fn->arg_end[0] = a1;
     fn->arg_end+=1;
@@ -224,7 +224,7 @@ inline VAL CLOSURE_ADD2(VAL xin, VAL a1, VAL a2)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, 2);
+    fn->args = MOREARGS(fn->args, diff + 2);
     fn->arg_end = fn->args + diff;
     fn->arg_end[0] = a1;
     fn->arg_end[1] = a2;
@@ -245,7 +245,7 @@ inline VAL CLOSURE_ADD3(VAL xin, VAL a1, VAL a2, VAL a3)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, 3);
+    fn->args = MOREARGS(fn->args, diff + 3);
     fn->arg_end = fn->args + diff;
     fn->arg_end[0] = a1;
     fn->arg_end[1] = a2;
@@ -267,7 +267,7 @@ inline VAL CLOSURE_ADD4(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, 2);
+    fn->args = MOREARGS(fn->args, diff + 4);
     fn->arg_end = fn->args + diff;
     fn->arg_end[0] = a1;
     fn->arg_end[1] = a2;
@@ -290,7 +290,7 @@ inline VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     fun* fn = (fun*)(x->info);
     int diff = fn->arg_end - fn->args;
 
-    fn->args = MOREARGS(fn->args, 2);
+    fn->args = MOREARGS(fn->args, diff + 5);
     fn->arg_end = fn->args + diff;
     fn->arg_end[0] = a1;
     fn->arg_end[1] = a2;
@@ -375,7 +375,7 @@ inline VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 
     fn->fn = (void*)f;
     fn->numargs = 2;
-    fn->args = MKARGS(2);
+    fn->args = MKARGS(3);
     fn->args[0] = a1;
     fn->args[1] = a2;
     fn->args[2] = a3;
@@ -396,7 +396,7 @@ inline VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 
     fn->fn = (void*)f;
     fn->numargs = 2;
-    fn->args = MKARGS(2);
+    fn->args = MKARGS(4);
     fn->args[0] = a1;
     fn->args[1] = a2;
     fn->args[2] = a3;
@@ -418,7 +418,7 @@ inline VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 
     fn->fn = (void*)f;
     fn->numargs = 2;
-    fn->args = MKARGS(2);
+    fn->args = MKARGS(5);
     fn->args[0] = a1;
     fn->args[1] = a2;
     fn->args[2] = a3;

@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EMALLOC malloc
-#define EREALLOC realloc
+#define EMALLOC GC_MALLOC
+#define EREALLOC GC_REALLOC
 #define EFREE free
 
 #define MKCON (con*)EMALLOC(sizeof(con))
@@ -20,8 +20,8 @@
 #define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
     || ISFV(x)) return 0;
 
-#define MKARGS(x) (void**)EMALLOC(sizeof(Closure)*x);
-#define MOREARGS(args,x) (void**)EREALLOC(args,sizeof(Closure)*x);
+#define MKARGS(x) (void**)EMALLOC(sizeof(VAL)*(x));
+#define MOREARGS(args,x) (void**)EREALLOC(args,sizeof(VAL)*(x));
 
 typedef enum { 
     FUN, 
