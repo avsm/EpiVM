@@ -210,6 +210,7 @@
 > foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
 > foreignArg (t, TyBigInt) = "*(GETBIGINT("++ tmp t ++"))"
 > foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
+> foreignArg (t, _) = tmp t
 
 > doOp t Plus l r = tmp t ++ " = INTOP(+,"++tmp l ++ ", "++tmp r++");"
 > doOp t Minus l r = tmp t ++ " = INTOP(-,"++tmp l ++ ", "++tmp r++");"

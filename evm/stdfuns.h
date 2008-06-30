@@ -4,6 +4,7 @@
 #include <gc/gc.h>
 #include <gmp.h>
 #include <stdio.h>
+#include "closure.h"
 
 // Some basic communication with the outside world
 
@@ -13,6 +14,11 @@ void printBigInt(mpz_t x);
 
 int readInt();
 char* readStr();
+
+// IORefs
+int newRef();
+void* readRef(int r);
+void writeRef(int r, void* val);
 
 int strToInt(char* str);
 char* intToStr(int x);

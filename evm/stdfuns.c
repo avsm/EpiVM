@@ -109,3 +109,27 @@ char* bigIntToStr(mpz_t x)
     return buf;
 }
 
+// IORefs
+int numrefs = 0;
+void** iorefs = NULL;
+
+int newRef() {
+    // Increase space for the iorefs
+    if (iorefs==NULL) {
+	iorefs = (void**)(malloc(sizeof(void*)));
+	numrefs=1;
+    } else {
+	iorefs = (void**)(realloc(iorefs, sizeof(void*)*(numrefs+1)));
+	numrefs++;
+    }
+    return numrefs-1;
+}
+
+void* readRef(int r) {
+    return iorefs[r];
+}
+
+void writeRef(int r, void* val) {
+    iorefs[r]=val;
+}
+
