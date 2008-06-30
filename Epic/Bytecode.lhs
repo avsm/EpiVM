@@ -133,7 +133,7 @@ place.
 >     ecomp tcall (ForeignCall ty fn argtypes) reg vs = do
 >           let (args,types) = unzip argtypes
 >           (argcode, argregs) <- ecomps args vs
->           let evalcode = map EVAL argregs
+>           let evalcode = [] -- map EVAL argregs
 >           return $ argcode ++ evalcode ++ [FOREIGN ty reg fn (zip argregs types)]
 
 >     ecomps :: [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
@@ -199,7 +199,7 @@ Compile an application of a function to arguments
 >     acomp tc lazy (R x) args reg vs
 >           | lazy == False && arity x ctxt == length args =
 >               do (argcode, argregs) <- ecomps args vs
->                  return $ argcode ++ map EVAL argregs ++ [(tcall tc) reg x argregs]
+>                  return $ argcode {- ++ map EVAL argregs -} ++ [(tcall tc) reg x argregs]
 >           | otherwise =
 >               do (argcode, argregs) <- ecomps args vs
 >                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs]

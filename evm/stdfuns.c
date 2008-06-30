@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <string.h>
-#include <pthread.h>
 
 void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
@@ -117,10 +116,10 @@ void** iorefs = NULL;
 int newRef() {
     // Increase space for the iorefs
     if (iorefs==NULL) {
-	iorefs = (void**)(malloc(sizeof(void*)));
+	iorefs = (void**)(EMALLOC(sizeof(void*)));
 	numrefs=1;
     } else {
-	iorefs = (void**)(realloc(iorefs, sizeof(void*)*(numrefs+1)));
+	iorefs = (void**)(EREALLOC(iorefs, sizeof(void*)*(numrefs+1)));
 	numrefs++;
     }
     return numrefs-1;
@@ -140,6 +139,10 @@ typedef struct {
     pthread_mutex_t m_id;
 } Mutex;
 
+typedef struct {
+    pthread_t t_id;
+} Thread;
+
 Mutex** ms = NULL;
 int mutexes = 0;
 
@@ -148,15 +151,15 @@ int newLock(int sem)
     pthread_mutex_t m;
 
     pthread_mutex_init(&m, NULL);
-    Mutex* newm = malloc(sizeof(Mutex));
+    Mutex* newm = EMALLOC(sizeof(Mutex));
     newm->m_id = m;
 
     // Increase space for the mutexes
     if (ms==NULL) {
-	ms = (Mutex**)(malloc(sizeof(Mutex*)));
+	ms = (Mutex**)EMALLOC(sizeof(Mutex*));
 	mutexes=1;
     } else {
-	ms = (Mutex**)(realloc(ms, sizeof(Mutex*)*(mutexes+1)));
+	ms = (Mutex**)(EREALLOC(ms, sizeof(Mutex*)*(mutexes+1)));
 	mutexes++;
     }
 
@@ -181,6 +184,8 @@ void* runThread(void* proc) {
 
 void doFork(void* proc)
 {
-    pthread_t t;
-    pthread_create(&t, NULL, runThread, (void *)proc);
+    pthread_t* t = EMALLOC(sizeof(pthread_t));
+//    printf("CREATING THREAD %d\n", t);
+    int r = pthread_create(t, NULL, runThread, proc);
+//    printf("THREAD CREATED %d\n", r);
 }

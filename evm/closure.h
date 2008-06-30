@@ -15,7 +15,7 @@
 
 #define EMALLOC GC_MALLOC
 #define EREALLOC GC_REALLOC
-#define EFREE free
+#define EFREE GC_FREE
 
 #define MKCON (con*)EMALLOC(sizeof(con))
 #define MKFUN (fun*)EMALLOC(sizeof(fun))

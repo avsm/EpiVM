@@ -1,5 +1,11 @@
+# ifndef WIN32
+#  include <pthread.h>
+#  define GC_THREADS
+# else
+#  define GC_WIN32_THREADS
+# endif
+
 #include "closure.h"
-#include <gc/gc.h>
 
 void* _do__U_main();
 

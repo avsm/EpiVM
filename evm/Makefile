@@ -19,4 +19,4 @@ clean:
 	rm -f ${OBJS} ${TARGET}
 
 closure.o : closure.h
-
+stdfuns.o : stdfuns.h closure.h
