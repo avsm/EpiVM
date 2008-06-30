@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <string.h>
+#include <pthread.h>
 
 void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
@@ -133,3 +134,53 @@ void writeRef(int r, void* val) {
     iorefs[r]=val;
 }
 
+// Threads and locks
+
+typedef struct {
+    pthread_mutex_t m_id;
+} Mutex;
+
+Mutex** ms = NULL;
+int mutexes = 0;
+
+int newLock(int sem)
+{
+    pthread_mutex_t m;
+
+    pthread_mutex_init(&m, NULL);
+    Mutex* newm = malloc(sizeof(Mutex));
+    newm->m_id = m;
+
+    // Increase space for the mutexes
+    if (ms==NULL) {
+	ms = (Mutex**)(malloc(sizeof(Mutex*)));
+	mutexes=1;
+    } else {
+	ms = (Mutex**)(realloc(ms, sizeof(Mutex*)*(mutexes+1)));
+	mutexes++;
+    }
+
+    ms[mutexes-1] = newm;
+    return mutexes-1;
+}
+
+void doLock(int lock)
+{
+    pthread_mutex_lock(&(ms[lock]->m_id));
+}
+
+void doUnlock(int lock)
+{
+    pthread_mutex_unlock(&(ms[lock]->m_id));
+}
+
+void* runThread(void* proc) {
+    DO_EVAL(proc);
+    return NULL;
+}
+
+void doFork(void* proc)
+{
+    pthread_t t;
+    pthread_create(&t, NULL, runThread, (void *)proc);
+}

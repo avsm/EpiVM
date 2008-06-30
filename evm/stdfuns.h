@@ -20,6 +20,12 @@ int newRef();
 void* readRef(int r);
 void writeRef(int r, void* val);
 
+// Locks
+int newLock(int sem);
+void doLock(int lock);
+void doUnlock(int lock);
+void doFork(void* proc);
+
 int strToInt(char* str);
 char* intToStr(int x);
 

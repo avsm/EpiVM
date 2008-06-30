@@ -1,6 +1,13 @@
 #ifndef _CLOSURE_H
 #define _CLOSURE_H
 
+# ifndef WIN32
+#  include <pthread.h>
+#  define GC_THREADS
+# else
+#  define GC_WIN32_THREADS
+# endif
+
 #include <gc/gc.h>
 #include <gmp.h>
 #include <stdio.h>
