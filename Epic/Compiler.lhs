@@ -64,7 +64,7 @@ Brings everything together; parsing, checking, code generation
 >                                       (getRoot fn) ++ ".c"
 >                            return ()
 >                    else return ()
->                 -- removeFile tmpn
+>                 removeFile tmpn
 >                 if (exit /= ExitSuccess) 
 >                    then fail $ "gcc failed"
 >                    else return ()

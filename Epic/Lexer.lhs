@@ -40,7 +40,8 @@
 > reportError :: String -> P a
 > reportError err = getFileName `thenP` \fn ->
 >                   getLineNo `thenP` \line ->
->                       failP (fn ++ ":" ++ show line ++ ":" ++ err)
+>                   getContent `thenP` \content ->
+>                       failP (fn ++ ":" ++ show line ++ ":" ++ err ++ " at " ++ take 40 content ++ " ...")
  
 > data Token 
 >       = TokenName Name
