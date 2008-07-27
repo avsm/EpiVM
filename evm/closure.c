@@ -24,7 +24,7 @@ void dumpClosure(Closure* c) {
 	dumpCon((con*)c->info);
 	break;
     case INT:
-	printf("INT[%d", (int)c->info);
+	printf("INT[%d", ((int)c)>>1);
 	break;
     case BIGINT:
 	printf("BIGINT[");
@@ -586,10 +586,11 @@ void* DO_PROJECT(VAL x, int arg)
 
 void* MKINT(int x)
 {
-    VAL c = MKCLOSURE;
-    SETTY(c, INT);
-    c->info = (void*)x;
-    return c;
+    return (void*)((x<<1)+1);
+//    VAL c = MKCLOSURE;
+//    SETTY(c, INT);
+//    c->info = (void*)x;
+//    return c;
 }
 
 void* NEWBIGINT(char* intstr)
@@ -620,7 +621,7 @@ void* MKBIGINT(mpz_t* big)
 
 int GETINT(void* x)
 {
-    return (int)(((VAL)x)->info);
+    return ((int)x)>>1;
 }
 
 mpz_t* GETBIGINT(void* x)

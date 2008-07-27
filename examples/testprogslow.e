@@ -1,7 +1,7 @@
 include "Prelude.e"
 
 main () -> Unit = 
-  printInt(apply(natToInt, fact(nine())))
+  printInt(apply(natToInt, fact(eight())))
 
 zero () -> Data = Con 0 ()
 one () -> Data = Con 1 (zero())

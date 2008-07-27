@@ -23,7 +23,7 @@
 #define MKCLOSURE (Closure*)EMALLOC(sizeof(Closure))
 #define MKUNIT (void*)0
 
-#define INTOP(op,x,y) MKINT((int)(((VAL)x)->info) op (int)(((VAL)y)->info))
+#define INTOP(op,x,y) MKINT((((int)x)>>1) op (((int)y)>>1))
 #define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
     || ISFV(x)) return 0;
 
@@ -52,7 +52,8 @@ void dumpClosure(Closure* c);
 
 typedef Closure* VAL;
 
-#define GETTY(x) ((ClosureType)(((x)->ty) >> 24))
+#define GETTY(x) (ISINT(x) ? INT : ((ClosureType)(((x)->ty) >> 24)))
+#define QGETTY(x) ((ClosureType)(((x)->ty) >> 24))
 #define SETTY(x,t) (x)->ty = (((int)t) << 24)
 
 #define REF(x) x
@@ -82,7 +83,7 @@ typedef struct {
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
 #define ISCON(x) GETTY(((Closure*)(x)))==CON
-#define ISINT(x) GETTY(((Closure*)(x)))==INT
+#define ISINT(x) (((int)x)&1 == 1)
 #define ISTHUNK(x) GETTY(((Closure*)(x)))==THUNK
 #define ISFUN(x) GETTY(((Closure*)(x)))==FUN
 #define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR
@@ -124,12 +125,9 @@ VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 #define PROJECT(x,arg) (((con*)((x)->info))->args[arg])
 //void* DO_PROJECT(VAL x, int arg);
 
-// Create new primitive values
-// Treating one specially is temporary -- actually, the compiler should
-// make a special value for each integer that's used.
-#define ASSIGNINT(t, x) if (x==1) t=one; else t=MKINT(x);
+#define ASSIGNINT(t, x) t=MKINT(x);
 
-extern VAL one; 
+//extern VAL one; 
 
 void* MKINT(int x);
 void* NEWBIGINT(char* bigint);
