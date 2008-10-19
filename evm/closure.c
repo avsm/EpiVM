@@ -545,11 +545,18 @@ void DO_EVAL(VAL x) {
 	if (excess == 0) {
 	    result = fn->fn(fn->args);
 	    // If the result is still a function, better eval again to make
-	    // more progress
-	    if (GETTY(result)==FUN || GETTY(result)==THUNK) {
-		DO_EVAL(result);
+	    // more progress.
+	    // It could reasonably be null though, so be careful. It's null
+	    // if it was a foreign/io call in particular.
+	    if (result) {
+		if (GETTY(result)==FUN || GETTY(result)==THUNK) {
+		    DO_EVAL(result);
+		}
+		UPDATE(x,result);
 	    }
-	    UPDATE(x,result);
+	    else {
+		SETTY(x, INT); x->info=42;
+	    }
 	}
 	// If there are too many arguments, run it with the right number
 	// then apply the remaining arguments to the resulting closure

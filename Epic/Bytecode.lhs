@@ -63,7 +63,7 @@ at this stage.
 >     do -- put (CS args (length args) 1)
 >        code <- ecomp Tail def 0 (length args)
 >        cs <- get
->        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code++[RETURN 0]
+>        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code++[EVAL 0, RETURN 0]
 
 >   where
 
@@ -127,7 +127,7 @@ place.
 >            reg' <- new_tmp
 >            valcode <- ecomp Middle val reg' vs
 >            scopecode <- ecomp tcall scope reg (vs+1)
->            return $ valcode ++ (ASSIGN vs reg'):scopecode
+>            return $ valcode ++ (EVAL reg'):(ASSIGN vs reg'):scopecode
 >     ecomp tcall (Error str) reg vs = return [ERROR str]
 >     ecomp tcall Impossible reg vs = return [ERROR "The impossible happened."]
 >     ecomp tcall (ForeignCall ty fn argtypes) reg vs = do
