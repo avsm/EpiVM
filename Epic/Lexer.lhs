@@ -59,6 +59,7 @@
 >       | TokenFloatType
 >       | TokenBigFloatType
 >       | TokenStringType
+>       | TokenPtrType
 >       | TokenUnitType
 >       | TokenAnyType
 >       | TokenDataType
@@ -200,6 +201,7 @@
 >       ("BigInt",rest) -> cont TokenBigIntType rest
 >       ("BigFloat",rest) -> cont TokenBigFloatType rest
 >       ("String",rest) -> cont TokenStringType rest
+>       ("Ptr",rest) -> cont TokenPtrType rest
 >       ("Unit",rest) -> cont TokenUnitType rest
 >       ("Data",rest) -> cont TokenDataType rest
 >       ("Fun",rest) -> cont TokenFunType rest

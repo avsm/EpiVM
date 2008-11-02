@@ -34,6 +34,7 @@ import Epic.Lexer
       floattype       { TokenFloatType }
       bigfloattype    { TokenBigFloatType }
       stringtype      { TokenStringType }
+      ptrtype         { TokenPtrType }
       unittype        { TokenUnitType }
       funtype         { TokenFunType }
       datatype        { TokenDataType }
@@ -110,6 +111,7 @@ Type : inttype { TyInt }
      | floattype { TyFloat }
      | bigfloattype { TyBigFloat }
      | stringtype { TyString }
+     | ptrtype { TyPtr }
      | unittype { TyUnit }
      | anytype { TyAny }
      | datatype { TyData }

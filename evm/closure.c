@@ -41,6 +41,9 @@ void dumpClosure(Closure* c) {
     case UNIT:
 	printf("UNIT[");
 	break;
+    case PTR:
+	printf("PTR[");
+	break;
     case FREEVAR:
 	printf("FREEVAR[");
 	break;
@@ -536,6 +539,7 @@ void DO_EVAL(VAL x) {
     case INT:
     case FLOAT:
     case STRING:
+    case PTR:
     case UNIT:
 	return; // Already evaluated
     case FUN:
@@ -555,7 +559,7 @@ void DO_EVAL(VAL x) {
 		UPDATE(x,result);
 	    }
 	    else {
-		SETTY(x, INT); x->info=42;
+		SETTY(x, INT); x->info=(void*)42;
 	    }
 	}
 	// If there are too many arguments, run it with the right number
@@ -646,9 +650,22 @@ void* MKSTR(char* x)
     return c;
 }
 
+void* MKPTR(void* x)
+{
+    VAL c = MKCLOSURE;
+    SETTY(c, PTR);
+    c->info = x;
+    return c;
+}
+
 char* GETSTR(void* x)
 {
     return (char*)(((VAL)x)->info);
+}
+
+void* GETPTR(void* x)
+{
+    return (void*)(((VAL)x)->info);
 }
 
 void ERROR(char* msg)

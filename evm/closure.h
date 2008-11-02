@@ -40,6 +40,7 @@ typedef enum {
     BIGFLOAT,
     STRING, 
     UNIT, 
+    PTR,
     FREEVAR 
 } ClosureType;
 
@@ -134,11 +135,13 @@ void* NEWBIGINT(char* bigint);
 void* MKBIGINT(mpz_t* bigint);
 
 void* MKSTR(char* str);
+void* MKPTR(void* ptr);
 
 // Get values from a closure
 int GETINT(void* x);
 mpz_t* GETBIGINT(void* x);
 char* GETSTR(void* x);
+void* GETPTR(void* x);
 
 void* MKFREE(int x);
 

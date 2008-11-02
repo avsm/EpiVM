@@ -203,6 +203,7 @@
 
 > castFrom t TyUnit x = tmp t ++ " = NULL; " ++ x
 > castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
+> castFrom t TyPtr rest = tmp t ++ " = MKPTR(" ++ rest ++ ")"
 > castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
 > castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"
 > castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
@@ -210,6 +211,7 @@
 > foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
 > foreignArg (t, TyBigInt) = "*(GETBIGINT("++ tmp t ++"))"
 > foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
+> foreignArg (t, TyPtr) = "GETPTR("++ tmp t ++")"
 > foreignArg (t, _) = tmp t
 
 > doOp t Plus l r = tmp t ++ " = INTOP(+,"++tmp l ++ ", "++tmp r++");"

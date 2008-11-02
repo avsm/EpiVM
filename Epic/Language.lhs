@@ -11,6 +11,7 @@ Raw data types. Int, Char, Bool are unboxed.
 >           | TyBigInt
 >           | TyBigFloat
 >           | TyString
+>           | TyPtr
 >           | TyUnit
 >           | TyAny -- unchecked, polymorphic
 >           | TyData -- generic data type
@@ -25,6 +26,7 @@ Raw data types. Int, Char, Bool are unboxed.
 >     show TyBigInt = "BigInt"
 >     show TyBigFloat = "BigFloat"
 >     show TyString = "String"
+>     show TyPtr = "Ptr"
 >     show TyUnit = "Unit"
 >     show TyAny = "Any"
 >     show TyData = "Data"

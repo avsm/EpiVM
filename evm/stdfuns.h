@@ -22,6 +22,11 @@ void printBigInt(mpz_t x);
 int readInt();
 char* readStr();
 
+void* fileOpen(char* name, char* mode);
+void fileClose(void* h);
+char* freadStr(void* h);
+void fputStr(void* h, char* str);
+
 // IORefs
 int newRef();
 void* readRef(int r);

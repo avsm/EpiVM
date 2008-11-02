@@ -12,12 +12,28 @@ int readInt() {
     return atoi(readStr());
 }
 
+// FIXME: Do this properly!
 char* readStr() {
     char* buf = EMALLOC(512); // yeah, right...
     fgets(buf,512,stdin);
     char *loc = strchr(buf,'\n');
     *loc = '\0';
     return buf;       
+}
+
+// FIXME: Do this properly!
+char* freadStr(void* h) {
+    FILE* f = (FILE*)h;
+    char* buf = EMALLOC(512); // yeah, right...
+    fgets(buf,512,f);
+    char *loc = strchr(buf,'\n');
+    *loc = '\0';
+    return buf;       
+}
+
+void fputStr(void* h, char* str) {
+    FILE* f = (FILE*)h;
+    fputs(str, h);
 }
 
 int strToInt(char* str)
@@ -188,4 +204,17 @@ void doFork(void* proc)
 //    printf("CREATING THREAD %d\n", t);
     int r = pthread_create(t, NULL, runThread, proc);
 //    printf("THREAD CREATED %d\n", r);
+}
+
+
+// Basic file handling
+
+void* fileOpen(char* name, char* mode) {
+    FILE* f = fopen(name, mode);
+    return (void*)f;
+}
+
+void fileClose(void* h) {
+    FILE* f = (FILE*)h;
+    fclose(f);
 }
