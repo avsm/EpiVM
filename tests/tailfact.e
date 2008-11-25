@@ -3,7 +3,7 @@ include "Prelude.e"
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 
-  printInt(natToInt(fact(nine))) 
+  printInt(natToInt(fact(eight))) 
 
 zero () -> Data = Con 0 ()
 one () -> Data = Con 1 (zero)

@@ -556,6 +556,11 @@ void DO_EVAL(VAL x) {
 		if (GETTY(result)==FUN || GETTY(result)==THUNK) {
 		    DO_EVAL(result);
 		}
+/*		if (ISINT(result)) {
+		    printf("Updating with %d\n", x);
+		} else {
+		    printf("Updating %d %d with %d\n", x, GETTY(x), result);
+		    }*/
 		UPDATE(x,result);
 	    }
 	    else {

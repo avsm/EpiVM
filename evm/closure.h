@@ -80,7 +80,8 @@ typedef struct {
     void** args;
 } con;
 
-#define UPDATE(x,res) SETTY(x, GETTY(res)); x->info=res->info;
+#define UPDATE(x,res) if (ISINT(res)) { x = MKINT(GETINT(res)); } else { \
+                      SETTY(x, GETTY(res)); x->info=res->info; }
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
 #define ISCON(x) GETTY(((Closure*)(x)))==CON

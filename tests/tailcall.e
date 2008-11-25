@@ -3,7 +3,7 @@ include "Prelude.e"
 {- Depending how much memory you have, you may need to reduce 'nine' -}
 
 main () -> Unit = 
-    printInt(natToInt(fact(nine)))
+    printInt(natToInt(fact(eight)))
 
 natrec (x:Data, z:Any, s:Fun) -> Any = natrectail(x,s,z)
 
