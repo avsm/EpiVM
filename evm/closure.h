@@ -91,10 +91,10 @@ typedef struct {
 #define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR
 
 // Evaluate x to head normal form
-void DO_EVAL(VAL x);
+VAL DO_EVAL(VAL x);
 
 //#define EVAL(x) DO_EVAL(x)
-#define EVAL(x) if (x && (ISTHUNK(x) || ISFUN(x))) DO_EVAL(x)
+#define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x) : x)
 
 // Return a new constructor
 VAL CONSTRUCTOR(int tag, int arity, void** block);

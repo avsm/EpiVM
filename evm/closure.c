@@ -523,7 +523,7 @@ inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     else return aux_CLOSURE_APPLY5(f,a1,a2,a3,a4,a5);
 }
 
-void DO_EVAL(VAL x) {
+VAL DO_EVAL(VAL x) {
     if (x==NULL) return; // dummy value we'll never inspect, leave it alone.
 
     VAL result;
@@ -574,6 +574,7 @@ void DO_EVAL(VAL x) {
 	    result = CLOSURE_APPLY(result, excess, fn->args + fn->arity);
 	    DO_EVAL(result);
 	    UPDATE(x,result);
+	    return x;
 	}
 	break;
     case THUNK:
@@ -585,10 +586,12 @@ void DO_EVAL(VAL x) {
 	// And off we go again...
 	DO_EVAL((VAL)(th->fn));
 	UPDATE(x,((VAL)(th->fn)));
+	return x;
 	break;
     default:
 	assert(0); // Can't happen
     }
+    return x;
 }
 
 /*
