@@ -33,7 +33,7 @@ char* freadStr(void* h) {
 
 void fputStr(void* h, char* str) {
     FILE* f = (FILE*)h;
-    fputs(str, h);
+    fputs(str, f);
 }
 
 int strToInt(char* str)
@@ -202,7 +202,8 @@ void doFork(void* proc)
 {
     pthread_t* t = EMALLOC(sizeof(pthread_t));
 //    printf("CREATING THREAD %d\n", t);
-    int r = pthread_create(t, NULL, runThread, proc);
+//    int r = 
+    pthread_create(t, NULL, runThread, proc);
 //    printf("THREAD CREATED %d\n", r);
 }
 

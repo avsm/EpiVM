@@ -85,7 +85,7 @@ typedef struct {
 #define TAG(x) ((con*)((Closure*)x)->info)->tag
 
 #define ISCON(x) GETTY(((Closure*)(x)))==CON
-#define ISINT(x) (((int)x)&1 == 1)
+#define ISINT(x) ((((int)x)&1) == 1)
 #define ISTHUNK(x) GETTY(((Closure*)(x)))==THUNK
 #define ISFUN(x) GETTY(((Closure*)(x)))==FUN
 #define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR

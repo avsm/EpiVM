@@ -524,7 +524,8 @@ inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 }
 
 VAL DO_EVAL(VAL x) {
-    if (x==NULL) return; // dummy value we'll never inspect, leave it alone.
+// dummy value we'll never inspect, leave it alone.
+    if (x==NULL) return x; 
 
     VAL result;
 //    VAL x = (VAL)(*xin);
@@ -541,7 +542,7 @@ VAL DO_EVAL(VAL x) {
     case STRING:
     case PTR:
     case UNIT:
-	return; // Already evaluated
+	return x; // Already evaluated
     case FUN:
 	// If the number of arguments is right, run it.
 	fn = (fun*)(x->info);
@@ -554,7 +555,7 @@ VAL DO_EVAL(VAL x) {
 	    // if it was a foreign/io call in particular.
 	    if (result) {
 		if (GETTY(result)==FUN || GETTY(result)==THUNK) {
-		    DO_EVAL(result);
+		    result=DO_EVAL(result);
 		}
 /*		if (ISINT(result)) {
 		    printf("Updating with %d\n", x);
@@ -572,7 +573,7 @@ VAL DO_EVAL(VAL x) {
 	else if (excess > 0) {
 	    result = fn->fn(fn->args);
 	    result = CLOSURE_APPLY(result, excess, fn->args + fn->arity);
-	    DO_EVAL(result);
+	    result = DO_EVAL(result);
 	    UPDATE(x,result);
 	    return x;
 	}
@@ -580,11 +581,11 @@ VAL DO_EVAL(VAL x) {
     case THUNK:
 	th = (thunk*)(x->info);
 	// Evaluate inner thunk, which should give us a function
-	DO_EVAL((VAL)(th->fn));
+	th->fn = DO_EVAL((VAL)(th->fn));
 	// Apply this thunk's arguments to it
 	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
 	// And off we go again...
-	DO_EVAL((VAL)(th->fn));
+	th->fn = DO_EVAL((VAL)(th->fn));
 	UPDATE(x,((VAL)(th->fn)));
 	return x;
 	break;
