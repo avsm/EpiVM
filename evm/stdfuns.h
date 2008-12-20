@@ -27,6 +27,8 @@ void fileClose(void* h);
 char* freadStr(void* h);
 void fputStr(void* h, char* str);
 
+int isNull(void* ptr);
+
 // IORefs
 int newRef();
 void* readRef(int r);

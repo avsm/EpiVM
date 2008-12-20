@@ -219,3 +219,7 @@ void fileClose(void* h) {
     FILE* f = (FILE*)h;
     fclose(f);
 }
+
+int isNull(void* ptr) {
+    return ptr==NULL;
+}
