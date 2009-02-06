@@ -18,7 +18,7 @@ strToInt (x:String) -> Int =
     foreign String "strToInt" (x:String)
 
 printInt (x:Int) -> Unit =
-  let foo:Unit = foreign Unit "printInt" (x:Int) in unit
+    foreign Unit "printInt" (x:Int)
 
 -- String operations
 
