@@ -30,7 +30,7 @@
 >              "#include \"stdfuns.h\"\n" ++ 
 >              "#include <assert.h>\n\n"
 
-> mainDriver = "int main() {\nGC_init();\ninit_evm();\n_do__U_main(); return 0; }\n"
+> mainDriver = "int main(int argc, char*[] argv) {\nGC_init();\ninit_evm();\n_do__U_main(); return 0; }\n"
 
 > showarg _ i = "void* " ++ loc i
 

@@ -46,6 +46,9 @@ char* intToStr(int x);
 mpz_t* strToBigInt(char* str);
 char* bigIntToStr(mpz_t x);
 
+// get a native representation of a value
+void* getNative(void * fn);
+
 // String operations
 
 int strIndex(char* str, int i);

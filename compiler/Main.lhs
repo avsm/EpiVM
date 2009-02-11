@@ -12,8 +12,10 @@
 >           (fns, opts) <- getInput args
 >           outfile <- getOutput opts
 >           ofiles <- compileFiles fns (mkOpts opts)
+>           copts <- getCOpts opts
+>           extras <- getExtra opts
 >           if ((length ofiles) > 0 && (not (elem Obj opts)))
->              then link ofiles outfile
+>              then link (ofiles ++ copts) extras outfile
 >              else return ()
 >   where mkOpts (KeepInt:xs) = KeepC:(mkOpts xs)
 >         mkOpts (_:xs) = mkOpts xs
@@ -66,6 +68,8 @@
 >             | Obj -- Just make the .o, don't link
 >             | File String -- File to send the compiler
 >             | Output String -- Output filename
+>             | ExtraInc String -- extra files to inlude
+>             | COpt String -- option to send straight to gcc
 >   deriving Eq
 
 > parseArgs :: [String] -> [Option]
@@ -73,6 +77,9 @@
 > parseArgs ("-keepc":args) = KeepInt:(parseArgs args)
 > parseArgs ("-c":args) = Obj:(parseArgs args)
 > parseArgs ("-o":name:args) = (Output name):(parseArgs args)
+> parseArgs ("-i":inc:args) = (ExtraInc inc):(parseArgs args)
+> parseArgs (('$':x):args) = (COpt (x ++ concat (map (" "++) args))):[]
+> parseArgs (('-':x):args) = (COpt x):(parseArgs args)
 > parseArgs (x:args) = (File x):(parseArgs args)
 
 > getFile :: [Option] -> IO [FilePath]
@@ -85,3 +92,15 @@
 > getOutput ((Output fn):xs) = return fn
 > getOutput (_:xs) = getOutput xs
 > getOutput [] = return "a.out"
+
+> getCOpts :: [Option] -> IO [String]
+> getCOpts ((COpt x):xs) = do fns <- getCOpts xs
+>                             return (x:fns)
+> getCOpts (_:xs) = getCOpts xs
+> getCOpts [] = return []
+
+> getExtra :: [Option] -> IO [String]
+> getExtra ((ExtraInc x):xs) = do fns <- getExtra xs
+>                                 return (x:fns)
+> getExtra (_:xs) = getExtra xs
+> getExtra [] = return []

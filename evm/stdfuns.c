@@ -48,6 +48,10 @@ char* intToStr(int x)
     return buf;
 }
 
+void* getNative(void * fn) {
+    return fn;
+}
+
 int strIndex(char* str, int i)
 {
     return (int)(str[i]);

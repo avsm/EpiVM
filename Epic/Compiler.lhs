@@ -32,7 +32,13 @@ Brings everything together; parsing, checking, code generation
 > data CompileOptions = KeepC -- ^ Keep intermediate C file
 >                     | ShowBytecode -- ^ Show generated code
 >                     | ShowParseTree -- ^ Show parse tree
+>                     | GCCOpt String -- ^ Extra GCC option
 >   deriving Eq
+
+> addGCC :: [CompileOptions] -> String
+> addGCC [] = ""
+> addGCC ((GCCOpt s):xs) = s ++ " " ++ addGCC xs
+> addGCC (_:xs) = addGCC xs
 
 > -- |Compile a source file in supercombinator language to a .o
 > compile :: FilePath -- ^ Input file name
@@ -56,7 +62,7 @@ Brings everything together; parsing, checking, code generation
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 checked <- compileDecls (checkAll ds) tmph
->                 let cmd = "gcc -c -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -I. -o " ++ outf
+>                 let cmd = "gcc -c -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf
 >                 -- putStrLn $ cmd
 >                 exit <- system cmd
 >                 if (elem KeepC opts)
@@ -85,10 +91,12 @@ Brings everything together; parsing, checking, code generation
 
 > -- |Link a collection of .o files into an executable
 > link :: [FilePath] -- ^ Object files
+>         -> [FilePath] -- ^ Extra include files for main program
 >         -> FilePath -- ^ Executable filename
 >         -> IO ()
-> link infs outf = do
->     let cmd = "gcc " ++ libdir ++ "/mainprog.c -L" ++
+> link infs extraIncs outf = do
+>     mainprog <- mkMain extraIncs 
+>     let cmd = "gcc -x c " ++ mainprog ++ " -x none -L" ++
 >               libdir++" -I"++libdir ++ " " ++
 >               (concat (map (++" ") infs)) ++ 
 >               " -levm -lgc -lpthread -lgmp -o "++outf
@@ -97,6 +105,19 @@ Brings everything together; parsing, checking, code generation
 >     if (exit /= ExitSuccess)
 >        then fail $ "Linking failed"
 >        else return ()
+
+Output the main progam, adding any extra includes needed. 
+(Some libraries need the extra includes, notably SDL, to compile correctly.
+Grr.)
+
+> mkMain :: [FilePath] -> IO FilePath
+> mkMain extra = 
+>    do mp <- readFile (libdir ++ "/mainprog.c")
+>       (tmp, tmpH) <- tempfile
+>       hPutStr tmpH (concat (map (\x -> "#include <" ++ x ++ ">\n") extra))
+>       hPutStr tmpH mp
+>       hClose tmpH
+>       return tmp
 
 > -- |Get the path where the required C libraries and include files are stored
 > libdir :: FilePath
