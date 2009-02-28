@@ -63,7 +63,7 @@ at this stage.
 >     do -- put (CS args (length args) 1)
 >        code <- ecomp Tail def 0 (length args)
 >        cs <- get
->        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code++[EVAL 0, RETURN 0]
+>        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code ++[EVAL 0, RETURN 0]
 
 >   where
 

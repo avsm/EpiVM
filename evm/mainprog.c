@@ -12,6 +12,6 @@ void* _do__U_main();
 int main(int argc, char* argv[]) {
     GC_init();
     init_evm();
-    _do__U_main(); 
+    _do___U__main();
     return 0; 
 }

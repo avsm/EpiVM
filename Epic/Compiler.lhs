@@ -62,7 +62,7 @@ Brings everything together; parsing, checking, code generation
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 checked <- compileDecls (checkAll ds) tmph
->                 let cmd = "gcc -c -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts
+>                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts
 >                 -- putStrLn $ cmd
 >                 exit <- system cmd
 >                 if (elem KeepC opts)
@@ -96,7 +96,7 @@ Brings everything together; parsing, checking, code generation
 >         -> IO ()
 > link infs extraIncs outf = do
 >     mainprog <- mkMain extraIncs 
->     let cmd = "gcc -x c " ++ mainprog ++ " -x none -L" ++
+>     let cmd = "gcc -x c -O2 -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
 >               libdir++" -I"++libdir ++ " " ++
 >               (concat (map (++" ") infs)) ++ 
 >               " -levm -lgc -lpthread -lgmp -o "++outf

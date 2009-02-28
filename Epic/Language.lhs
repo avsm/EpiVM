@@ -53,6 +53,17 @@ Raw data types. Int, Char, Bool are unboxed.
 > showuser (UN str) = str
 > showuser (MN str i) = "["++str++"_"++show i++"]"
 
+> quotename [] = ""
+> quotename ('_':cs) = "__"++quotename cs
+> quotename ('\'':cs) = "_PR_"++quotename cs
+> quotename ('?':cs) = "_QU_"++quotename cs
+> quotename ('$':cs) = "_DO_"++quotename cs
+> quotename ('#':cs) = "_HA_"++quotename cs
+> quotename ('@':cs) = "_AT_"++quotename cs
+> quotename (c:cs) = c:(quotename cs)
+
+> showC n = quotename (show n)
+
 > type Context = [(Name,([Type],Type))] -- Name, arg types, return type
 
 Get the arity of a definition in the context

@@ -680,6 +680,7 @@ void* GETPTR(void* x)
 void ERROR(char* msg)
 {
     printf("*** error : %s ***\n",msg);
+    assert(0);
     exit(1);
 }
 

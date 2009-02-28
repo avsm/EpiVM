@@ -17,13 +17,13 @@
 > writeIFace :: [Decl] -> String
 > writeIFace [] = ""
 > writeIFace ((Decl name ret (Bind args _ _)):xs) =
->     "extern " ++ showuser name ++ " ("++ showextargs (args) ++ ")" ++
+>     "extern " ++ showC name ++ " ("++ showextargs (args) ++ ")" ++
 >               " -> " ++ show ret ++ "\n" ++ writeIFace xs
 > writeIFace (_:xs) = writeIFace xs
 
 > showextargs [] = ""
-> showextargs [(n,ty)] = showuser n ++ ":" ++ show ty
-> showextargs ((n,ty):xs) = showuser n ++ ":" ++ show ty ++ ", " ++ 
+> showextargs [(n,ty)] = showC n ++ ":" ++ show ty
+> showextargs ((n,ty):xs) = showC n ++ ":" ++ show ty ++ ", " ++ 
 >                           showextargs xs
 
 > fileHeader = "#include \"closure.h\"\n" ++ 
@@ -74,8 +74,8 @@
 > tmp v = "tmp" ++ show v
 > loc v = "var" ++ show v
 
-> quickcall fn = "_do_" ++ show fn
-> thunk fn = "_wrap_" ++ show fn
+> quickcall fn = "_do_" ++ showC fn
+> thunk fn = "_wrap_" ++ showC fn
 
 > compileBody :: FunCode -> String
 > compileBody (Code args bytecode) = 
