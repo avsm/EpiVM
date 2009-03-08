@@ -67,7 +67,7 @@
 > workers ctxt ((Decl fname ret func@(Bind args locals defn)):xs) =
 >     -- trace (show fname ++ ": " ++ show defn) $
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ") {\n" ++
->      compileBody (compile ctxt func) ++ "\n}\n\n" ++
+>      compileBody (compile ctxt fname func) ++ "\n}\n\n" ++
 >     workers ctxt xs
 > workers ctxt (_:xs) = workers ctxt xs
 
@@ -142,6 +142,10 @@
 >    cg (RETURN t) = return $ "return "++tmp t++";"
 >    cg DRETURN = return $ "return NULL;"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
+>    cg (TRACE s args) = return $ "TRACE {\n\tprintf(\"%s\\n\", " ++ show s ++ ");\n" ++
+>                              concat (map dumpClosure args) ++ " }"
+>        where dumpClosure i 
+>                  = "\tdumpClosure(" ++ loc i ++ "); printf(\"--\\n\");\n"
 >    -- cg x = return $ "NOP; // not done " ++ show x
 
 >    cgalts [] def _ = 

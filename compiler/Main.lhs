@@ -18,6 +18,7 @@
 >              then link (ofiles ++ copts) extras outfile
 >              else return ()
 >   where mkOpts (KeepInt:xs) = KeepC:(mkOpts xs)
+>         mkOpts (TraceOn:xs) = Trace:(mkOpts xs)
 >         mkOpts (_:xs) = mkOpts xs
 >         mkOpts [] = []
 
@@ -61,10 +62,11 @@
 >                       else return (fns,opts)
 
 > showUsage = do putStrLn "Epigram Supercombinator Compiler version 0.1"
->                putStrLn "Usage:\n\tesc <input file> [options]"
+>                putStrLn "Usage:\n\tepic <input file> [options]"
 >                exitWith (ExitFailure 1)
 
 > data Option = KeepInt -- Don't delete intermediate file
+>             | TraceOn -- Trace while running (debug option)
 >             | Obj -- Just make the .o, don't link
 >             | File String -- File to send the compiler
 >             | Output String -- Output filename
@@ -75,6 +77,7 @@
 > parseArgs :: [String] -> [Option]
 > parseArgs [] = []
 > parseArgs ("-keepc":args) = KeepInt:(parseArgs args)
+> parseArgs ("-trace":args) = TraceOn:(parseArgs args)
 > parseArgs ("-c":args) = Obj:(parseArgs args)
 > parseArgs ("-o":name:args) = (Output name):(parseArgs args)
 > parseArgs ("-i":inc:args) = (ExtraInc inc):(parseArgs args)

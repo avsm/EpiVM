@@ -90,6 +90,12 @@ typedef struct {
 #define ISFUN(x) GETTY(((Closure*)(x)))==FUN
 #define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR
 
+#ifdef TRACEON
+#define TRACE if(1)
+#else
+#define TRACE if(0)
+#endif
+
 // Evaluate x to head normal form
 VAL DO_EVAL(VAL x);
 

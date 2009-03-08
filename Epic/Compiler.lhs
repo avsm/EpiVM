@@ -30,6 +30,7 @@ Brings everything together; parsing, checking, code generation
 
 > -- | (Debugging) options to give to compiler
 > data CompileOptions = KeepC -- ^ Keep intermediate C file
+>                     | Trace -- ^ Generate trace at run-time (debug)
 >                     | ShowBytecode -- ^ Show generated code
 >                     | ShowParseTree -- ^ Show parse tree
 >                     | GCCOpt String -- ^ Extra GCC option
@@ -39,6 +40,9 @@ Brings everything together; parsing, checking, code generation
 > addGCC [] = ""
 > addGCC ((GCCOpt s):xs) = s ++ " " ++ addGCC xs
 > addGCC (_:xs) = addGCC xs
+
+> doTrace opts | elem Trace opts = " -DTRACEON"
+>              | otherwise = ""
 
 > -- |Compile a source file in supercombinator language to a .o
 > compile :: FilePath -- ^ Input file name
@@ -62,7 +66,7 @@ Brings everything together; parsing, checking, code generation
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 checked <- compileDecls (checkAll ds) tmph
->                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts
+>                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
 >                 -- putStrLn $ cmd
 >                 exit <- system cmd
 >                 if (elem KeepC opts)

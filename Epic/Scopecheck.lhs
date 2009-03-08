@@ -41,7 +41,7 @@ checking we do (for now).
 >                      (Just i) -> return $ V i
 >    tc env (Let n ty v sc) = do
 >                v' <- tc env v
->                sc' <- tc (env++[(n,length env)]) sc
+>                sc' <- tc ((n,length env):env) sc
 >                maxlen <- get
 >                put (if (length env + 1)>maxlen 
 >                        then (length env + 1) 
@@ -81,7 +81,7 @@ checking we do (for now).
 
 >    tcalts env [] = return []
 >    tcalts env ((Alt tag args expr):alts) = do
->                let env' = env++(v_ise args (length env))
+>                let env' = (v_ise args (length env))++env
 >                expr' <- tc env' expr
 >                maxlen <- get
 >                put (if (length env')>maxlen 

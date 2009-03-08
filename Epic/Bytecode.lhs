@@ -39,6 +39,7 @@ at this stage.
 >             | RETURN TmpVar
 >             | DRETURN -- return dummy value
 >             | ERROR String -- Fatal error, exit
+>             | TRACE String [TmpVar]
 >   deriving Show
 
 > type Bytecode = [ByteOp]
@@ -50,20 +51,22 @@ at this stage.
 >                          num_locals :: Int,
 >                          next_tmp :: Int }
 
-> compile :: Context -> Func -> FunCode
-> compile ctxt fn@(Bind args locals def) = 
+> compile :: Context -> Name -> Func -> FunCode
+> compile ctxt fname fn@(Bind args locals def) = 
 >     let cs = (CS (map snd args) (length args) 1)
->         code = evalState (scompile ctxt fn) cs in
+>         code = evalState (scompile ctxt fname fn) cs in
 >         Code (map snd args) code
 
 > data TailCall = Tail | Middle
 
-> scompile :: Context -> Func -> State CompileState Bytecode
-> scompile ctxt (Bind args locals def) = 
+> scompile :: Context -> Name -> Func -> State CompileState Bytecode
+> scompile ctxt fname (Bind args locals def) = 
 >     do -- put (CS args (length args) 1)
 >        code <- ecomp Tail def 0 (length args)
 >        cs <- get
->        return $ (LOCALS (num_locals cs)):(TMPS (next_tmp cs)):code ++[EVAL 0, RETURN 0]
+>        return $ (LOCALS (num_locals cs)):
+>                 (TRACE (show fname) [0..(length args)-1]):
+>                 (TMPS (next_tmp cs)):code ++[EVAL 0, RETURN 0]
 
 >   where
 
