@@ -35,8 +35,9 @@ checking we do (for now).
 >  where
 >    tc env (R n) = case lookup n env of
 >                      Nothing -> case lookup n ctxt of
->                         Nothing -> lift $ fail $ 
->                                      "Unknown name " ++ showuser n
+>                         Nothing -> return $ Const (MkInt 1234567890)
+> -- lift $ fail $ 
+>    --                                  "Unknown name " ++ showuser n
 >                         (Just _) -> return $ R n
 >                      (Just i) -> return $ V i
 >    tc env (Let n ty v sc) = do
