@@ -1,5 +1,5 @@
 Name:		epic
-Version:	0.1.1
+Version:	0.1.2
 Author:		Edwin Brady
 License:	BSD3
 License-file:	LICENSE
@@ -21,5 +21,6 @@ Extensions:	MultiParamTypeClasses, FunctionalDependencies,
 Exposed-modules: Epic.Compiler
 Other-modules: Epic.Bytecode Epic.Parser Epic.Scopecheck
                Epic.Language Epic.Lexer Epic.CodegenC
-	       Epic.Prefix Epic.OTTLang
+	       Epic.OTTLang Paths_epic
+Data-files:    evm/libevm.a evm/closure.h evm/stdfuns.h evm/mainprog.c
 Extra-source-files: evm/*.c evm/*.h evm/Makefile

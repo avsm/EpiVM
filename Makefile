@@ -2,32 +2,32 @@ DB = --user
 PREFIX = $(HOME)
 GHCOPTS = 
 
-package: rts
-	runhaskell Setup.lhs build
+package:
+	runhaskell Setup.hs build
 
 cabal-package:
-	runhaskell Setup.lhs sdist
+	runhaskell Setup.hs sdist
 
 configure:
-	runhaskell Setup.lhs configure --user --ghc --prefix=$(PREFIX)
-	cd Epic; echo "module Epic.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
+	runhaskell Setup.hs configure --user --ghc --prefix=$(PREFIX)
+#	cd Epic; echo "module Epic.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
 
 rts:
 	$(MAKE) -C evm
 
-install: .PHONY rts
-	$(MAKE) -C evm install PREFIX=$(PREFIX)
+install: .PHONY
+	#$(MAKE) -C evm install PREFIX=$(PREFIX)
 	#$(MAKE) -C lib install PREFIX=$(PREFIX)
-	runhaskell Setup.lhs install $(DB)
+	runhaskell Setup.hs install $(DB)
 
 unregister:
-	runhaskell Setup.lhs unregister $(DB)
+	runhaskell Setup.hs unregister $(DB)
 
 doc:
-	runhaskell Setup.lhs haddock
+	runhaskell Setup.hs haddock
 
 clean:
-	runhaskell Setup.lhs clean
+	runhaskell Setup.hs clean
 	$(MAKE) -C evm clean
 	cd compiler; rm -f *.o *.hi epic
 

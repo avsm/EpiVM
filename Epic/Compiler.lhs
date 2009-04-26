@@ -12,8 +12,7 @@
 > module Epic.Compiler(CompileOptions(..),
 >                      compile, 
 >                      compileOpts, 
->                      link, 
->                      libdir) where
+>                      link) where
 
 Brings everything together; parsing, checking, code generation
 
@@ -26,7 +25,8 @@ Brings everything together; parsing, checking, code generation
 > import Epic.Parser
 > import Epic.Scopecheck
 > import Epic.CodegenC
-> import Epic.Prefix
+
+> import Paths_epic
 
 > -- | (Debugging) options to give to compiler
 > data CompileOptions = KeepC -- ^ Keep intermediate C file
@@ -52,6 +52,11 @@ Brings everything together; parsing, checking, code generation
 > compile fn outf iface
 >     = compileOpts fn outf iface []
 
+Chop off everything after the last / - get the directory a file is in
+
+> trimLast f = case span (\x -> x /= '/') (reverse f) of
+>                 (eman, htap) -> reverse htap
+
 > compileOpts :: FilePath -- ^ Input file name
 >            -> FilePath -- ^ Output file name
 >            -> Maybe FilePath -- ^ Interface (.ei) file name, if desired
@@ -66,8 +71,11 @@ Brings everything together; parsing, checking, code generation
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 checked <- compileDecls (checkAll ds) tmph
+>                 fp <- getDataFileName "evm/closure.h"
+>                 let libdir = trimLast fp
 >                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
 >                 -- putStrLn $ cmd
+>                 -- putStrLn $ fp
 >                 exit <- system cmd
 >                 if (elem KeepC opts)
 >                    then do system $ "cp " ++ tmpn ++ " " ++ 
@@ -100,6 +108,8 @@ Brings everything together; parsing, checking, code generation
 >         -> IO ()
 > link infs extraIncs outf = do
 >     mainprog <- mkMain extraIncs 
+>     fp <- getDataFileName "evm/closure.h"
+>     let libdir = trimLast fp
 >     let cmd = "gcc -x c -O2 -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
 >               libdir++" -I"++libdir ++ " " ++
 >               (concat (map (++" ") infs)) ++ 
@@ -116,16 +126,17 @@ Grr.)
 
 > mkMain :: [FilePath] -> IO FilePath
 > mkMain extra = 
->    do mp <- readFile (libdir ++ "/mainprog.c")
+>    do mppath <- getDataFileName "evm/mainprog.c"
+>       mp <- readFile mppath
 >       (tmp, tmpH) <- tempfile
 >       hPutStr tmpH (concat (map (\x -> "#include <" ++ x ++ ">\n") extra))
 >       hPutStr tmpH mp
 >       hClose tmpH
 >       return tmp
 
-> -- |Get the path where the required C libraries and include files are stored
-> libdir :: FilePath
-> libdir = libprefix ++ "/lib/evm"
+ -- |Get the path where the required C libraries and include files are stored
+ libdir :: FilePath
+ libdir = libprefix ++ "/lib/evm"
 
 > tempfile :: IO (FilePath, Handle)
 > tempfile = do env <- environment "TMPDIR"
