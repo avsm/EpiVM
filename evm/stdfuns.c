@@ -8,6 +8,17 @@ void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
 void printBigInt(mpz_t x) { printf("%s\n",mpz_get_str(NULL,10,x)); }
 
+void epicMemInfo() {
+    GC_gcollect();
+    int heap = GC_get_heap_size();
+    int free = GC_get_free_bytes();
+    int total = GC_get_total_bytes();
+
+    printf("Heap size %d\n", heap);
+    printf("Heap used %d\n", heap-free);
+    printf("Total allocations %d\n", total);
+}
+
 int readInt() {
     return atoi(readStr());
 }

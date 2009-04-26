@@ -4,13 +4,22 @@ Author:		Edwin Brady
 License:	BSD3
 License-file:	LICENSE
 Maintainer:	eb@dcs.st-and.ac.uk
-Homepage:	http://www.dcs.st-and.ac.uk/~eb/
+Homepage:	http://www.dcs.st-and.ac.uk/~eb/epic.php
 Stability:	experimental
+Category:       Compilers/Interpreters
+Synopsis:	Compiler for a supercombinator language
+Description:    Epic is a simple functional language which compiles to
+                reasonably efficient C code, using the Boehm-Demers-Weiser 
+	        garbage collector. It is currently used as a back end for 
+	        the Idris dependently typed programming language.
+
 Build-depends:	base, haskell98, mtl, Cabal, array, directory
+Build-type:     Simple
+
 Extensions:	MultiParamTypeClasses, FunctionalDependencies,
 		ExistentialQuantification, OverlappingInstances
-Synopsis:	Compiler for Supercombinator language
 Exposed-modules: Epic.Compiler
 Other-modules: Epic.Bytecode Epic.Parser Epic.Scopecheck
                Epic.Language Epic.Lexer Epic.CodegenC
 	       Epic.Prefix Epic.OTTLang
+Extra-source-files: evm/*.c evm/*.h evm/Makefile

@@ -5,6 +5,9 @@ GHCOPTS =
 package: rts
 	runhaskell Setup.lhs build
 
+cabal-package:
+	runhaskell Setup.lhs sdist
+
 configure:
 	runhaskell Setup.lhs configure --user --ghc --prefix=$(PREFIX)
 	cd Epic; echo "module Epic.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs

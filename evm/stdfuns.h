@@ -19,6 +19,9 @@ void putStr(char* str);
 void printInt(int x);
 void printBigInt(mpz_t x);
 
+// dump memory usage (from libgc)
+void epicMemInfo();
+
 int readInt();
 char* readStr();
 
