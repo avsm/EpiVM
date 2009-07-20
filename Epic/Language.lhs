@@ -88,6 +88,7 @@ Get the arity of a definition in the context
 >           | Error String -- Exit with error message
 >           | Impossible -- Claimed impossible to reach code
 >           | ForeignCall Type String [(Expr, Type)] -- Foreign function call
+>           | LazyForeignCall Type String [(Expr, Type)] -- Foreign function call
 >   deriving (Show, Eq)
 
 > data CaseAlt = Alt { alt_tag :: Tag,
@@ -123,6 +124,10 @@ Programs
 >                      fargs :: [Type] }
 >           | Include String
 >           | Link String
+>           | Export { cname :: Name,
+>                      fname :: Name,
+>                      export_args :: [(Name, Name)] }
+>           | CType Name
 >   deriving Show
 
 > data Result r = Success r

@@ -138,6 +138,10 @@ place.
 >           (argcode, argregs) <- ecomps args vs
 >           let evalcode = map EVAL argregs
 >           return $ argcode ++ evalcode ++ [FOREIGN ty reg fn (zip argregs types)]
+>     ecomp tcall (LazyForeignCall ty fn argtypes) reg vs = do
+>           let (args,types) = unzip argtypes
+>           (argcode, argregs) <- ecomps args vs
+>           return $ argcode ++ [FOREIGN ty reg fn (zip argregs types)]
 
 >     ecomps :: [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
 >     ecomps e vs = ecomps' [] [] e vs

@@ -86,6 +86,8 @@
 >       | TokenUnit
 >       | TokenCon
 >       | TokenDefault
+>       | TokenExport
+>       | TokenCType
 >       | TokenLet
 >       | TokenCase
 >       | TokenOf
@@ -224,6 +226,8 @@
 >       ("impossible",rest) -> cont TokenImpossible rest
 >       ("foreign",rest) -> cont TokenForeign rest
 > -- declarations
+>       ("export",rest) -> cont TokenExport rest
+>       ("ctype",rest) -> cont TokenCType rest
 >       ("extern",rest) -> cont TokenExtern rest
 >       ("include",rest) -> cont TokenInclude rest
 >       (var,rest)   -> cont (mkname var) rest

@@ -42,6 +42,12 @@ subBig (x:BigInt, y:BigInt) -> BigInt =
 mulBig (x:BigInt, y:BigInt) -> BigInt =
    foreign BigInt "mulBigInt" (x:BigInt, y:BigInt)
 
+divBig (x:BigInt, y:BigInt) -> BigInt =
+   foreign BigInt "divBigInt" (x:BigInt, y:BigInt)
+
+modBig (x:BigInt, y:BigInt) -> BigInt =
+   foreign BigInt "modBigInt" (x:BigInt, y:BigInt)
+
 eqBig (x:BigInt, y:BigInt) -> Bool =
    foreign Int "eqBigInt" (x:BigInt, y:BigInt)
 

@@ -13,9 +13,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EMALLOC GC_MALLOC
-#define EREALLOC GC_REALLOC
-#define EFREE GC_FREE
+//#define EMALLOC GC_MALLOC
+//#define EREALLOC GC_REALLOC
+//#define EFREE GC_FREE
+
+#define EMALLOC malloc
+#define EREALLOC realloc
+#define EFREE free
 
 #define MKCON (con*)EMALLOC(sizeof(con))
 #define MKFUN (fun*)EMALLOC(sizeof(fun))

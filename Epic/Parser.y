@@ -75,6 +75,8 @@ import Epic.Lexer
       arrow           { TokenArrow }
       cinclude         { TokenCInclude }
       extern          { TokenExtern }
+      export          { TokenExport }
+      ctype           { TokenCType }
       include         { TokenInclude }
 
 %nonassoc NONE
@@ -86,6 +88,7 @@ import Epic.Lexer
 %left '<' '>' le ge
 %left '+' '-'
 %left '*' '/'
+%left NEG
 %nonassoc '!'
 %nonassoc '('
 
@@ -148,6 +151,8 @@ Expr : name { R $1 }
      | impossible { Impossible }
      | foreign Type string '(' ExprTypeList ')' 
           { ForeignCall $2 $3 $5 }
+     | lazy foreign Type string '(' ExprTypeList ')' 
+          { LazyForeignCall $3 $4 $6 }
 
 CaseExpr :: { Expr }
 CaseExpr : case Expr of '{' Alts '}' { Case $2 $5 }
@@ -165,6 +170,7 @@ Alt : con int '(' TypeList ')' arrow Expr
 MathExpr :: { Expr }
 MathExpr : Expr '+' Expr { Op Plus $1 $3 }
          | Expr '-' Expr { Op Minus $1 $3 }
+         | '-' Expr %prec NEG { Op Minus (Const (MkInt 0)) $2 }
          | Expr '*' Expr { Op Times $1 $3 }
          | Expr '/' Expr { Op Divide $1 $3 }
          | Expr '<' Expr { Op OpLT $1 $3 }

@@ -49,7 +49,7 @@ void fputStr(void* h, char* str) {
 
 int strToInt(char* str)
 {
-    return atoi(str);
+    return strtol(str,NULL,10);
 }
 
 char* intToStr(int x)
@@ -95,7 +95,13 @@ mpz_t* mulBigInt(mpz_t x, mpz_t y) {
 
 mpz_t* divBigInt(mpz_t x, mpz_t y) {
     mpz_t* answer = EMALLOC(sizeof(mpz_t));
-    mpz_cdiv_q(*answer, x, y);
+    mpz_tdiv_q(*answer, x, y);
+    return answer;
+}
+
+mpz_t* modBigInt(mpz_t x, mpz_t y) {
+    mpz_t* answer = EMALLOC(sizeof(mpz_t));
+    mpz_tdiv_r(*answer, x, y);
     return answer;
 }
 

@@ -63,6 +63,7 @@ mpz_t* addBigInt(mpz_t x, mpz_t y);
 mpz_t* subBigInt(mpz_t x, mpz_t y);
 mpz_t* mulBigInt(mpz_t x, mpz_t y);
 mpz_t* divBigInt(mpz_t x, mpz_t y);
+mpz_t* modBigInt(mpz_t x, mpz_t y);
 
 int eqBigInt(mpz_t x, mpz_t y);
 int ltBigInt(mpz_t x, mpz_t y);

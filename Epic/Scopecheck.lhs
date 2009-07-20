@@ -78,6 +78,9 @@ checking we do (for now).
 >    tc env (ForeignCall ty fn args) = do
 >                argexps' <- mapM (tc env) (map fst args)
 >                return $ ForeignCall ty fn (zip argexps' (map snd args))
+>    tc env (LazyForeignCall ty fn args) = do
+>                argexps' <- mapM (tc env) (map fst args)
+>                return $ LazyForeignCall ty fn (zip argexps' (map snd args))
 >    tc env x = return x
 
 >    tcalts env [] = return []
