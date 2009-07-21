@@ -7,11 +7,26 @@
 
 VAL one;
 
-void dumpCon(con* c) {
-    printf("%d", c->tag);
+void dumpClosureA(Closure* c, int rec);
+
+void dumpCon(con* c, int rec) {
+    int x,arity;
+    if (!rec) { printf("TAG(%d)", c->tag & 65535); }
+
+    arity = c->tag >> 16;
+    if (arity>0 && !rec) { printf(": "); }
+
+    for(x=0; x<arity; ++x) {
+	dumpClosureA(c->args[x], rec);
+	if (x!=(arity-1)) { printf(", "); }
+    }
 }
 
-void dumpClosure(Closure* c) {
+void dumpRecord(Closure* r) {
+    dumpClosureA(r, 1);
+}
+
+void dumpClosureA(Closure* c, int rec) {
     switch(GETTY(c)) {
     case FUN:
 	printf("FUN[");
@@ -20,11 +35,11 @@ void dumpClosure(Closure* c) {
 	printf("THUNK[");
 	break;
     case CON:
-	printf("CON[");
-	dumpCon((con*)c->info);
+	if (!rec) { printf("CON["); } else { printf("["); }
+	dumpCon((con*)c->info, rec);
 	break;
     case INT:
-	printf("INT[%d", ((int)c)>>1);
+	if (!rec) { printf("INT[%d", ((int)c)>>1); } else { printf("[%d", ((int)c)>>1); }
 	break;
     case BIGINT:
 	printf("BIGINT[");
@@ -50,7 +65,12 @@ void dumpClosure(Closure* c) {
     default:
 	printf("[%d,%d", GETTY(c), (int)c->info);
     }
-    printf("]\n");
+    printf("]");
+}
+
+void dumpClosure(Closure* c) {
+    dumpClosureA(c,0);
+    printf("\n");
 }
 
 void assertCon(Closure* c) 
@@ -88,7 +108,7 @@ inline VAL CONSTRUCTOR(int tag, int arity, void** block)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (arity << 16);
     if (arity==0) {
 	cn->args = 0;
     } else {
@@ -104,7 +124,7 @@ inline VAL CONSTRUCTOR1(int tag, VAL a1)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (1 << 16);
     cn->args = MKARGS(1);
     cn->args[0] = a1;
     SETTY(c,CON);
@@ -116,7 +136,7 @@ inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (2 << 16);
     cn->args = MKARGS(2);
     cn->args[0] = a1;
     cn->args[1] = a2;
@@ -129,7 +149,7 @@ inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (3 << 16);
     cn->args = MKARGS(3);
     cn->args[0] = a1;
     cn->args[1] = a2;
@@ -143,7 +163,7 @@ inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (4 << 16);
     cn->args = MKARGS(2);
     cn->args[0] = a1;
     cn->args[1] = a2;
@@ -158,7 +178,7 @@ inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
-    cn->tag = tag;
+    cn->tag = tag + (5 << 16);
     cn->args = MKARGS(5);
     cn->args[0] = a1;
     cn->args[1] = a2;

@@ -88,7 +88,8 @@ typedef struct {
 
 #define UPDATE(x,res) if (ISINT(res)) { x = MKINT(GETINT(res)); } else { \
                       SETTY(x, GETTY(res)); x->info=res->info; }
-#define TAG(x) ((con*)((Closure*)x)->info)->tag
+#define TAG(x) (((con*)((Closure*)x)->info)->tag & 65535)
+#define ARITY(x) (((con*)((Closure*)x)->info)->tag >> 16)
 
 #define ISCON(x) GETTY(((Closure*)(x)))==CON
 #define ISINT(x) ((((int)x)&1) == 1)
