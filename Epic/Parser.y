@@ -57,6 +57,8 @@ import Epic.Lexer
       ')'             { TokenCB }
       '{'             { TokenOCB }
       '}'             { TokenCCB }
+      '['             { TokenOSB }
+      ']'             { TokenCSB }
       '+'             { TokenPlus }
       '-'             { TokenMinus }
       '*'             { TokenTimes }
@@ -89,7 +91,7 @@ import Epic.Lexer
 %left '+' '-'
 %left '*' '/'
 %left NEG
-%nonassoc '!'
+%left '!'
 %nonassoc '('
 
 
@@ -137,6 +139,7 @@ Expr :: { Expr }
 Expr : name { R $1 }
      | '(' Expr ')' { $2 }
      | Expr '(' ExprList ')' { App $1 $3 }
+     | '[' ExprList ']' { Con 0 $2 }
      | lazy '(' Expr ')' { Lazy $3 }
      | con int '(' ExprList ')' { Con $2 $4 }
      | Const { Const $1 }
@@ -164,6 +167,8 @@ Alts : { [] }
 Alt :: { CaseAlt }
 Alt : con int '(' TypeList ')' arrow Expr 
          { Alt $2 $4 $7 }
+    | int arrow Expr
+         { ConstAlt $1 $3 }
     | default arrow Expr { DefaultCase $3 }
 
 MathExpr :: { Expr }

@@ -95,6 +95,8 @@ Get the arity of a definition in the context
 >                      alt_args :: [(Name, Type)], -- bound arguments
 >                      alt_expr :: Expr -- what to do
 >                    }
+>              | ConstAlt { alt_const :: Int,
+>                           alt_expr :: Expr }
 >              | DefaultCase { alt_expr :: Expr }
 >   deriving (Show, Eq)
 

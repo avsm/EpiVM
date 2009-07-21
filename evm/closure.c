@@ -59,6 +59,11 @@ void assertCon(Closure* c)
     if (!ISCON(c)) { dumpClosure(c); assert(0); }
 }
 
+void assertInt(Closure* c) 
+{
+    if (!ISINT(c)) { dumpClosure(c); assert(0); }
+}
+
 inline VAL CLOSURE(func x, int arity, int args, void** block)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(fun)); // MKCLOSURE;

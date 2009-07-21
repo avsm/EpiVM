@@ -30,6 +30,7 @@ at this stage.
 >             | PROJVAR Local TmpVar Int -- project into a local variable
 >               -- each case branch records which tag it's code for
 >             | CASE TmpVar [(Int, Bytecode)] (Maybe Bytecode)
+>             | INTCASE TmpVar [(Int, Bytecode)] (Maybe Bytecode)
 >             | IF TmpVar Bytecode Bytecode
 >             | OP TmpVar Op TmpVar TmpVar
 >             | LOCALS Int -- allocate space for locals
@@ -105,13 +106,13 @@ place.
 >     ecomp lazy tcall (Proj con i) reg vs =
 >         do reg' <- new_tmp
 >            concode <- ecomp lazy Middle con reg' vs
->            return [PROJ reg reg' i]
+>            return $ concode ++ [EVAL reg', PROJ reg reg' i]
 >     ecomp lazy tcall (Const c) reg vs = ccomp c reg
 >     ecomp lazy tcall (Case scrutinee alts) reg vs =
 >         do screg <- new_tmp
 >            sccode <- ecomp lazy Middle scrutinee screg vs
 >            (altcode, def) <- altcomps lazy tcall (order alts) screg reg vs
->            return $ sccode ++ [EVAL screg, CASE screg altcode def]
+>            return $ sccode ++ [EVAL screg, (caseop alts) screg altcode def]
 >     ecomp lazy tcall (If a t e) reg vs =
 >         do areg <- new_tmp
 >            acode <- ecomp lazy Middle a areg vs
@@ -189,9 +190,15 @@ Return the tag and the code - tag is -1 for default case.
 >            projcode <- project args scrutinee vs 0
 >            exprcode <- ecomp lazy tc expr reg (vs+(length args))
 >            return (tag, projcode++exprcode)
+>     altcomp lazy tc (ConstAlt tag expr) scrutinee reg vs =
+>         do exprcode <- ecomp lazy tc expr reg (vs+(length args))
+>            return (tag, exprcode)
 >     altcomp lazy tc (DefaultCase expr) scrutinee reg vs =
 >         do exprcode <- ecomp lazy tc expr reg vs
 >            return (-1,exprcode)
+
+>     caseop ((ConstAlt _ _):_) = INTCASE
+>     caseop _ = CASE
 
 >     project [] _ _ _ = return []
 >     project (_:as) scr loc arg = 
@@ -209,7 +216,8 @@ Compile an application of a function to arguments
 >                  return $ argcode {- ++ map EVAL argregs -} ++ [(tcall tc) reg x argregs]
 >           | otherwise =
 >               do (argcode, argregs) <- ecomps lazy args vs
->                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs]
+>                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs] ++ 
+>                           if (not lazy) then [EVAL reg] else []
 >      where tcall Tail = TAILCALL
 >            tcall Middle = CALL
 >     acomp _ lazy f args reg vs

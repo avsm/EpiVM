@@ -132,6 +132,12 @@
 >                   "switch(TAG(" ++ tmp v ++")) {\n" ++
 >                   altscode
 >                   ++ "}"
+>    cg (INTCASE v alts def) = do
+>        altscode <- cgalts alts def 0
+>        return $ "assertInt("++tmp v++");\n" ++
+>                   "switch(GETINT(" ++ tmp v ++")) {\n" ++
+>                   altscode
+>                   ++ "}"
 >    cg (IF v t e) = do
 >        tcode <- cgs t
 >        ecode <- cgs e

@@ -71,6 +71,8 @@
 >       | TokenCB
 >       | TokenOCB
 >       | TokenCCB
+>       | TokenOSB
+>       | TokenCSB
 >       | TokenPlus
 >       | TokenMinus
 >       | TokenTimes
@@ -125,6 +127,8 @@
 > lexer cont (')':cs) = cont TokenCB cs
 > lexer cont ('{':cs) = cont TokenOCB cs
 > lexer cont ('}':cs) = cont TokenCCB cs
+> lexer cont ('[':cs) = cont TokenOSB cs
+> lexer cont (']':cs) = cont TokenCSB cs
 > lexer cont ('+':cs) = cont TokenPlus cs
 > lexer cont ('-':cs) = cont TokenMinus cs
 > lexer cont ('*':cs) = cont TokenTimes cs

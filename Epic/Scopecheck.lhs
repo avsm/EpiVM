@@ -92,6 +92,10 @@ checking we do (for now).
 >                        else maxlen)
 >                alts' <- tcalts env alts
 >                return $ (Alt tag args expr'):alts'
+>    tcalts env ((ConstAlt tag expr):alts) = do
+>                expr' <- tc env expr
+>                alts' <- tcalts env alts
+>                return $ (ConstAlt tag expr'):alts'
 >    tcalts env ((DefaultCase expr):alts) = do
 >                expr' <- tc env expr
 >                alts' <- tcalts env alts
