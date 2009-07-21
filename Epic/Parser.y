@@ -137,8 +137,7 @@ Expr :: { Expr }
 Expr : name { R $1 }
      | '(' Expr ')' { $2 }
      | Expr '(' ExprList ')' { App $1 $3 }
-     | lazy '(' Expr '(' ExprList ')' ')' { LazyApp $3 $5 }
-     | lazy '(' name ')' { LazyApp (R $3) [] }
+     | lazy '(' Expr ')' { Lazy $3 }
      | con int '(' ExprList ')' { Con $2 $4 }
      | Const { Const $1 }
      | Expr '!' int { Proj $1 $3 }

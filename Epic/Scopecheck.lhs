@@ -61,10 +61,9 @@ checking we do (for now).
 >                f' <- tc env f
 >                as' <- mapM (tc env) as
 >                return $ App f' as'
->    tc env (LazyApp f as) = do
->                f' <- tc env f
->                as' <- mapM (tc env) as
->                return $ LazyApp f' as'
+>    tc env (Lazy e) = do
+>                e' <- tc env e
+>                return $ Lazy e'
 >    tc env (Con t as) = do
 >                as' <- mapM (tc env) as
 >                return $ Con t as'

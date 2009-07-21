@@ -62,7 +62,7 @@ at this stage.
 > scompile :: Context -> Name -> Func -> State CompileState Bytecode
 > scompile ctxt fname (Bind args locals def) = 
 >     do -- put (CS args (length args) 1)
->        code <- ecomp Tail def 0 (length args)
+>        code <- ecomp False Tail def 0 (length args)
 >        cs <- get
 >        return $ (LOCALS (num_locals cs)):
 >                 (TRACE (show fname) [0..(length args)-1]):
@@ -92,64 +92,64 @@ Also carry the number of real variables currently in scope so that, in
 particular, when we project from a data structure we store it in the right
 place.
 
->     ecomp :: TailCall -> Expr -> TmpVar -> Int -> 
+>     ecomp :: Bool -> TailCall -> Expr -> TmpVar -> Int -> 
 >              State CompileState Bytecode
->     ecomp tcall (V v) reg vs = 
+>     ecomp lazy tcall (V v) reg vs = 
 >         do return [VAR reg v]
->     ecomp tcall (R x) reg vs = acomp tcall False (R x) [] reg vs
->     ecomp tcall (App f as) reg vs = acomp tcall False f as reg vs
->     ecomp tcall (LazyApp f as) reg vs = acomp tcall True f as reg vs
->     ecomp tcall (Con t as) reg vs = 
->         do (argcode, argregs) <- ecomps as vs
+>     ecomp lazy tcall (R x) reg vs = acomp tcall lazy (R x) [] reg vs
+>     ecomp lazy tcall (App f as) reg vs = acomp tcall lazy f as reg vs
+>     ecomp lazy tcall (Lazy e) reg vs = ecomp True tcall e reg vs
+>     ecomp lazy tcall (Con t as) reg vs = 
+>         do (argcode, argregs) <- ecomps lazy as vs
 >            return $ argcode ++ [CON reg t argregs]
->     ecomp tcall (Proj con i) reg vs =
+>     ecomp lazy tcall (Proj con i) reg vs =
 >         do reg' <- new_tmp
->            concode <- ecomp Middle con reg' vs
+>            concode <- ecomp lazy Middle con reg' vs
 >            return [PROJ reg reg' i]
->     ecomp tcall (Const c) reg vs = ccomp c reg
->     ecomp tcall (Case scrutinee alts) reg vs =
+>     ecomp lazy tcall (Const c) reg vs = ccomp c reg
+>     ecomp lazy tcall (Case scrutinee alts) reg vs =
 >         do screg <- new_tmp
->            sccode <- ecomp Middle scrutinee screg vs
->            (altcode, def) <- altcomps tcall (order alts) screg reg vs
+>            sccode <- ecomp lazy Middle scrutinee screg vs
+>            (altcode, def) <- altcomps lazy tcall (order alts) screg reg vs
 >            return $ sccode ++ [EVAL screg, CASE screg altcode def]
->     ecomp tcall (If a t e) reg vs =
+>     ecomp lazy tcall (If a t e) reg vs =
 >         do areg <- new_tmp
->            acode <- ecomp Middle a areg vs
->            tcode <- ecomp tcall t reg vs
->            ecode <- ecomp tcall e reg vs
+>            acode <- ecomp lazy Middle a areg vs
+>            tcode <- ecomp lazy tcall t reg vs
+>            ecode <- ecomp lazy tcall e reg vs
 >            return $ acode ++ [EVAL areg, IF areg tcode ecode]
->     ecomp tcall (Op op l r) reg vs =
+>     ecomp lazy tcall (Op op l r) reg vs =
 >         do lreg <- new_tmp
 >            rreg <- new_tmp
->            lcode <- ecomp Middle l lreg vs
->            rcode <- ecomp Middle r rreg vs
+>            lcode <- ecomp lazy Middle l lreg vs
+>            rcode <- ecomp lazy Middle r rreg vs
 >            return $ lcode ++ [EVAL lreg] ++ 
 >                     rcode ++ [EVAL rreg, OP reg op lreg rreg]
->     ecomp tcall (Let nm ty val scope) reg vs =
+>     ecomp lazy tcall (Let nm ty val scope) reg vs =
 >         do loc <- new_locals 1
 >            reg' <- new_tmp
->            valcode <- ecomp Middle val reg' vs
->            scopecode <- ecomp tcall scope reg (vs+1)
+>            valcode <- ecomp lazy Middle val reg' vs
+>            scopecode <- ecomp lazy tcall scope reg (vs+1)
 >            return $ valcode ++ (EVAL reg'):(ASSIGN vs reg'):scopecode
->     ecomp tcall (Error str) reg vs = return [ERROR str]
->     ecomp tcall Impossible reg vs = return [ERROR "The impossible happened."]
->     ecomp tcall (ForeignCall ty fn argtypes) reg vs = do
+>     ecomp lazy tcall (Error str) reg vs = return [ERROR str]
+>     ecomp lazy tcall Impossible reg vs = return [ERROR "The impossible happened."]
+>     ecomp lazy tcall (ForeignCall ty fn argtypes) reg vs = do
 >           let (args,types) = unzip argtypes
->           (argcode, argregs) <- ecomps args vs
+>           (argcode, argregs) <- ecomps lazy args vs
 >           let evalcode = map EVAL argregs
 >           return $ argcode ++ evalcode ++ [FOREIGN ty reg fn (zip argregs types)]
->     ecomp tcall (LazyForeignCall ty fn argtypes) reg vs = do
+>     ecomp lazy tcall (LazyForeignCall ty fn argtypes) reg vs = do
 >           let (args,types) = unzip argtypes
->           (argcode, argregs) <- ecomps args vs
+>           (argcode, argregs) <- ecomps lazy args vs
 >           return $ argcode ++ [FOREIGN ty reg fn (zip argregs types)]
 
->     ecomps :: [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
->     ecomps e vs = ecomps' [] [] e vs
->     ecomps' code tmps [] vs = return (code, tmps)
->     ecomps' code tmps (e:es) vs =
+>     ecomps :: Bool -> [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
+>     ecomps lazy e vs = ecomps' lazy [] [] e vs
+>     ecomps' lazy code tmps [] vs = return (code, tmps)
+>     ecomps' lazy code tmps (e:es) vs =
 >         do reg <- new_tmp
->            ecode <- ecomp Middle e reg vs
->            ecomps' (code++ecode) (tmps++[reg]) es vs
+>            ecode <- ecomp lazy Middle e reg vs
+>            ecomps' lazy (code++ecode) (tmps++[reg]) es vs
 
 Compile case alternatives.
 
@@ -167,12 +167,12 @@ We don't do this any more, now that we have default cases.
 >     errors x end | x == end = []
 >                  | otherwise = (Alt x [] Impossible):(errors (x+1) end)
 
->     altcomps :: TailCall -> [CaseAlt] -> TmpVar -> TmpVar -> Int ->
+>     altcomps :: Bool -> TailCall -> [CaseAlt] -> TmpVar -> TmpVar -> Int ->
 >                 State CompileState ([(Int, Bytecode)], Maybe Bytecode)
->     altcomps tc [] _ _ vs = return ([], Nothing)
->     altcomps tc (a:as) scrutinee reg vs = 
->         do (t,acode) <- altcomp tc a scrutinee reg vs
->            (ascode, def) <- altcomps tc as scrutinee reg vs
+>     altcomps lazy tc [] _ _ vs = return ([], Nothing)
+>     altcomps lazy tc (a:as) scrutinee reg vs = 
+>         do (t,acode) <- altcomp lazy tc a scrutinee reg vs
+>            (ascode, def) <- altcomps lazy tc as scrutinee reg vs
 >            if (t<0) then return (ascode, Just acode)
 >                     else return ((t,acode):ascode, def)
 
@@ -181,16 +181,16 @@ a default inserted (i.e., tag can be ignored).
 
 Return the tag and the code - tag is -1 for default case.
 
->     altcomp :: TailCall -> CaseAlt -> TmpVar -> TmpVar -> Int ->
+>     altcomp :: Bool -> TailCall -> CaseAlt -> TmpVar -> TmpVar -> Int ->
 >                State CompileState (Int, Bytecode)
->     altcomp tc (Alt tag nmargs expr) scrutinee reg vs =
+>     altcomp lazy tc (Alt tag nmargs expr) scrutinee reg vs =
 >         do let args = map snd nmargs
 >            local <- new_locals (length args)
 >            projcode <- project args scrutinee vs 0
->            exprcode <- ecomp tc expr reg (vs+(length args))
+>            exprcode <- ecomp lazy tc expr reg (vs+(length args))
 >            return (tag, projcode++exprcode)
->     altcomp tc (DefaultCase expr) scrutinee reg vs =
->         do exprcode <- ecomp tc expr reg vs
+>     altcomp lazy tc (DefaultCase expr) scrutinee reg vs =
+>         do exprcode <- ecomp lazy tc expr reg vs
 >            return (-1,exprcode)
 
 >     project [] _ _ _ = return []
@@ -205,17 +205,17 @@ Compile an application of a function to arguments
 >              State CompileState Bytecode
 >     acomp tc lazy (R x) args reg vs
 >           | lazy == False && arity x ctxt == length args =
->               do (argcode, argregs) <- ecomps args vs
+>               do (argcode, argregs) <- ecomps lazy args vs
 >                  return $ argcode {- ++ map EVAL argregs -} ++ [(tcall tc) reg x argregs]
 >           | otherwise =
->               do (argcode, argregs) <- ecomps args vs
+>               do (argcode, argregs) <- ecomps lazy args vs
 >                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs]
 >      where tcall Tail = TAILCALL
 >            tcall Middle = CALL
->     acomp _ _ f args reg vs
->           = do (argcode, argregs) <- ecomps args vs
+>     acomp _ lazy f args reg vs
+>           = do (argcode, argregs) <- ecomps lazy args vs
 >                reg' <- new_tmp
->                fcode <- ecomp Middle f reg' vs
+>                fcode <- ecomp lazy Middle f reg' vs
 >                return $ fcode ++ argcode ++ [ADDARGS reg reg' argregs]
 
 >     ccomp (MkInt i) reg = return [INT reg i]

@@ -53,6 +53,11 @@ void dumpClosure(Closure* c) {
     printf("]\n");
 }
 
+void assertCon(Closure* c) 
+{
+    if (c==NULL) { printf("Null constructor\n"); assert(0); }
+    if (!ISCON(c)) { dumpClosure(c); assert(0); }
+}
 
 inline VAL CLOSURE(func x, int arity, int args, void** block)
 {

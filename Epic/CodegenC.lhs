@@ -128,7 +128,7 @@
 >    cg (TMPS n) = return $ declare "void* " tmp 0 n
 >    cg (CASE v alts def) = do
 >        altscode <- cgalts alts def 0
->        return $ "assert(ISCON("++tmp v++"));\n" ++
+>        return $ "assertCon("++tmp v++");\n" ++
 >                   "switch(TAG(" ++ tmp v ++")) {\n" ++
 >                   altscode
 >                   ++ "}"

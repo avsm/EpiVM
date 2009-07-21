@@ -54,6 +54,7 @@ typedef struct {
 } Closure;
 
 void dumpClosure(Closure* c);
+void assertCon(Closure* c);
 
 typedef Closure* VAL;
 
