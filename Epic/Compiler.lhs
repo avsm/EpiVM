@@ -20,6 +20,7 @@ Brings everything together; parsing, checking, code generation
 > import System.IO
 > import System.Directory
 > import System.Environment
+> import Char
 
 > import Epic.Language
 > import Epic.Parser
@@ -33,6 +34,7 @@ Brings everything together; parsing, checking, code generation
 >                     | Trace -- ^ Generate trace at run-time (debug)
 >                     | ShowBytecode -- ^ Show generated code
 >                     | ShowParseTree -- ^ Show parse tree
+>                     | MakeHeader FilePath -- ^ Output a .h file too
 >                     | GCCOpt String -- ^ Extra GCC option
 >   deriving Eq
 
@@ -40,6 +42,11 @@ Brings everything together; parsing, checking, code generation
 > addGCC [] = ""
 > addGCC ((GCCOpt s):xs) = s ++ " " ++ addGCC xs
 > addGCC (_:xs) = addGCC xs
+
+> outputHeader :: [CompileOptions] -> Maybe FilePath
+> outputHeader [] = Nothing
+> outputHeader ((MakeHeader f):_) = Just f
+> outputHeader (_:xs) = outputHeader xs
 
 > doTrace opts | elem Trace opts = " -DTRACEON"
 >              | otherwise = ""
@@ -70,7 +77,8 @@ Chop off everything after the last / - get the directory a file is in
 >              Failure err _ _ -> fail err
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
->                 checked <- compileDecls (checkAll ds) tmph
+>                 let hdr = outputHeader opts
+>                 checked <- compileDecls (checkAll ds) tmph hdr
 >                 fp <- getDataFileName "evm/closure.h"
 >                 let libdir = trimLast fp
 >                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
@@ -94,20 +102,26 @@ Chop off everything after the last / - get the directory a file is in
 >     (stem,_) -> stem
 
 
-> compileDecls (Success (ctxt, decls)) outh
+> compileDecls (Success (ctxt, decls)) outh hdr
 >     = do hPutStr outh $ codegenC ctxt decls
+>          case hdr of
+>              Just fpath ->
+>                   do let hout = codegenH (filter isAlpha (map toUpper (getRoot fpath))) decls
+>                      writeFile fpath hout
+>              Nothing -> return ()
 >          hFlush outh
 >          hClose outh
 >          return decls
-> compileDecls (Failure err _ _) _ = fail err
+> compileDecls (Failure err _ _) _ _ = fail err
 
 > -- |Link a collection of .o files into an executable
 > link :: [FilePath] -- ^ Object files
 >         -> [FilePath] -- ^ Extra include files for main program
 >         -> FilePath -- ^ Executable filename
+>         -> Bool -- ^ Generate a 'main' (False if externally defined)
 >         -> IO ()
-> link infs extraIncs outf = do
->     mainprog <- mkMain extraIncs 
+> link infs extraIncs outf genmain = do
+>     mainprog <- if genmain then mkMain extraIncs else return ""
 >     fp <- getDataFileName "evm/closure.h"
 >     let libdir = trimLast fp
 >     let cmd = "gcc -x c -O2 -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++

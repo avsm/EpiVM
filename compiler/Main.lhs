@@ -15,10 +15,11 @@
 >           copts <- getCOpts opts
 >           extras <- getExtra opts
 >           if ((length ofiles) > 0 && (not (elem Obj opts)))
->              then link (ofiles ++ copts) extras outfile
+>              then link (ofiles ++ copts) extras outfile (not (elem ExtMain opts))
 >              else return ()
 >   where mkOpts (KeepInt:xs) = KeepC:(mkOpts xs)
 >         mkOpts (TraceOn:xs) = Trace:(mkOpts xs)
+>         mkOpts (Header f:xs) = MakeHeader f:(mkOpts xs)
 >         mkOpts (_:xs) = mkOpts xs
 >         mkOpts [] = []
 
@@ -41,6 +42,10 @@
 > isDotE ('.':'e':[]) = True
 > isDotE (_:xs) = isDotE xs
 > isDotE [] = False
+
+> isDotC ('.':'c':[]) = True
+> isDotC (_:xs) = isDotC xs
+> isDotC [] = False
 
 > isDotO ('.':'o':[]) = True
 > isDotO (_:xs) = isDotO xs
@@ -70,8 +75,10 @@
 >             | Obj -- Just make the .o, don't link
 >             | File String -- File to send the compiler
 >             | Output String -- Output filename
+>             | Header String -- Header output filename
 >             | ExtraInc String -- extra files to inlude
 >             | COpt String -- option to send straight to gcc
+>             | ExtMain -- external main (i.e. in a .o)
 >   deriving Eq
 
 > parseArgs :: [String] -> [Option]
@@ -79,7 +86,9 @@
 > parseArgs ("-keepc":args) = KeepInt:(parseArgs args)
 > parseArgs ("-trace":args) = TraceOn:(parseArgs args)
 > parseArgs ("-c":args) = Obj:(parseArgs args)
+> parseArgs ("-extmain":args) = ExtMain:(parseArgs args)
 > parseArgs ("-o":name:args) = (Output name):(parseArgs args)
+> parseArgs ("-h":name:args) = (Header name):(parseArgs args)
 > parseArgs ("-i":inc:args) = (ExtraInc inc):(parseArgs args)
 > parseArgs (('$':x):args) = (COpt (x ++ concat (map (" "++) args))):[]
 > parseArgs (('-':x):args) = (COpt x):(parseArgs args)

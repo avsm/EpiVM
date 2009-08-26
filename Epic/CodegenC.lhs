@@ -14,9 +14,13 @@
 >     workers ctxt decs
 >     -- ++ mainDriver
 
+> codegenH :: String -> [Decl] -> String
+> codegenH guard ds = "#ifndef _" ++ guard ++ "_H\n#define _" ++ guard ++ "_H\n\n" ++
+>                     concat (map exportH ds) ++ "\n\n#endif"
+
 > writeIFace :: [Decl] -> String
 > writeIFace [] = ""
-> writeIFace ((Decl name ret (Bind args _ _)):xs) =
+> writeIFace ((Decl name ret (Bind args _ _) _):xs) =
 >     "extern " ++ showC name ++ " ("++ showextargs (args) ++ ")" ++
 >               " -> " ++ show ret ++ "\n" ++ writeIFace xs
 > writeIFace (_:xs) = writeIFace xs
@@ -38,8 +42,12 @@
 > showargs [x] i = showarg x i
 > showargs (x:xs) i = showarg x i ++ ", " ++ showargs xs (i+1)
 
+> showlist [] = ""
+> showlist [x] = x
+> showlist (x:xs) = x ++ ", " ++ showlist xs
+
 > headers [] = ""
-> headers ((Decl fname ret (Bind args _ _)):xs) =
+> headers ((Decl fname ret (Bind args _ _) _):xs) =
 >     "void* " ++ thunk fname ++ "(void** block);\n" ++
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ");\n" ++
 >     headers xs
@@ -52,7 +60,7 @@
 > headers (_:xs) = headers xs
 
 > wrappers [] = ""
-> wrappers ((Decl fname ret (Bind args _ _)):xs) =
+> wrappers ((Decl fname ret (Bind args _ _) _):xs) =
 >     "void* " ++ thunk fname ++ "(void** block) {\n    return " ++ 
 >     quickcall fname ++ "(" ++
 >     wrapperArgs (length args) ++ ");\n}\n\n" ++
@@ -64,10 +72,10 @@
 > wrapperArgs x = wrapperArgs (x-1) ++ ", block[" ++ show (x-1) ++ "]"
 
 > workers _ [] = ""
-> workers ctxt ((Decl fname ret func@(Bind args locals defn)):xs) =
+> workers ctxt (decl@(Decl fname ret func@(Bind args locals defn) _):xs) =
 >     -- trace (show fname ++ ": " ++ show defn) $
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ") {\n" ++
->      compileBody (compile ctxt fname func) ++ "\n}\n\n" ++
+>      compileBody (compile ctxt fname func) ++ "\n}\n\n" ++ exportC decl ++
 >     workers ctxt xs
 > workers ctxt (_:xs) = workers ctxt xs
 
@@ -211,18 +219,36 @@
 > foreignArgs [x] = foreignArg x
 > foreignArgs (x:xs) = foreignArg x ++ ", " ++ foreignArgs xs
 
-> castFrom t TyUnit x = tmp t ++ " = NULL; " ++ x
-> castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
-> castFrom t TyPtr rest = tmp t ++ " = MKPTR(" ++ rest ++ ")"
-> castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
-> castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"
-> castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
+> cToEpic var TyString = "MKSTR((char*)(" ++ var ++ "))"
+> cToEpic var TyInt = "MKINT((int)(" ++ var ++ "))"
+> cToEpic var TyPtr = "MKPTR(" ++ var ++ ")"
+> cToEpic var TyBigInt = "MKBIGINT((mpz_t*)(" ++ var ++ "))"
+> cToEpic var TyUnit = "NULL"
+> cToEpic var _ = "(void*)(" ++ var ++")"
 
-> foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
-> foreignArg (t, TyBigInt) = "*(GETBIGINT("++ tmp t ++"))"
-> foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
-> foreignArg (t, TyPtr) = "GETPTR("++ tmp t ++")"
-> foreignArg (t, _) = tmp t
+> castFrom t TyUnit x = tmp t ++ " = NULL; " ++ x
+> castFrom t ty rest = tmp t ++ " = " ++ cToEpic rest ty
+
+
+ castFrom t TyString rest = tmp t ++ " = MKSTR((char*)(" ++ rest ++ "))"
+ castFrom t TyPtr rest = tmp t ++ " = MKPTR(" ++ rest ++ ")"
+ castFrom t TyInt rest = tmp t ++ " = MKINT((int)(" ++ rest ++ "))"
+ castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"
+ castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
+
+> epicToC t TyInt = "GETINT("++ t ++")"
+> epicToC t TyBigInt = "*(GETBIGINT("++ t ++"))"
+> epicToC t TyString = "GETSTR("++ t ++")"
+> epicToC t TyPtr = "GETPTR("++ t ++")"
+> epicToC t _ = t
+
+> foreignArg (t, ty) = epicToC (tmp t) ty
+
+ foreignArg (t, TyInt) = "GETINT("++ tmp t ++")"
+ foreignArg (t, TyBigInt) = "*(GETBIGINT("++ tmp t ++"))"
+ foreignArg (t, TyString) = "GETSTR("++ tmp t ++")"
+ foreignArg (t, TyPtr) = "GETPTR("++ tmp t ++")"
+ foreignArg (t, _) = tmp t
 
 > doOp t Plus l r = tmp t ++ " = INTOP(+,"++tmp l ++ ", "++tmp r++");"
 > doOp t Minus l r = tmp t ++ " = INTOP(-,"++tmp l ++ ", "++tmp r++");"
@@ -234,3 +260,34 @@
 > doOp t OpGE l r = tmp t ++ " = INTOP(>=,"++tmp l ++ ", "++tmp r++");"
 > doOp t OpLE l r = tmp t ++ " = INTOP(<=,"++tmp l ++ ", "++tmp r++");"
 
+Write out code for an export
+
+> cty TyInt = "int"
+> cty TyChar = "char"
+> cty TyBool = "int"
+> cty TyString = "char*"
+> cty TyUnit = "void"
+> cty _ = "void*"
+
+> ctys [] = ""
+> ctys [x] = ctyarg x
+> ctys (x:xs) = ctyarg x ++ ", " ++ ctys xs
+
+> ctyarg (n,ty) = cty ty ++ " " ++ showuser n
+
+> exportC :: Decl -> String
+> exportC (Decl nm rt (Bind args _ _) (Just cname)) =
+>     cty rt ++ " " ++ cname ++ "(" ++ ctys args ++ ") {\n\t" ++
+>         if (rt==TyUnit) then "" else "return " ++
+>         epicToC (quickcall nm ++ "(" ++ showlist (map conv args) ++ ")") rt ++ 
+>         ";\n\n" ++
+>     "}"
+>   where conv (nm, ty) = cToEpic (showuser nm) ty
+> exportC _ = ""
+
+... and in the header file
+
+> exportH :: Decl -> String
+> exportH (Decl nm rt (Bind args _ _) (Just cname)) =
+>     cty rt ++ " " ++ cname ++ "(" ++ ctys args ++ ");\n"
+> exportH _ = ""

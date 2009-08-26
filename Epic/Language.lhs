@@ -120,15 +120,14 @@ Programs
 
 > data Decl = Decl { fname :: Name,
 >                    frettype :: Type,
->                    fdef :: Func }
+>                    fdef :: Func,
+>                    fexport :: Maybe String  -- C name
+>                  }
 >           | Extern { fname :: Name, 
 >                      frettype :: Type,
 >                      fargs :: [Type] }
 >           | Include String
 >           | Link String
->           | Export { cname :: Name,
->                      fname :: Name,
->                      export_args :: [(Name, Name)] }
 >           | CType Name
 >   deriving Show
 

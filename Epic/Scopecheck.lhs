@@ -13,16 +13,16 @@ checking we do (for now).
 >                  ds <- ca (mkContext xs) xs
 >                  return (ctxt,ds)
 >    where ca ctxt [] = return []
->          ca ctxt ((Decl nm rt fn):xs) = 
+>          ca ctxt ((Decl nm rt fn exp):xs) = 
 >              do fn' <- scopecheck ctxt fn
 >                 xs' <- ca ctxt xs
->                 return $ (Decl nm rt fn'):xs'
+>                 return $ (Decl nm rt fn' exp):xs'
 >          ca ctxt (x:xs) =
 >              do xs' <- ca ctxt xs
 >                 return (x:xs')
 
 >          mkContext [] = []
->          mkContext ((Decl nm rt (Bind args _ _)):xs) =
+>          mkContext ((Decl nm rt (Bind args _ _) _):xs) =
 >              (nm,(map snd args, rt)):(mkContext xs)
 >          mkContext ((Extern nm rt args):xs) =
 >              (nm,(args, rt)):(mkContext xs)

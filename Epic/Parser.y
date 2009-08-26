@@ -123,12 +123,15 @@ Type : inttype { TyInt }
      | funtype { TyFun }
 
 Declaration :: { Decl }
-Declaration: name '(' TypeList ')' arrow Type '=' Expr
-               { mkBind $1 (map snd $3) $6 (map fst $3) $8 }
+Declaration: Export name '(' TypeList ')' arrow Type '=' Expr
+               { mkBind $2 (map snd $4) $7 (map fst $4) $9 $1 }
            | extern name '(' TypeList ')' arrow Type
                { mkExtern $2 (map snd $4) $7 (map fst $4) }
            | cinclude string { Include $2 }
 
+Export :: { Maybe String }
+Export : { Nothing }
+       | export string { Just $2 }
 
 TypeList :: { [(Name,Type)] }
 TypeList : { [] }
@@ -211,8 +214,8 @@ File :: { String }
 
 {
 
-mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Decl
-mkBind n tys ret ns expr = Decl n ret (Bind (zip ns tys) 0 expr)
+mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Maybe String -> Decl
+mkBind n tys ret ns expr export = Decl n ret (Bind (zip ns tys) 0 expr) export
 
 mkExtern :: Name -> [Type] -> Type -> [Name] -> Decl
 mkExtern n tys ret ns = Extern n ret tys
