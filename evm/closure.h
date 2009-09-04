@@ -109,7 +109,7 @@ VAL DO_EVAL(VAL x);
 //#define EVAL(x) DO_EVAL(x)
 #define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x) : x)
 
-#define CONSTRUCTOR(t,a,b) ((a)==0 ? zcon[t] : CONSTRUCTORn(t,a,b))
+#define CONSTRUCTOR(t,a,b) ((a)==0 && t<255 ? zcon[t] : CONSTRUCTORn(t,a,b))
 
 // Return a new constructor
 VAL CONSTRUCTORn(int tag, int arity, void** block);
