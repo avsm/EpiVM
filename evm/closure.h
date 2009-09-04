@@ -109,8 +109,10 @@ VAL DO_EVAL(VAL x);
 //#define EVAL(x) DO_EVAL(x)
 #define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x) : x)
 
+#define CONSTRUCTOR(t,a,b) ((a)==0 ? zcon[t] : CONSTRUCTORn(t,a,b))
+
 // Return a new constructor
-VAL CONSTRUCTOR(int tag, int arity, void** block);
+VAL CONSTRUCTORn(int tag, int arity, void** block);
 VAL CONSTRUCTOR1(int tag, VAL a1);
 VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2);
 VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3);
@@ -144,7 +146,13 @@ VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 //extern VAL one; 
 
-void* MKINT(int x);
+// array of zero arity constructors. We don't need more than one of each...
+extern VAL* zcon;
+
+#define MKINT(x) ((void*)((x)<<1)+1)
+#define GETINT(x) ((int)(x)>>1)
+
+//void* MKINT(int x);
 void* NEWBIGINT(char* bigint);
 void* MKBIGINT(mpz_t* bigint);
 
@@ -152,7 +160,8 @@ void* MKSTR(char* str);
 void* MKPTR(void* ptr);
 
 // Get values from a closure
-int GETINT(void* x);
+//int GETINT(void* x);
+
 mpz_t* GETBIGINT(void* x);
 char* GETSTR(void* x);
 void* GETPTR(void* x);

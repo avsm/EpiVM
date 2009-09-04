@@ -6,6 +6,7 @@
 #include <gmp.h>
 
 VAL one;
+VAL* zcon;
 
 void dumpClosureA(Closure* c, int rec);
 
@@ -104,7 +105,7 @@ inline VAL CLOSURE(func x, int arity, int args, void** block)
     return c;
 }
 
-inline VAL CONSTRUCTOR(int tag, int arity, void** block)
+inline VAL CONSTRUCTORn(int tag, int arity, void** block)
 {
     VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
     con* cn = (con*)(c+1);
@@ -634,14 +635,14 @@ void* DO_PROJECT(VAL x, int arg)
 }
 */
 
-void* MKINT(int x)
+ /*void* MKINT(int x)
 {
     return (void*)((x<<1)+1);
 //    VAL c = MKCLOSURE;
 //    SETTY(c, INT);
 //    c->info = (void*)x;
 //    return c;
-}
+}*/
 
 void* NEWBIGINT(char* intstr)
 {
@@ -669,10 +670,12 @@ void* MKBIGINT(mpz_t* big)
     return c;
 }
 
+/*
 int GETINT(void* x)
 {
     return ((int)x)>>1;
 }
+*/
 
 mpz_t* GETBIGINT(void* x)
 {
@@ -724,5 +727,10 @@ void* MKFREE(int x)
 
 void init_evm()
 {
+    int i;
     one = MKINT(1);
+    zcon = EMALLOC(sizeof(Closure)*255);
+    for(i=0;i<255;++i) {
+	zcon[i] = CONSTRUCTORn(i,0,0);
+    }
 }
