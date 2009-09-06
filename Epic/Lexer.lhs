@@ -67,6 +67,7 @@
 >       | TokenForeign
 >       | TokenCInclude
 >       | TokenLink
+>       | TokenInline
 >       | TokenOB
 >       | TokenCB
 >       | TokenOCB
@@ -240,6 +241,7 @@
 >     case span isAllowed cs of
 >       ("include",rest) -> cont TokenCInclude rest
 >       ("link",rest) -> cont TokenLink rest
+>       ("inline",rest) -> cont TokenInline rest
 >       (thing,rest) -> lexError '%' rest
  
 > mkname :: String -> Token

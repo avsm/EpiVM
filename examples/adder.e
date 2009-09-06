@@ -3,7 +3,7 @@ include "Prelude.e"
 main () -> Unit = 
   printInt(natToInt(adder(three, two, three, four, five)))
 
-adder (arity:Data, acc:Data) -> Any =
+%inline adder (arity:Data, acc:Data) -> Any =
   case arity of {
      Con 0 () -> acc
    | Con 1 (k:Data) -> adderAux(k, acc)
@@ -11,6 +11,12 @@ adder (arity:Data, acc:Data) -> Any =
 
 adderAux (k:Data, acc:Data, n:Data) -> Any =
   adder(k,plus(acc,n))
+
+adderAuxE (k:Data, acc:Data, n:Data) -> Any =
+  case k of {
+     Con 0 () -> plus(acc,n)
+   | Con 1 (k:Data) -> adderAuxE(k,plus(acc,n))
+  }
 
 zero () -> Data = Con 0 ()
 one () -> Data = Con 1 (zero)

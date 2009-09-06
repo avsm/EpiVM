@@ -74,7 +74,7 @@ void dumpClosure(Closure* c) {
     printf("\n");
 }
 
-void assertCon(Closure* c) 
+void assertConR(Closure* c) 
 {
     if (c==NULL) { printf("Null constructor\n"); assert(0); }
     if (!ISCON(c)) { dumpClosure(c); assert(0); }

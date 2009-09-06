@@ -22,6 +22,6 @@ Extensions:	MultiParamTypeClasses, FunctionalDependencies,
 Exposed-modules: Epic.Compiler
 Other-modules: Epic.Bytecode Epic.Parser Epic.Scopecheck
                Epic.Language Epic.Lexer Epic.CodegenC
-	       Epic.OTTLang Paths_epic
+	       Epic.OTTLang Epic.Simplify Paths_epic
 Data-files:    evm/libevm.a evm/closure.h evm/stdfuns.h evm/stdfuns.c evm/mainprog.c 
 Extra-source-files: evm/closure.c evm/closure.h evm/stdfuns.h evm/mainprog.c evm/stdfuns.c evm/Makefile 

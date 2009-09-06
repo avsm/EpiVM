@@ -80,6 +80,7 @@ import Epic.Lexer
       export          { TokenExport }
       ctype           { TokenCType }
       include         { TokenInclude }
+      inline          { TokenInline }
 
 %nonassoc NONE
 %nonassoc lazy
@@ -123,11 +124,18 @@ Type : inttype { TyInt }
      | funtype { TyFun }
 
 Declaration :: { Decl }
-Declaration: Export name '(' TypeList ')' arrow Type '=' Expr
-               { mkBind $2 (map snd $4) $7 (map fst $4) $9 $1 }
+Declaration: Export Flags name '(' TypeList ')' arrow Type '=' Expr
+               { mkBind $3 (map snd $5) $8 (map fst $5) $10 $1 $2 }
            | extern name '(' TypeList ')' arrow Type
                { mkExtern $2 (map snd $4) $7 (map fst $4) }
            | cinclude string { Include $2 }
+
+Flags :: { [CGFlag] }
+Flags : { [] }
+      | Flag Flags { $1:$2 }
+
+Flag :: { CGFlag }
+     : inline { Inline }
 
 Export :: { Maybe String }
 Export : { Nothing }
@@ -214,8 +222,8 @@ File :: { String }
 
 {
 
-mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Maybe String -> Decl
-mkBind n tys ret ns expr export = Decl n ret (Bind (zip ns tys) 0 expr) export
+mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Maybe String -> [CGFlag] -> Decl
+mkBind n tys ret ns expr export fl = Decl n ret (Bind (zip ns tys) 0 expr) export fl
 
 mkExtern :: Name -> [Type] -> Type -> [Name] -> Decl
 mkExtern n tys ret ns = Extern n ret tys

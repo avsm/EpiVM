@@ -121,7 +121,8 @@ Programs
 > data Decl = Decl { fname :: Name,
 >                    frettype :: Type,
 >                    fdef :: Func,
->                    fexport :: Maybe String  -- C name
+>                    fexport :: Maybe String,  -- C name
+>                    fcompflags :: [CGFlag]
 >                  }
 >           | Extern { fname :: Name, 
 >                      frettype :: Type,
@@ -130,6 +131,9 @@ Programs
 >           | Link String
 >           | CType Name
 >   deriving Show
+
+> data CGFlag = Inline
+>   deriving (Show, Eq)
 
 > data Result r = Success r
 >               | Failure String String Int

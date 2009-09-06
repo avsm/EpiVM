@@ -24,6 +24,7 @@ void epicMemInfo();
 
 int readInt();
 char* readStr();
+int streq(char* x, char* y);
 
 void* fileOpen(char* name, char* mode);
 void fileClose(void* h);

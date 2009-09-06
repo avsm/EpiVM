@@ -2,7 +2,7 @@
 
 -- IO
 
-putStr (x:String) -> Unit =
+%inline putStr (x:String) -> Unit =
     foreign Unit "putStr" (x:String)
 
 putStrLn (x:String) -> Unit =

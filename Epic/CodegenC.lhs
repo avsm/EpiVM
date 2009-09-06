@@ -20,7 +20,7 @@
 
 > writeIFace :: [Decl] -> String
 > writeIFace [] = ""
-> writeIFace ((Decl name ret (Bind args _ _) _):xs) =
+> writeIFace ((Decl name ret (Bind args _ _) _ _):xs) =
 >     "extern " ++ showC name ++ " ("++ showextargs (args) ++ ")" ++
 >               " -> " ++ show ret ++ "\n" ++ writeIFace xs
 > writeIFace (_:xs) = writeIFace xs
@@ -47,7 +47,7 @@
 > showlist (x:xs) = x ++ ", " ++ showlist xs
 
 > headers [] = ""
-> headers ((Decl fname ret (Bind args _ _) _):xs) =
+> headers ((Decl fname ret (Bind args _ _) _ _):xs) =
 >     "void* " ++ thunk fname ++ "(void** block);\n" ++
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ");\n" ++
 >     headers xs
@@ -60,7 +60,7 @@
 > headers (_:xs) = headers xs
 
 > wrappers [] = ""
-> wrappers ((Decl fname ret (Bind args _ _) _):xs) =
+> wrappers ((Decl fname ret (Bind args _ _) _ _):xs) =
 >     "void* " ++ thunk fname ++ "(void** block) {\n    return " ++ 
 >     quickcall fname ++ "(" ++
 >     wrapperArgs (length args) ++ ");\n}\n\n" ++
@@ -72,7 +72,7 @@
 > wrapperArgs x = wrapperArgs (x-1) ++ ", block[" ++ show (x-1) ++ "]"
 
 > workers _ [] = ""
-> workers ctxt (decl@(Decl fname ret func@(Bind args locals defn) _):xs) =
+> workers ctxt (decl@(Decl fname ret func@(Bind args locals defn) _ _):xs) =
 >     -- trace (show fname ++ ": " ++ show defn) $
 >     "void* " ++ quickcall fname ++ "(" ++ showargs args 0 ++ ") {\n" ++
 >      compileBody (compile ctxt fname func) ++ "\n}\n\n" ++ exportC decl ++
@@ -188,7 +188,7 @@
 >          = tmp t ++ " = CONSTRUCTOR(" ++
 >            show tag ++ ", 0, 0);"
 >    constructor t tag args 
->        | length args < 3 && length args > 0
+>        | length args < 6 && length args > 0
 >          = tmp t ++ " = CONSTRUCTOR" ++ show (length args) ++ "(" ++
 >            show tag ++ targs ", " args ++ ");"
 >    constructor t tag args = argblock "block" args ++ tmp t ++
@@ -276,7 +276,7 @@ Write out code for an export
 > ctyarg (n,ty) = cty ty ++ " " ++ showuser n
 
 > exportC :: Decl -> String
-> exportC (Decl nm rt (Bind args _ _) (Just cname)) =
+> exportC (Decl nm rt (Bind args _ _) (Just cname) _) =
 >     cty rt ++ " " ++ cname ++ "(" ++ ctys args ++ ") {\n\t" ++
 >         if (rt==TyUnit) then "" else "return " ++
 >         epicToC (quickcall nm ++ "(" ++ showlist (map conv args) ++ ")") rt ++ 
@@ -288,6 +288,6 @@ Write out code for an export
 ... and in the header file
 
 > exportH :: Decl -> String
-> exportH (Decl nm rt (Bind args _ _) (Just cname)) =
+> exportH (Decl nm rt (Bind args _ _) (Just cname) _) =
 >     cty rt ++ " " ++ cname ++ "(" ++ ctys args ++ ");\n"
 > exportH _ = ""

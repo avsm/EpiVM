@@ -47,6 +47,10 @@ void fputStr(void* h, char* str) {
     fputs(str, f);
 }
 
+int streq(char* x, char* y) {
+    return !(strcmp(x,y));
+}
+
 int strToInt(char* str)
 {
     return strtol(str,NULL,10);

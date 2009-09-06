@@ -26,6 +26,7 @@ Brings everything together; parsing, checking, code generation
 > import Epic.Parser
 > import Epic.Scopecheck
 > import Epic.CodegenC
+> import Epic.Simplify
 
 > import Paths_epic
 
@@ -78,7 +79,9 @@ Chop off everything after the last / - get the directory a file is in
 >              Success ds -> do
 >                 (tmpn,tmph) <- tempfile
 >                 let hdr = outputHeader opts
->                 checked <- compileDecls (checkAll ds) tmph hdr
+>                 scchecked <- checkAll ds
+>                 let simplified = simplifyAll scchecked
+>                 checked <- compileDecls simplified tmph hdr
 >                 fp <- getDataFileName "evm/closure.h"
 >                 let libdir = trimLast fp
 >                 let cmd = "gcc -c -O2 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
@@ -102,7 +105,7 @@ Chop off everything after the last / - get the directory a file is in
 >     (stem,_) -> stem
 
 
-> compileDecls (Success (ctxt, decls)) outh hdr
+> compileDecls (ctxt, decls) outh hdr
 >     = do hPutStr outh $ codegenC ctxt decls
 >          case hdr of
 >              Just fpath ->
@@ -112,7 +115,6 @@ Chop off everything after the last / - get the directory a file is in
 >          hFlush outh
 >          hClose outh
 >          return decls
-> compileDecls (Failure err _ _) _ _ = fail err
 
 > -- |Link a collection of .o files into an executable
 > link :: [FilePath] -- ^ Object files
