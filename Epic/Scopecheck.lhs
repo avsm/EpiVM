@@ -102,6 +102,16 @@ checking we do (for now).
 >                return $ (DefaultCase expr'):alts'
 
 Turn the argument list into a mapping from names to argument position
+If any names appear more than once, use the last one.
+
+We're being very tolerant of input here... 
 
 >    v_ise [] _ = []
->    v_ise ((n,ty):args) i = (n,i):(v_ise args (i+1))
+>    v_ise ((n,ty):args) i = let rest = v_ise args (i+1) in
+>                                case lookup n rest of
+>                                  Nothing -> (n,i):rest
+>                                  _ -> rest
+
+       where dropArg n [] = []
+             dropArg n ((x,i):xs) | x == n = dropArg n xs
+                                  | otherwise = (x,i):(dropArg n xs)
