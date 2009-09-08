@@ -123,10 +123,10 @@ inline VAL CONSTRUCTORn(int tag, int arity, void** block)
 
 inline VAL CONSTRUCTOR1(int tag, VAL a1)
 {
-    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)+sizeof(VAL)); // MKCLOSURE;
     con* cn = (con*)(c+1);
     cn->tag = tag + (1 << 16);
-    cn->args = MKARGS(1);
+    cn->args = (void*)c+sizeof(Closure)+sizeof(con); // MKARGS(1);
     cn->args[0] = a1;
     SETTY(c,CON);
     c->info = (void*)cn;
@@ -135,10 +135,10 @@ inline VAL CONSTRUCTOR1(int tag, VAL a1)
 
 inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
 {
-    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)+2*sizeof(VAL)); // MKCLOSURE;
     con* cn = (con*)(c+1);
     cn->tag = tag + (2 << 16);
-    cn->args = MKARGS(2);
+    cn->args = (void*)c+sizeof(Closure)+sizeof(con); //MKARGS(2);
     cn->args[0] = a1;
     cn->args[1] = a2;
     SETTY(c,CON);
@@ -148,10 +148,10 @@ inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
 
 inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
 {
-    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)+3*sizeof(VAL)); // MKCLOSURE;
     con* cn = (con*)(c+1);
     cn->tag = tag + (3 << 16);
-    cn->args = MKARGS(3);
+    cn->args = (void*)c+sizeof(Closure)+sizeof(con); //MKARGS(3);
     cn->args[0] = a1;
     cn->args[1] = a2;
     cn->args[2] = a3;
@@ -162,10 +162,10 @@ inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
 
 inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
 {
-    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)+4*sizeof(VAL)); // MKCLOSURE;
     con* cn = (con*)(c+1);
     cn->tag = tag + (4 << 16);
-    cn->args = MKARGS(2);
+    cn->args = (void*)c+sizeof(Closure)+sizeof(con); //MKARGS(2);
     cn->args[0] = a1;
     cn->args[1] = a2;
     cn->args[2] = a3;
@@ -177,10 +177,10 @@ inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
 
 inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 {
-    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)); // MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+sizeof(con)+5*sizeof(VAL)); // MKCLOSURE;
     con* cn = (con*)(c+1);
     cn->tag = tag + (5 << 16);
-    cn->args = MKARGS(5);
+    cn->args = (void*)c+sizeof(Closure)+sizeof(con); //MKARGS(5);
     cn->args[0] = a1;
     cn->args[1] = a2;
     cn->args[2] = a3;
@@ -384,7 +384,7 @@ inline VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
     thunk* fn = (thunk*)(c+1);
 
     if (ISFUN(f)) {
-	return CLOSURE_ADD2(f,a1,a2);
+	return NULL; //CLOSURE_ADD2(f,a1,a2);
     }
 
     fn->fn = (void*)f;
@@ -480,14 +480,19 @@ inline VAL CLOSURE_APPLY1(VAL f, VAL a1)
     else return aux_CLOSURE_APPLY1(f,a1);
 }
 
+void* block[1024]; // Yes. I know. Better check below that this is big enough.
+
 inline VAL CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 {
+    int i;
     if (ISFUN(f)) {
 	fun* finf = (fun*)(f->info);
 	int got = finf->arg_end-finf->args;
 	if (finf->arity == (got+2)) {
-	    void* block[got+2];
-	    memcpy(block, finf->args, got*sizeof(VAL));
+//	    memcpy(block, finf->args, got*sizeof(VAL));
+	    for(i=0; i<got; ++i) {
+		block[i] = finf->args[i];
+	    }
 	    block[got] = a1;
 	    block[got+1] = a2;
 	    return (VAL)(finf->fn(block));
@@ -685,9 +690,9 @@ mpz_t* GETBIGINT(void* x)
 
 void* MKSTR(char* x)
 {
-    VAL c = MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1); //MKCLOSURE;
     SETTY(c, STRING);
-    c->info = (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
+    c->info = ((void*)c)+sizeof(Closure);// (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
     strcpy(c->info,x);
     return c;
 }
@@ -698,11 +703,6 @@ void* MKPTR(void* x)
     SETTY(c, PTR);
     c->info = x;
     return c;
-}
-
-char* GETSTR(void* x)
-{
-    return (char*)(((VAL)x)->info);
 }
 
 void* GETPTR(void* x)

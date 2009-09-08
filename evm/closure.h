@@ -57,7 +57,8 @@ void dumpClosure(Closure* c);
 void assertConR(Closure* c);
 void assertInt(Closure* c);
 
-#define assertCon(x) assertConR(x)
+#define assertCon(x)
+// assertConR(x)
 
 typedef Closure* VAL;
 
@@ -114,12 +115,12 @@ VAL DO_EVAL(VAL x);
 #define CONSTRUCTOR(t,a,b) ((a)==0 && t<255 ? zcon[t] : CONSTRUCTORn(t,a,b))
 
 // Return a new constructor
-VAL CONSTRUCTORn(int tag, int arity, void** block);
-VAL CONSTRUCTOR1(int tag, VAL a1);
-VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2);
-VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3);
-VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4);
-VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
+inline VAL CONSTRUCTORn(int tag, int arity, void** block);
+inline VAL CONSTRUCTOR1(int tag, VAL a1);
+inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2);
+inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3);
+inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4);
+inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 
 // Return a new function node
 VAL CLOSURE(func x, int arity, int args, void** block);
@@ -136,6 +137,7 @@ VAL CLOSURE_ADD5(VAL xin, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 VAL CLOSURE_APPLY(VAL x, int args, void** block);
 VAL CLOSURE_APPLY1(VAL x, VAL a1);
 VAL CLOSURE_APPLY2(VAL x, VAL a1, VAL a2);
+
 VAL CLOSURE_APPLY3(VAL x, VAL a1, VAL a2, VAL a3);
 VAL CLOSURE_APPLY4(VAL x, VAL a1, VAL a2, VAL a3, VAL a4);
 VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
@@ -154,6 +156,8 @@ extern VAL* zcon;
 #define MKINT(x) ((void*)((x)<<1)+1)
 #define GETINT(x) ((int)(x)>>1)
 
+#define GETSTR(x) ((char*)(((VAL)x)->info))
+
 //void* MKINT(int x);
 void* NEWBIGINT(char* bigint);
 void* MKBIGINT(mpz_t* bigint);
@@ -165,7 +169,6 @@ void* MKPTR(void* ptr);
 //int GETINT(void* x);
 
 mpz_t* GETBIGINT(void* x);
-char* GETSTR(void* x);
 void* GETPTR(void* x);
 
 void* MKFREE(int x);
@@ -176,5 +179,61 @@ void ERROR(char* msg);
 // Initialise everything
 void init_evm();
 
+
+#define CONSTRUCTOR1m(c,t,x)		\
+    c=EMALLOC(sizeof(Closure)+sizeof(con)+sizeof(VAL)); \
+    ((con*)((VAL)c+1))->tag = t + (1 << 16);			\
+    ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
+    ((con*)((VAL)c+1))->args[0] = x; \
+    SETTY(((VAL)c),CON);	 \
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+
+#define CONSTRUCTOR2m(c,t,x,y)		\
+    c=EMALLOC(sizeof(Closure)+sizeof(con)+2*sizeof(VAL)); \
+    ((con*)((VAL)c+1))->tag = t + (2 << 16);			\
+    ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
+    ((con*)((VAL)c+1))->args[0] = x; \
+    ((con*)((VAL)c+1))->args[1] = y; \
+    SETTY(((VAL)c),CON);	 \
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+
+#define CONSTRUCTOR3m(c,t,x,y,z)		\
+    c=EMALLOC(sizeof(Closure)+sizeof(con)+3*sizeof(VAL)); \
+    ((con*)((VAL)c+1))->tag = t + (3 << 16);			\
+    ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
+    ((con*)((VAL)c+1))->args[0] = x; \
+    ((con*)((VAL)c+1))->args[1] = y; \
+    ((con*)((VAL)c+1))->args[2] = z; \
+    SETTY(((VAL)c),CON);	 \
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+
+#define CONSTRUCTOR4m(c,t,x,y,z,w)			  \
+    c=EMALLOC(sizeof(Closure)+sizeof(con)+4*sizeof(VAL)); \
+    ((con*)((VAL)c+1))->tag = t + (4<< 16);			\
+    ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
+    ((con*)((VAL)c+1))->args[0] = x; \
+    ((con*)((VAL)c+1))->args[1] = y; \
+    ((con*)((VAL)c+1))->args[2] = z; \
+    ((con*)((VAL)c+1))->args[2] = w; \
+    SETTY(((VAL)c),CON);	 \
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+
+#define CONSTRUCTOR5m(c,t,x,y,z,w,v)			  \
+    c=EMALLOC(sizeof(Closure)+sizeof(con)+5*sizeof(VAL)); \
+    ((con*)((VAL)c+1))->tag = t + (5 << 16);			\
+    ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
+    ((con*)((VAL)c+1))->args[0] = x; \
+    ((con*)((VAL)c+1))->args[1] = y; \
+    ((con*)((VAL)c+1))->args[2] = z; \
+    ((con*)((VAL)c+1))->args[3] = w; \
+    ((con*)((VAL)c+1))->args[4] = v; \
+    SETTY(((VAL)c),CON);	 \
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+
+#define MKSTRm(c,x) \
+    c = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1); \
+    SETTY((VAL)c, STRING);				   \
+    ((VAL)(c))->info = ((void*)c)+sizeof(Closure);	   \
+	    strcpy(((VAL)(c))->info,x);
 
 #endif

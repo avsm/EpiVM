@@ -56,7 +56,7 @@ at this stage.
 > compile ctxt fname fn@(Bind args locals def) = 
 >     let cs = (CS (map snd args) (length args) 1)
 >         code = evalState (scompile ctxt fname fn) cs in
->         Code (map snd args) code
+>         Code (map snd args) (peephole code)
 
 > data TailCall = Tail | Middle
 
@@ -235,3 +235,21 @@ Compile an application of a function to arguments
 >     ccomp (MkString s) reg = return [STRING reg s]
 >     ccomp (MkUnit) reg = return [UNIT reg]
 
+
+
+> peephole :: Bytecode -> Bytecode
+> peephole [] = []
+> peephole ((CASE t cases mcs):cs)
+>    = CASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
+> peephole ((INTCASE t cases mcs):cs)
+>    = INTCASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
+> peephole (c:EVAL v:xs) | evalled v c = c:peephole xs
+>                        | otherwise = c:EVAL v:peephole xs
+> peephole (x:xs) = x:peephole xs
+
+> evalled v (INT x i) = x==v
+> evalled v (OP x _ _ _) = x==v
+> evalled v (CON x _ _) = x==v
+> evalled v (STRING x _) = x==v
+> evalled v (CALL x _ _) = x==v -- functions always eval before return
+> evalled _ _ = False

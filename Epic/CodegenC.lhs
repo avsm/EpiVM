@@ -128,7 +128,7 @@
 >    cg (BIGINT t i) = return $ tmp t ++ " = NEWBIGINT(\"" ++show i++"\");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
 >    cg (BIGFLOAT t i) = return $ tmp t ++ " = NEWBIGFLOAT(\""++show i++"\");"
->    cg (STRING t s) = return $ tmp t ++ " = MKSTR("++show s++");"
+>    cg (STRING t s) = return $ "MKSTRm("++tmp t ++ ", " ++show s++");"
 >    cg (PROJ t1 t2 i) = return $ tmp t1 ++ " = PROJECT((Closure*)"++tmp t2++", "++show i++");"
 >    cg (PROJVAR l t i) = return $ loc l ++ " = PROJECT((Closure*)"++tmp t++", "++show i++");"
 >    cg (OP t op l r) = return $ doOp t op l r 
@@ -188,9 +188,14 @@
 >          = tmp t ++ " = CONSTRUCTOR(" ++
 >            show tag ++ ", 0, 0);"
 >    constructor t tag args 
->        | length args < 6 && length args > 0
->          = tmp t ++ " = CONSTRUCTOR" ++ show (length args) ++ "(" ++
->            show tag ++ targs ", " args ++ ");"
+>        | length args <6 && length args > 0
+>            = "CONSTRUCTOR" ++ show (length args) ++ 
+>              "m(" ++ tmp t ++ ", " ++  show tag ++ targs ", " args ++ ");"
+
+        | length args < 6 && length args > 0
+          = tmp t ++ " = CONSTRUCTOR" ++ show (length args) ++ "(" ++
+            show tag ++ targs ", " args ++ ");"
+
 >    constructor t tag args = argblock "block" args ++ tmp t ++
 >                             " = (void*)CONSTRUCTOR(" ++ 
 >                             show tag ++ ", " ++ 
