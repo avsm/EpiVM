@@ -131,13 +131,13 @@ place.
 >            reg' <- new_tmp
 >            valcode <- ecomp lazy Middle val reg' vs
 >            scopecode <- ecomp lazy tcall scope reg (vs+1)
->            return $ valcode ++ (EVAL reg'):(ASSIGN vs reg'):scopecode
+>            return $ valcode ++ (ASSIGN vs reg'):scopecode
 >     ecomp lazy tcall (Error str) reg vs = return [ERROR str]
 >     ecomp lazy tcall Impossible reg vs = return [ERROR "The impossible happened."]
 >     ecomp lazy tcall (ForeignCall ty fn argtypes) reg vs = do
 >           let (args,types) = unzip argtypes
 >           (argcode, argregs) <- ecomps lazy args vs
->           let evalcode = map EVAL argregs
+>           let evalcode = if lazy then [] else map EVAL argregs
 >           return $ argcode ++ evalcode ++ [FOREIGN ty reg fn (zip argregs types)]
 >     ecomp lazy tcall (LazyForeignCall ty fn argtypes) reg vs = do
 >           let (args,types) = unzip argtypes
