@@ -48,6 +48,7 @@ Also consider creating specialised versions of functions?
 >             _ -> R fn
 >     s' args (App f a) = apply (s' args f) (map (s' args) a)
 >     s' args (Lazy e) = Lazy $ s' args e
+>     s' args (Effect e) = Effect $ s' args e
 >     s' args (Con t a) = Con t (map (s' args) a)
 >     s' args (Proj e i) = project (s' args e) i
 >     s' args (Case e alts) = runCase (s' args e) (map (salt args) alts)

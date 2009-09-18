@@ -601,7 +601,7 @@ VAL DO_EVAL(VAL x, int update) {
 		if (update) { UPDATE(x,result); } else { return result; }
 	    }
 	    else {
-		if (update) { SETTY(x, INT); x->info=(void*)42; }
+		if (update) { SETTY(x, INT); x->info=(void*)42; } else { return NULL; }
 	    }
 	}
 	// If there are too many arguments, run it with the right number
@@ -617,12 +617,12 @@ VAL DO_EVAL(VAL x, int update) {
     case THUNK:
 	th = (thunk*)(x->info);
 	// Evaluate inner thunk, which should give us a function
-	th->fn = DO_EVAL((VAL)(th->fn), update);
+	VAL nextfn = DO_EVAL((VAL)(th->fn), update);
 	// Apply this thunk's arguments to it
-	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
+	CLOSURE_APPLY((VAL)nextfn, th->numargs, th->args);
 	// And off we go again...
-	th->fn = DO_EVAL((VAL)(th->fn), update);
-	if (update) { UPDATE(x,((VAL)(th->fn))); } else { return (VAL)(th->fn); }
+	nextfn = DO_EVAL(nextfn, update);
+	if (update) { UPDATE(x, nextfn); } else { return nextfn; }
 	return x;
 	break;
     default:
