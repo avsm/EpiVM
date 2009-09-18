@@ -107,10 +107,11 @@ typedef struct {
 #endif
 
 // Evaluate x to head normal form
-VAL DO_EVAL(VAL x);
+VAL DO_EVAL(VAL x, int update);
 
 //#define EVAL(x) DO_EVAL(x)
-#define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x) : x)
+#define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x, 1) : x)
+#define EVAL_NOUP(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x, 0) : x)
 
 #define CONSTRUCTOR(t,a,b) ((a)==0 && t<255 ? zcon[t] : CONSTRUCTORn(t,a,b))
 

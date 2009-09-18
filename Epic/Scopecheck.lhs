@@ -8,14 +8,16 @@ checking we do (for now).
 > import Epic.Language
 > import Epic.Parser
 
+> import Debug.Trace
+
 > checkAll :: Monad m => [Decl] -> m (Context, [Decl])
 > checkAll xs = do let ctxt = mkContext xs
 >                  ds <- ca (mkContext xs) xs
->                  return (ctxt,ds)
+>                  return (mkContext ds,ds)
 >    where ca ctxt [] = return []
 >          ca ctxt ((Decl nm rt fn exp fl):xs) = 
->              do fn' <- scopecheck ctxt fn
->                 xs' <- ca ctxt xs
+>              do (fn', newds) <- scopecheck ctxt nm fn
+>                 xs' <- ca ctxt (newds ++ xs)
 >                 return $ (Decl nm rt fn' exp fl):xs'
 >          ca ctxt (x:xs) =
 >              do xs' <- ca ctxt xs
@@ -28,11 +30,18 @@ checking we do (for now).
 >              (nm,(args, rt)):(mkContext xs)
 >          mkContext (_:xs) = mkContext xs
 
-> scopecheck :: Monad m => Context -> Func -> m Func
-> scopecheck ctxt (Bind args locs exp) = do
->        (exp', locs') <- runStateT (tc (v_ise args 0) exp) (length args)
->        return $ Bind args locs' exp'
+Check all names are in scope in a function, and convert global references (R) to local names
+(V). Also, if any lazy expressions are not already applications, lift them out and make
+a new function. Returns the modified function, and a list of new declarations. The new 
+declarations will *not* have been scopechecked.
+
+> scopecheck :: Monad m => Context -> Name -> Func -> m (Func, [Decl])
+> scopecheck ctxt nm (Bind args locs exp) = do
+>        (exp', (locs', _, ds)) <- runStateT (tc (v_ise args 0) exp) (length args, 0, [])
+>        return $ (Bind args locs' exp', ds)
 >  where
+>    getRoot (UN nm) = nm
+>    getRoot (MN nm i) = "_" ++ nm ++ "_" ++ show i
 >    tc env (R n) = case lookup n env of
 >                      Nothing -> case lookup n ctxt of
 >                         Nothing -> return $ Const (MkInt 1234567890)
@@ -43,10 +52,10 @@ checking we do (for now).
 >    tc env (Let n ty v sc) = do
 >                v' <- tc env v
 >                sc' <- tc ((n,length env):env) sc
->                maxlen <- get
->                put (if (length env + 1)>maxlen 
->                        then (length env + 1) 
->                        else maxlen)
+>                (maxlen, nextn, decls) <- get
+>                put ((if (length env + 1)>maxlen 
+>                         then (length env + 1) 
+>                         else maxlen), nextn, decls)
 >                return $ Let n ty v' sc'
 >    tc env (Case v alts) = do
 >                v' <- tc env v
@@ -61,9 +70,24 @@ checking we do (for now).
 >                f' <- tc env f
 >                as' <- mapM (tc env) as
 >                return $ App f' as'
->    tc env (Lazy e) = do
+>    tc env (Lazy e) | appForm e = do
 >                e' <- tc env e
 >                return $ Lazy e'
+
+Make a new function, with current env as arguments, and add as a decl
+
+>    tc env (Lazy e) = 
+>         do (maxlen, nextn, decls) <- get
+>            let newname = MN (getRoot nm) nextn
+>            let newargs = zip (map fst env) (repeat TyAny)
+>            let newfn = Bind newargs 0 e
+>            let newd = Decl newname TyAny newfn Nothing []
+>            put (maxlen, nextn+1, newd:decls)
+>            return $ Lazy (App (R newname) (map V (map snd env)))
+
+>    tc env (Effect e) = do
+>                e' <- tc env e
+>                return $ Effect e'
 >    tc env (Con t as) = do
 >                as' <- mapM (tc env) as
 >                return $ Con t as'
@@ -86,10 +110,10 @@ checking we do (for now).
 >    tcalts env ((Alt tag args expr):alts) = do
 >                let env' = (v_ise args (length env))++env
 >                expr' <- tc env' expr
->                maxlen <- get
->                put (if (length env')>maxlen 
->                        then (length env')
->                        else maxlen)
+>                (maxlen, nextn, decls) <- get
+>                put ((if (length env')>maxlen 
+>                         then (length env')
+>                         else maxlen), nextn, decls)
 >                alts' <- tcalts env alts
 >                return $ (Alt tag args expr'):alts'
 >    tcalts env ((ConstAlt tag expr):alts) = do

@@ -84,7 +84,7 @@ Chop off everything after the last / - get the directory a file is in
 >                 checked <- compileDecls simplified tmph hdr
 >                 fp <- getDataFileName "evm/closure.h"
 >                 let libdir = trimLast fp
->                 let cmd = "gcc -c -O3 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
+>                 let cmd = "gcc -c -g -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
 >                 -- putStrLn $ cmd
 >                 -- putStrLn $ fp
 >                 exit <- system cmd
@@ -126,7 +126,7 @@ Chop off everything after the last / - get the directory a file is in
 >     mainprog <- if genmain then mkMain extraIncs else return ""
 >     fp <- getDataFileName "evm/closure.h"
 >     let libdir = trimLast fp
->     let cmd = "gcc -x c -O3 -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
+>     let cmd = "gcc -x c -g -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
 >               libdir++" -I"++libdir ++ " " ++
 >               (concat (map (++" ") infs)) ++ 
 >               " -levm -lgc -lpthread -lgmp -o "++outf

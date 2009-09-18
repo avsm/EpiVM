@@ -99,6 +99,7 @@
 >       | TokenElse
 >       | TokenIn
 >       | TokenLazy
+>       | TokenEffect
 >       | TokenError
 >       | TokenImpossible
 >       | TokenProj
@@ -242,6 +243,7 @@
 >       ("include",rest) -> cont TokenCInclude rest
 >       ("link",rest) -> cont TokenLink rest
 >       ("inline",rest) -> cont TokenInline rest
+>       ("effect",rest) -> cont TokenEffect rest
 >       (thing,rest) -> lexError '%' rest
  
 > mkname :: String -> Token

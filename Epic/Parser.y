@@ -50,6 +50,7 @@ import Epic.Lexer
       else            { TokenElse }
       in              { TokenIn }
       lazy            { TokenLazy }
+      effect          { TokenEffect }
       foreign         { TokenForeign }
       errorcode       { TokenError }
       impossible      { TokenImpossible }
@@ -152,6 +153,7 @@ Expr : name { R $1 }
      | Expr '(' ExprList ')' { App $1 $3 }
      | '[' ExprList ']' { Con 0 $2 }
      | lazy '(' Expr ')' { Lazy $3 }
+     | effect '(' Expr ')' { Effect $3 }
      | con int '(' ExprList ')' { Con $2 $4 }
      | Const { Const $1 }
      | Expr '!' int { Proj $1 $3 }

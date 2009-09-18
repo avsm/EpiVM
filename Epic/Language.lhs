@@ -78,6 +78,7 @@ Get the arity of a definition in the context
 >           | R Name -- Global reference
 >           | App Expr [Expr] -- Function application
 >           | Lazy Expr -- Lazy function application
+>           | Effect Expr -- Expression with side effects (i.e. don't update when EVALing)
 >           | Con Tag [Expr] -- Constructor, tags, arguments (fully applied)
 >           | Const Const -- a constant
 >           | Proj Expr Int -- Project argument
@@ -150,6 +151,15 @@ Programs
 >     mplus (Success x) _ = (Success x)
 >     mplus (Failure _ _ _) y = y
 > 
+
+> appForm :: Expr -> Bool
+> appForm (App _ _) = True
+> appForm (V _) = True
+> appForm (R _) = True
+> appForm (Con _ _) = True
+> appForm (Const _) = True
+> appForm (LazyForeignCall _ _ _) = True
+> appForm _ = False
 
 
 

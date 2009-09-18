@@ -38,7 +38,7 @@ char* freadStr(void* h) {
     char* buf = EMALLOC(512); // yeah, right...
     fgets(buf,512,f);
     char *loc = strchr(buf,'\n');
-    *loc = '\0';
+    if (loc) *loc = '\0'; else buf[0]='\0';
     return buf;       
 }
 
@@ -219,7 +219,7 @@ void doUnlock(int lock)
 }
 
 void* runThread(void* proc) {
-    DO_EVAL(proc);
+    DO_EVAL(proc, 1);
     return NULL;
 }
 

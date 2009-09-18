@@ -559,7 +559,7 @@ inline VAL CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     else return aux_CLOSURE_APPLY5(f,a1,a2,a3,a4,a5);
 }
 
-VAL DO_EVAL(VAL x) {
+VAL DO_EVAL(VAL x, int update) {
 // dummy value we'll never inspect, leave it alone.
     if (x==NULL) return x; 
 
@@ -591,17 +591,17 @@ VAL DO_EVAL(VAL x) {
 	    // if it was a foreign/io call in particular.
 	    if (result) {
 		if (GETTY(result)==FUN || GETTY(result)==THUNK) {
-		    result=DO_EVAL(result);
+		    result=DO_EVAL(result, update);
 		}
 /*		if (ISINT(result)) {
 		    printf("Updating with %d\n", x);
 		} else {
 		    printf("Updating %d %d with %d\n", x, GETTY(x), result);
 		    }*/
-		UPDATE(x,result);
+		if (update) { UPDATE(x,result); } else { return result; }
 	    }
 	    else {
-		SETTY(x, INT); x->info=(void*)42;
+		if (update) { SETTY(x, INT); x->info=(void*)42; }
 	    }
 	}
 	// If there are too many arguments, run it with the right number
@@ -609,20 +609,20 @@ VAL DO_EVAL(VAL x) {
 	else if (excess > 0) {
 	    result = fn->fn(fn->args);
 	    result = CLOSURE_APPLY(result, excess, fn->args + fn->arity);
-	    result = DO_EVAL(result);
-	    UPDATE(x,result);
+	    result = DO_EVAL(result, update);
+	    if (update) { UPDATE(x,result); } else { return result; }
 	    return x;
 	}
 	break;
     case THUNK:
 	th = (thunk*)(x->info);
 	// Evaluate inner thunk, which should give us a function
-	th->fn = DO_EVAL((VAL)(th->fn));
+	th->fn = DO_EVAL((VAL)(th->fn), update);
 	// Apply this thunk's arguments to it
 	CLOSURE_APPLY((VAL)th->fn, th->numargs, th->args);
 	// And off we go again...
-	th->fn = DO_EVAL((VAL)(th->fn));
-	UPDATE(x,((VAL)(th->fn)));
+	th->fn = DO_EVAL((VAL)(th->fn), update);
+	if (update) { UPDATE(x,((VAL)(th->fn))); } else { return (VAL)(th->fn); }
 	return x;
 	break;
     default:

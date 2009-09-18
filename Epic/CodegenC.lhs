@@ -152,7 +152,8 @@
 >        return $ "assert(ISINT("++tmp v++"));\n" ++
 >                 "if (GETINT("++tmp v++")) {\n" ++ tcode ++ "} else {\n" ++
 >                 ecode ++ "}"
->    cg (EVAL v) = return $ tmp v ++ "=(void*)EVAL((VAL)"++tmp v++");"
+>    cg (EVAL v True) = return $ tmp v ++ "=(void*)EVAL((VAL)"++tmp v++");"
+>    cg (EVAL v False) = return $ tmp v ++ "=(void*)EVAL_NOUP((VAL)"++tmp v++");"
 >    cg (RETURN t) = return $ "return "++tmp t++";"
 >    cg DRETURN = return $ "return NULL;"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
