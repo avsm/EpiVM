@@ -34,49 +34,49 @@ Also consider creating specialised versions of functions?
 > inlinable = elem Inline
 
 > simplify :: SCtxt -> [Maybe Expr] -> Int -> Expr -> Expr
-> simplify sctxt args arity exp = s' args exp where
->     s' args (V i) = if i<length args then 
->                         case args!!i of
->                             Nothing -> V i
->                             Just v -> v
->                         else V (i + (arity - length args)) -- adjust case/let offset
->     s' args (R fn) 
+> simplify sctxt args arity exp = s' args arity exp where
+>     s' args depth (V i) = if i<length args then 
+>                             case args!!i of
+>                               Nothing -> V i
+>                               Just v -> v
+>                             else V (i + (arity - length args)) -- adjust case/let offset
+>     s' args d (R fn) 
 >       = case lookup fn sctxt of
 >             Just (decl, 0, fl) -> 
->                if (inlinable fl) then s' args (inline decl [])
+>                if (inlinable fl) then s' args d (inline d decl [])
 >                    else R fn
 >             _ -> R fn
->     s' args (App f a) = apply (s' args f) (map (s' args) a)
->     s' args (Lazy e) = Lazy $ s' args e
->     s' args (Effect e) = Effect $ s' args e
->     s' args (Con t a) = Con t (map (s' args) a)
->     s' args (Proj e i) = project (s' args e) i
->     s' args (Case e alts) = runCase (s' args e) (map (salt args) alts)
->     s' args (If x t e) = runIf (s' args x) (s' args t) (s' args e)
->     s' args (Op op l r) = runOp op (s' args l) (s' args r)
->     s' args (Let n ty v sc) = Let n ty (s' args v) (s' args sc)
->     s' args (ForeignCall ty nm a) 
->           = ForeignCall ty nm (map (\ (x,y) -> (s' args x, y)) a)
->     s' args (LazyForeignCall ty nm a) 
->           = LazyForeignCall ty nm (map (\ (x,y) -> (s' args x, y)) a)
->     s' args x = x
+>     s' args d (App f a) = apply d (s' args d f) (map (s' args d) a)
+>     s' args d (Lazy e) = Lazy $ s' args d e
+>     s' args d (Effect e) = Effect $ s' args d e
+>     s' args d (Con t a) = Con t (map (s' args d) a)
+>     s' args d (Proj e i) = project (s' args d e) i
+>     s' args d (Case e alts) = runCase (s' args d e) (map (salt args d) alts)
+>     s' args d (If x t e) = runIf (s' args d x) (s' args d t) (s' args d e)
+>     s' args d (Op op l r) = runOp op (s' args d l) (s' args d r)
+>     s' args d (Let n ty v sc) = Let n ty (s' args d v) (s' args (d+1) sc)
+>     s' args d (ForeignCall ty nm a) 
+>           = ForeignCall ty nm (map (\ (x,y) -> (s' args d x, y)) a)
+>     s' args d (LazyForeignCall ty nm a) 
+>           = LazyForeignCall ty nm (map (\ (x,y) -> (s' args d x, y)) a)
+>     s' args d x = x
 
->     salt args (Alt t bargs e) = Alt t bargs (s' args e)
->     salt args (ConstAlt c e) = ConstAlt c (s' args e)
->     salt args (DefaultCase e) = DefaultCase (s' args e)
+>     salt args d (Alt t bargs e) = Alt t bargs (s' args (d+length bargs) e)
+>     salt args d (ConstAlt c e) = ConstAlt c (s' args d e)
+>     salt args d (DefaultCase e) = DefaultCase (s' args d e)
 
 >     project e i = Proj e i
 >     runCase e alts = Case e alts
 >     runIf x t e = If x t e
 >     runOp op l r = Op op l r
 
->     apply f@(R fn) as 
+>     apply d f@(R fn) as 
 >       = case lookup fn sctxt of
 >             Just (decl, ar, fl) -> 
->                if (inlinable fl && ar == length as) then s' args (inline decl as)
+>                if (inlinable fl && ar == length as) then s' args d (inline d decl as)
 >                    else App f as
 >             _ -> App f as
->     apply f as = App f as
+>     apply d f as = App f as
 
->     inline :: Decl -> [Expr] -> Expr
->     inline (Decl _ _ (Bind _ _ exp) _ _) args = simplify sctxt (map Just args) arity exp
+>     inline :: Int -> Decl -> [Expr] -> Expr
+>     inline d (Decl _ _ (Bind _ _ exp) _ _) args = simplify sctxt (map Just args) d exp

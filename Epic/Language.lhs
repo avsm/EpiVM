@@ -153,12 +153,16 @@ Programs
 > 
 
 > appForm :: Expr -> Bool
-> appForm (App _ _) = True
-> appForm (V _) = True
+
+ appForm (App _ _) = True
+ appForm (V _) = True
+
 > appForm (R _) = True
-> appForm (Con _ _) = True
-> appForm (Const _) = True
-> appForm (LazyForeignCall _ _ _) = True
+
+ appForm (Con _ _) = True
+ appForm (Const _) = True
+ appForm (LazyForeignCall _ _ _) = True
+
 > appForm _ = False
 
 

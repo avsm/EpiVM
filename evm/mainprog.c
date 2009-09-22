@@ -12,7 +12,7 @@ void* _do__U_main();
 int main(int argc, char* argv[]) {
     GC_init();
     init_evm();
-//    GC_use_entire_heap = 1;
+    GC_use_entire_heap = 1;
 //    GC_free_space_divisor = 1;
 //    GC_expand_hp(10000000);
 

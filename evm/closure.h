@@ -57,8 +57,7 @@ void dumpClosure(Closure* c);
 void assertConR(Closure* c);
 void assertInt(Closure* c);
 
-#define assertCon(x)
-// assertConR(x)
+#define assertCon(x)  assertConR(x)
 
 typedef Closure* VAL;
 
