@@ -93,11 +93,11 @@ typedef struct {
 #define TAG(x) (((con*)((Closure*)x)->info)->tag & 65535)
 #define ARITY(x) (((con*)((Closure*)x)->info)->tag >> 16)
 
-#define ISCON(x) GETTY(((Closure*)(x)))==CON
+#define ISCON(x) (GETTY(((Closure*)(x)))==CON)
 #define ISINT(x) ((((int)x)&1) == 1)
-#define ISTHUNK(x) GETTY(((Closure*)(x)))==THUNK
-#define ISFUN(x) GETTY(((Closure*)(x)))==FUN
-#define ISFV(x) GETTY(((Closure*)(x)))==FREEVAR
+#define ISTHUNK(x) (GETTY(((Closure*)(x)))==THUNK)
+#define ISFUN(x) (GETTY(((Closure*)(x)))==FUN)
+#define ISFV(x) (GETTY(((Closure*)(x)))==FREEVAR)
 
 #ifdef TRACEON
 #define TRACE if(1)
@@ -214,7 +214,7 @@ void init_evm();
     ((con*)((VAL)c+1))->args[0] = x; \
     ((con*)((VAL)c+1))->args[1] = y; \
     ((con*)((VAL)c+1))->args[2] = z; \
-    ((con*)((VAL)c+1))->args[2] = w; \
+    ((con*)((VAL)c+1))->args[3] = w; \
     SETTY(((VAL)c),CON);	 \
     ((VAL)c)->info = (void*)((con*)((VAL)c+1));
 
