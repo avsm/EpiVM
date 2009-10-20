@@ -4,6 +4,7 @@
 > import List
 
 > import Epic.Language
+> import Debug.Trace
 
 > type Local = Int
 > type TmpVar = Int
@@ -212,7 +213,7 @@ place.
 >            ecomps' lazy (code++ecode) (tmps++[reg]) es vs
 
 >     ecompsEv :: (Bool, Bool) -> [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
->     ecompsEv lazy e vs = ecomps' lazy [] [] e vs
+>     ecompsEv lazy e vs = ecompsEv' lazy [] [] e vs
 >     ecompsEv' lazy code tmps [] vs = return (code, tmps)
 >     ecompsEv' lazy code tmps (e:es) vs =
 >         do reg <- new_tmp
@@ -307,15 +308,16 @@ Compile an application of a function to arguments
 
 
 > peephole :: Bytecode -> Bytecode
+
 > peephole [] = []
 > peephole ((CASE t cases mcs):cs)
 >    = CASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
 > peephole ((INTCASE t cases mcs):cs)
 >    = INTCASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
+> peephole (c:EVAL v l:xs) | evalled v c = peephole (c:peephole xs)
+>                          | otherwise = c:EVAL v l:peephole xs
 > peephole (EVAL v l: EVAL v' l':cs) 
 >              | v == v' && l == l' = peephole ((EVAL v l):cs)
-> peephole (c:EVAL v l:xs) | evalled v c = c:peephole xs
->                          | otherwise = c:EVAL v l:peephole xs
 > peephole (x:xs) = x:peephole xs
 
 > evalled v (INT x i) = x==v
