@@ -84,6 +84,7 @@ Get the arity of a definition in the context
 >           | Proj Expr Int -- Project argument
 >           | Case Expr [CaseAlt]
 >           | If Expr Expr Expr
+>           | While Expr Expr
 >           | Op Op Expr Expr -- Infix operator
 >           | Let Name Type Expr Expr -- Let binding
 >           | Error String -- Exit with error message

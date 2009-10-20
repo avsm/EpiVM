@@ -66,6 +66,10 @@ declarations will *not* have been scopechecked.
 >                t' <- tc env t
 >                e' <- tc env e
 >                return $ If a' t' e'
+>    tc env (While t b) = do
+>                t' <- tc env t
+>                b' <- tc env b
+>                return $ While t' b'
 >    tc env (App f as) = do
 >                f' <- tc env f
 >                as' <- mapM (tc env) as

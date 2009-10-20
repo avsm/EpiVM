@@ -48,6 +48,7 @@ import Epic.Lexer
       if              { TokenIf }
       then            { TokenThen }
       else            { TokenElse }
+      while           { TokenWhile }
       in              { TokenIn }
       lazy            { TokenLazy }
       effect          { TokenEffect }
@@ -160,6 +161,7 @@ Expr : name { R $1 }
      | let name ':' Type '=' Expr in Expr %prec LET { Let $2 $4 $6 $8 }
      | Expr ';' Expr { Let (MN "unused" 0) TyUnit $1 $3 }
      | if Expr then Expr else Expr %prec IF { If $2 $4 $6 }
+     | while '(' Expr ',' Expr ')' { While $3 $5 }
      | CaseExpr { $1 }
      | MathExpr { $1 }
      | errorcode string { Error $2 }

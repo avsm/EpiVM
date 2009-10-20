@@ -7,6 +7,7 @@
 
 > type Local = Int
 > type TmpVar = Int
+> type StrVar = Int
 
 Register based - most operations do an action, then put the result in a
 'TmpVar' which is basically a numbered register. There are infinite registers
@@ -25,7 +26,7 @@ at this stage.
 >             | BIGINT TmpVar Integer
 >             | FLOAT TmpVar Float
 >             | BIGFLOAT TmpVar Double
->             | STRING TmpVar String
+>             | STRING TmpVar StrVar
 >             | PROJ TmpVar TmpVar Int -- project into a register
 >             | PROJVAR Local TmpVar Int -- project into a local variable
 >               -- each case branch records which tag it's code for
@@ -35,6 +36,10 @@ at this stage.
 >             | OP TmpVar Op TmpVar TmpVar
 >             | LOCALS Int -- allocate space for locals
 >             | TMPS Int -- declare temporary variables
+>             | CONSTS [String] -- declare constants
+>             | LABEL Int
+>             | JFALSE TmpVar Int
+>             | JUMP Int
 >             | EVAL TmpVar Bool -- Bool is True if update required
 >             -- | LET TmpVar Local TmpVar
 >             | RETURN TmpVar
@@ -50,11 +55,14 @@ at this stage.
 
 > data CompileState = CS { arg_types :: [Type],
 >                          num_locals :: Int,
->                          next_tmp :: Int }
+>                          next_tmp :: Int,
+>                          string_pool :: [String],
+>                          max_tmp :: Int,
+>                          next_label :: Int }
 
 > compile :: Context -> Name -> Func -> FunCode
 > compile ctxt fname fn@(Bind args locals def) = 
->     let cs = (CS (map snd args) (length args) 1)
+>     let cs = (CS (map snd args) (length args) 1 [] 1 0)
 >         code = evalState (scompile ctxt fname fn) cs in
 >         Code (map snd args) (peephole code)
 
@@ -67,15 +75,37 @@ at this stage.
 >        cs <- get
 >        return $ (LOCALS (num_locals cs)):
 >                 (TRACE (show fname) [0..(length args)-1]):
->                 (TMPS (next_tmp cs)):code ++[EVAL 0 True, RETURN 0]
+>                 (TMPS (max_tmp cs)):(CONSTS (string_pool cs)):code ++
+>                   [EVAL 0 True, RETURN 0]
 
 >   where
 
 >     new_tmp :: State CompileState Int
 >     new_tmp = do cs <- get
 >                  let reg' = next_tmp cs
->                  put (cs { next_tmp = reg'+1 } )
+>                  let max = if (reg'+ 1) > max_tmp cs then reg'+1 else max_tmp cs
+>                  put (cs { next_tmp = reg'+1, max_tmp = max } )
 >                  return reg'
+
+>     set_tmp :: Int -> State CompileState ()
+>     set_tmp n = do cs <- get
+>                    put (cs { next_tmp = n } )
+
+>     get_tmp :: State CompileState Int
+>     get_tmp = do cs <- get
+>                  return $ next_tmp cs
+
+>     new_label :: State CompileState Int
+>     new_label = do cs <- get
+>                    let reg' = next_label cs
+>                    put (cs { next_label = reg'+1 } )
+>                    return reg'
+
+>     new_string :: String -> State CompileState Int
+>     new_string s = do cs <- get
+>                       let reg' = string_pool cs
+>                       put (cs { string_pool = reg'++[s] } )
+>                       return (length reg')
 
 Add some locals, return de Bruijn level of first new one.
 
@@ -97,8 +127,16 @@ place.
 >              State CompileState Bytecode
 >     ecomp lazy tcall (V v) reg vs = 
 >         do return [VAR reg v]
->     ecomp lazy tcall (R x) reg vs = acomp tcall lazy (R x) [] reg vs
->     ecomp lazy tcall (App f as) reg vs = acomp tcall lazy f as reg vs
+>     ecomp lazy tcall (R x) reg vs = do
+>       savetmp <- get_tmp
+>       code <- acomp tcall lazy (R x) [] reg vs
+>       set_tmp savetmp
+>       return code
+>     ecomp lazy tcall (App f as) reg vs = do
+>       savetmp <- get_tmp
+>       code <- acomp tcall lazy f as reg vs
+>       set_tmp savetmp
+>       return code
 >     ecomp (lazy, update) tcall (Lazy e) reg vs = ecomp (True, update) tcall e reg vs
 >     ecomp (lazy, update) tcall (Effect e) reg vs = 
 >         do ecode <- ecomp (lazy, False) tcall e reg vs
@@ -122,11 +160,25 @@ place.
 >            tcode <- ecomp lazy tcall t reg vs
 >            ecode <- ecomp lazy tcall e reg vs
 >            return $ acode ++ [EVAL areg (snd lazy), IF areg tcode ecode]
+>     ecomp lazy tcall (While t b) reg vs =
+>         do savetmp <- get_tmp
+>            start <- new_label
+>            end <- new_label
+>            treg <- new_tmp
+>            tcode <- ecomp lazy Middle t treg vs
+>            bcode <- ecomp lazy Middle b reg vs
+>            set_tmp savetmp
+>            return $ (LABEL start):tcode ++ 
+>                     (EVAL treg False):(JFALSE treg end):bcode ++
+>                     [EVAL reg False, JUMP start, LABEL end]
+
 >     ecomp lazy tcall (Op op l r) reg vs =
->         do lreg <- new_tmp
+>         do savetmp <- get_tmp
+>            lreg <- new_tmp
 >            rreg <- new_tmp
 >            lcode <- ecomp lazy Middle l lreg vs
 >            rcode <- ecomp lazy Middle r rreg vs
+>            set_tmp savetmp
 >            return $ lcode ++ [EVAL lreg (snd lazy)] ++ 
 >                     rcode ++ [EVAL rreg (snd lazy), OP reg op lreg rreg]
 >     ecomp lazy tcall (Let nm ty val scope) reg vs =
@@ -138,13 +190,17 @@ place.
 >     ecomp lazy tcall (Error str) reg vs = return [ERROR str]
 >     ecomp lazy tcall Impossible reg vs = return [ERROR "The impossible happened."]
 >     ecomp lazy tcall (ForeignCall ty fn argtypes) reg vs = do
+>           savetmp <- get_tmp
 >           let (args,types) = unzip argtypes
->           (argcode, argregs) <- ecomps lazy args vs
->           let evalcode = if (snd lazy) then [] else map (\x -> EVAL x (snd lazy)) argregs
->           return $ argcode ++ evalcode ++ [FOREIGN ty reg fn (zip argregs types)]
+>           (argcode, argregs) <- ecompsEv lazy args vs
+>           -- let evalcode = if (snd lazy) then [] else map (\x -> EVAL x (snd lazy)) argregs
+>           set_tmp savetmp
+>           return $ argcode ++ [FOREIGN ty reg fn (zip argregs types)]
 >     ecomp lazy tcall (LazyForeignCall ty fn argtypes) reg vs = do
+>           savetmp <- get_tmp
 >           let (args,types) = unzip argtypes
 >           (argcode, argregs) <- ecomps lazy args vs
+>           set_tmp savetmp
 >           return $ argcode ++ [FOREIGN ty reg fn (zip argregs types)]
 
 >     ecomps :: (Bool, Bool) -> [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
@@ -154,6 +210,15 @@ place.
 >         do reg <- new_tmp
 >            ecode <- ecomp lazy Middle e reg vs
 >            ecomps' lazy (code++ecode) (tmps++[reg]) es vs
+
+>     ecompsEv :: (Bool, Bool) -> [Expr] -> Int -> State CompileState (Bytecode, [TmpVar])
+>     ecompsEv lazy e vs = ecomps' lazy [] [] e vs
+>     ecompsEv' lazy code tmps [] vs = return (code, tmps)
+>     ecompsEv' lazy code tmps (e:es) vs =
+>         do reg <- new_tmp
+>            ecode <- ecomp lazy Middle e reg vs
+>            let evcode = if (snd lazy) then [] else [EVAL reg (snd lazy)]
+>            ecompsEv' lazy (code++ecode++evcode) (tmps++[reg]) es vs
 
 Compile case alternatives.
 
@@ -235,7 +300,8 @@ Compile an application of a function to arguments
 >     ccomp (MkFloat f) reg = return [FLOAT reg f]
 >     ccomp (MkBigFloat f) reg = return [BIGFLOAT reg f]
 >     ccomp (MkBool b) reg = return [INT reg (if b then 1 else 0)]
->     ccomp (MkString s) reg = return [STRING reg s]
+>     ccomp (MkString s) reg = do sreg <- new_string s
+>                                 return [STRING reg sreg]
 >     ccomp (MkUnit) reg = return [UNIT reg]
 
 
@@ -246,6 +312,8 @@ Compile an application of a function to arguments
 >    = CASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
 > peephole ((INTCASE t cases mcs):cs)
 >    = INTCASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
+> peephole (EVAL v l: EVAL v' l':cs) 
+>              | v == v' && l == l' = peephole ((EVAL v l):cs)
 > peephole (c:EVAL v l:xs) | evalled v c = c:peephole xs
 >                          | otherwise = c:EVAL v l:peephole xs
 > peephole (x:xs) = x:peephole xs
@@ -255,4 +323,5 @@ Compile an application of a function to arguments
 > evalled v (CON x _ _) = x==v
 > evalled v (STRING x _) = x==v
 > evalled v (CALL x _ _) = x==v -- functions always eval before return
+> evalled v (FOREIGN _ x _ _) = x==v
 > evalled _ _ = False

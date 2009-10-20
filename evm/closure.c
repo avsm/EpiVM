@@ -705,10 +705,10 @@ void* MKPTR(void* x)
     return c;
 }
 
-void* GETPTR(void* x)
-{
-    return (void*)(((VAL)x)->info);
-}
+/* void* GETPTR(void* x) */
+/* { */
+/*     return (void*)(((VAL)x)->info); */
+/* } */
 
 void ERROR(char* msg)
 {

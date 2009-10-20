@@ -80,3 +80,5 @@ Also consider creating specialised versions of functions?
 
 >     inline :: Int -> Decl -> [Expr] -> Expr
 >     inline d (Decl _ _ (Bind _ _ exp) _ _) args = simplify sctxt (map Just args) d exp
+
+

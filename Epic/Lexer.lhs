@@ -97,6 +97,7 @@
 >       | TokenIf
 >       | TokenThen
 >       | TokenElse
+>       | TokenWhile
 >       | TokenIn
 >       | TokenLazy
 >       | TokenEffect
@@ -244,6 +245,7 @@
 >       ("link",rest) -> cont TokenLink rest
 >       ("inline",rest) -> cont TokenInline rest
 >       ("effect",rest) -> cont TokenEffect rest
+>       ("while",rest) -> cont TokenWhile rest
 >       (thing,rest) -> lexError '%' rest
  
 > mkname :: String -> Token

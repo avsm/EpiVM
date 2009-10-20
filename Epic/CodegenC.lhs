@@ -80,6 +80,7 @@
 > workers ctxt (_:xs) = workers ctxt xs
 
 > tmp v = "tmp" ++ show v
+> constv v = "const" ++ show v
 > loc v = "var" ++ show v
 
 > quickcall fn = "_do_" ++ showC fn
@@ -128,12 +129,18 @@
 >    cg (BIGINT t i) = return $ tmp t ++ " = NEWBIGINT(\"" ++show i++"\");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
 >    cg (BIGFLOAT t i) = return $ tmp t ++ " = NEWBIGFLOAT(\""++show i++"\");"
->    cg (STRING t s) = return $ "MKSTRm("++tmp t ++ ", " ++show s++");"
+>    cg (STRING t st) = return $ "MKSTRm("++tmp t ++ ", " ++ constv st ++ ");"
 >    cg (PROJ t1 t2 i) = return $ tmp t1 ++ " = PROJECT((Closure*)"++tmp t2++", "++show i++");"
 >    cg (PROJVAR l t i) = return $ loc l ++ " = PROJECT((Closure*)"++tmp t++", "++show i++");"
 >    cg (OP t op l r) = return $ doOp t op l r 
 >    cg (LOCALS n) = return $ declare "void* " loc (length args) n
 >    cg (TMPS n) = return $ declare "void* " tmp 0 n
+>    cg (CONSTS n) = return $ declareconsts n 0
+>    cg (LABEL i) = return $ "lbl" ++ show i ++ ":"
+>    cg (JUMP i) = return $ "goto lbl" ++ show i ++ ";"
+>    cg (JFALSE t i) 
+>           = return $ "assert(ISINT(" ++ tmp t ++ "));\n" ++
+>                      "if (!GETINT(" ++ tmp t ++ ")) goto lbl" ++ show i ++ ";"
 >    cg (CASE v alts def) = do
 >        altscode <- cgalts alts def 0
 >        return $ "assertCon("++tmp v++");\n" ++
@@ -216,6 +223,10 @@
 >                           show (length args) ++ 
 >                           ", block);"
 
+> declareconsts [] i = ""
+> declareconsts (s:xs) i = "INITSTRING(const" ++ show i ++ ", " ++ show s ++ ")"
+>                          ++ ";\n" ++ declareconsts xs (i+1)
+
 > declare decl fn start end 
 >     | start == end = ""
 >     | otherwise = decl ++ fn start ++";\n" ++
@@ -233,6 +244,7 @@
 > cToEpic var _ = "(void*)(" ++ var ++")"
 
 > castFrom t TyUnit x = tmp t ++ " = NULL; " ++ x
+> castFrom t TyPtr x = "MKPTRm(" ++ tmp t ++ ", " ++ x ++ ");"
 > castFrom t ty rest = tmp t ++ " = " ++ cToEpic rest ty
 
 

@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     init_evm();
     GC_use_entire_heap = 1;
 //    GC_free_space_divisor = 1;
-//    GC_expand_hp(10000000);
+    GC_expand_hp(10000000);
 
 //    GC_disable();
 

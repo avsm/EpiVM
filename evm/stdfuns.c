@@ -25,7 +25,7 @@ int readInt() {
 
 // FIXME: Do this properly!
 char* readStr() {
-    char* buf = EMALLOC(512); // yeah, right...
+    static char buf[512]; // yeah, right...
     fgets(buf,512,stdin);
     char *loc = strchr(buf,'\n');
     *loc = '\0';
@@ -35,7 +35,7 @@ char* readStr() {
 // FIXME: Do this properly!
 char* freadStr(void* h) {
     FILE* f = (FILE*)h;
-    char* buf = EMALLOC(512); // yeah, right...
+    static char buf[512]; // yeah, right...
     fgets(buf,512,f);
     char *loc = strchr(buf,'\n');
     if (loc) *loc = '\0'; else buf[0]='\0';

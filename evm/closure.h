@@ -155,8 +155,8 @@ extern VAL* zcon;
 
 #define MKINT(x) ((void*)((x)<<1)+1)
 #define GETINT(x) ((int)(x)>>1)
-
-#define GETSTR(x) ((char*)(((VAL)x)->info))
+#define GETPTR(x) ((void*)(((VAL)(x))->info))
+#define GETSTR(x) ((char*)(((VAL)(x))->info))
 
 //void* MKINT(int x);
 void* NEWBIGINT(char* bigint);
@@ -169,7 +169,7 @@ void* MKPTR(void* ptr);
 //int GETINT(void* x);
 
 mpz_t* GETBIGINT(void* x);
-void* GETPTR(void* x);
+//void* GETPTR(void* x);
 
 void* MKFREE(int x);
 
@@ -230,10 +230,20 @@ void init_evm();
     SETTY(((VAL)c),CON);	 \
     ((VAL)c)->info = (void*)((con*)((VAL)c+1));
 
-#define MKSTRm(c,x) \
-    c = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1); \
-    SETTY((VAL)c, STRING);				   \
-    ((VAL)(c))->info = ((void*)c)+sizeof(Closure);	   \
-	    strcpy(((VAL)(c))->info,x);
+//    s = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1);	\
+
+#define INITSTRING(var, str) \
+    static Closure var = { STRING, (void*)(str) };
+
+#define MKSTRm(c,s) c = &s;
+
+//    SETTY((VAL)c, STRING);				   \
+//    ((VAL)(c))->info = ((void*)c)+sizeof(Closure);	   \
+//	    strcpy(((VAL)(c))->info,x);
+
+#define MKPTRm(c, x) \
+    c = MKCLOSURE; \
+    SETTY((VAL)c, PTR);				\
+    ((VAL)(c))->info = x; 
 
 #endif
