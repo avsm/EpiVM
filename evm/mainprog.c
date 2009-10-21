@@ -19,8 +19,8 @@ int main(int argc, char* argv[]) {
 //    GC_disable();
 
     _do___U__main();
-//    fprintf(stderr, "%d\n", GC_gc_no);
-//    fprintf(stderr, "Heap: %d\n", GC_get_heap_size());
-//    fprintf(stderr, "Total: %d\n", GC_get_total_bytes());
+    fprintf(stderr, "%d\n", GC_gc_no);
+    fprintf(stderr, "Heap: %d\n", GC_get_heap_size());
+    fprintf(stderr, "Total: %d\n", GC_get_total_bytes());
     return 0; 
 }

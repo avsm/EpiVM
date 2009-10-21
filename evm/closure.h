@@ -55,9 +55,12 @@ typedef struct {
 
 void dumpClosure(Closure* c);
 void assertConR(Closure* c);
-void assertInt(Closure* c);
+void assertIntR(Closure* c);
 
-#define assertCon(x)  assertConR(x)
+#define assertCon(x)  
+#define assertInt(x) 
+//assertConR(x)
+//assertIntR(x)
 
 typedef Closure* VAL;
 
@@ -99,18 +102,23 @@ typedef struct {
 #define ISFUN(x) (GETTY(((Closure*)(x)))==FUN)
 #define ISFV(x) (GETTY(((Closure*)(x)))==FREEVAR)
 
+#define NEEDSEVAL(x) (GETTY((Closure*)(x))<CON)
+
 #ifdef TRACEON
-#define TRACE if(1)
+  #define TRACE if(1)
 #else
-#define TRACE if(0)
+  #define TRACE if(0)
 #endif
 
 // Evaluate x to head normal form
 VAL DO_EVAL(VAL x, int update);
 
 //#define EVAL(x) DO_EVAL(x)
-#define EVAL(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x, 1) : x)
-#define EVAL_NOUP(x) ((x && (ISTHUNK(x) || ISFUN(x))) ? DO_EVAL(x, 0) : x)
+#define EVAL(x) ((x && (NEEDSEVAL(x))) ? DO_EVAL(x, 1) : x)
+#define EVAL_NOUP(x) ((x && (NEEDSEVAL(x))) ? DO_EVAL(x, 0) : x)
+
+//#define EVAL(x) ((x && (ISFUN(x) || ISTHUNK(x))) ? DO_EVAL(x, 1) : x)
+//#define EVAL_NOUP(x) ((x && (ISFUN(x) || ISTHUNK(x))) ? DO_EVAL(x, 0) : x)
 
 #define CONSTRUCTOR(t,a,b) ((a)==0 && t<255 ? zcon[t] : CONSTRUCTORn(t,a,b))
 
@@ -179,6 +187,7 @@ void ERROR(char* msg);
 // Initialise everything
 void init_evm();
 
+void* FASTMALLOC(int size);
 
 #define CONSTRUCTOR1m(c,t,x)		\
     c=EMALLOC(sizeof(Closure)+sizeof(con)+sizeof(VAL)); \
@@ -230,15 +239,16 @@ void init_evm();
     SETTY(((VAL)c),CON);	 \
     ((VAL)c)->info = (void*)((con*)((VAL)c+1));
 
-//    s = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1);	\
+//    s = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1);	
 
 #define INITSTRING(var, str) \
-    static Closure var = { STRING, (void*)(str) };
+    static Closure* var = NULL; \
+    if (var==NULL) { var = MKSTR(str); }
 
-#define MKSTRm(c,s) c = &s;
+#define MKSTRm(c,s) c = s;
 
-//    SETTY((VAL)c, STRING);				   \
-//    ((VAL)(c))->info = ((void*)c)+sizeof(Closure);	   \
+//    SETTY((VAL)c, STRING);				   
+//    ((VAL)(c))->info = ((void*)c)+sizeof(Closure);	   
 //	    strcpy(((VAL)(c))->info,x);
 
 #define MKPTRm(c, x) \

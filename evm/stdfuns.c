@@ -25,21 +25,26 @@ int readInt() {
 
 // FIXME: Do this properly!
 char* readStr() {
-    static char buf[512]; // yeah, right...
+    char *buf = NULL;
+    if (buf==NULL) { buf = EMALLOC(sizeof(char)*512); } // yeah, right...
     fgets(buf,512,stdin);
     char *loc = strchr(buf,'\n');
     *loc = '\0';
-    return buf;       
+    return buf;
 }
 
 // FIXME: Do this properly!
-char* freadStr(void* h) {
+void* freadStr(void* h) {
+    VAL c = GC_MALLOC_ATOMIC(sizeof(Closure)+64*sizeof(char)+sizeof(char)+1);
+    SETTY(c, STRING);
+    c->info = ((void*)(c+1));
+    char *buf = (char*)(c->info);
+    
     FILE* f = (FILE*)h;
-    static char buf[512]; // yeah, right...
-    fgets(buf,512,f);
+    fgets(buf,64,f);
     char *loc = strchr(buf,'\n');
     if (loc) *loc = '\0'; else buf[0]='\0';
-    return buf;       
+    return ((void*)c);
 }
 
 void fputStr(void* h, char* str) {

@@ -21,8 +21,11 @@ at this stage.
 >             | FOREIGN Type TmpVar String [(TmpVar, Type)]
 >             | VAR TmpVar Local
 >             | ASSIGN Local TmpVar
+>             | TMPASSIGN TmpVar TmpVar
+>             | NOASSIGN Local TmpVar -- No-op, but flag not to eval the register
 >             | CON TmpVar Tag [TmpVar]
 >             | UNIT TmpVar
+>             | UNUSED TmpVar
 >             | INT TmpVar Int
 >             | BIGINT TmpVar Integer
 >             | FLOAT TmpVar Float
@@ -39,6 +42,8 @@ at this stage.
 >             | TMPS Int -- declare temporary variables
 >             | CONSTS [String] -- declare constants
 >             | LABEL Int
+>             | WHILE Bytecode Bytecode
+>             | BREAKFALSE TmpVar
 >             | JFALSE TmpVar Int
 >             | JUMP Int
 >             | EVAL TmpVar Bool -- Bool is True if update required
@@ -47,6 +52,7 @@ at this stage.
 >             | DRETURN -- return dummy value
 >             | ERROR String -- Fatal error, exit
 >             | TRACE String [TmpVar]
+>             | COMMENT String -- handy for adding notes to output
 >   deriving Show
 
 > type Bytecode = [ByteOp]
@@ -64,8 +70,9 @@ at this stage.
 > compile :: Context -> Name -> Func -> FunCode
 > compile ctxt fname fn@(Bind args locals def) = 
 >     let cs = (CS (map snd args) (length args) 1 [] 1 0)
->         code = evalState (scompile ctxt fname fn) cs in
->         Code (map snd args) (peephole code)
+>         code = evalState (scompile ctxt fname fn) cs 
+>         opt = peephole code in
+>               Code (map snd args) opt
 
 > data TailCall = Tail | Middle
 
@@ -169,9 +176,11 @@ place.
 >            tcode <- ecomp lazy Middle t treg vs
 >            bcode <- ecomp lazy Middle b reg vs
 >            set_tmp savetmp
->            return $ (LABEL start):tcode ++ 
->                     (EVAL treg False):(JFALSE treg end):bcode ++
->                     [EVAL reg False, JUMP start, LABEL end]
+>            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) bcode]
+
+(LABEL start):tcode ++ 
+                     (EVAL treg False):(JFALSE treg end):bcode ++
+                     [EVAL reg False, JUMP start, LABEL end]
 
 >     ecomp lazy tcall (Op op l r) reg vs =
 >         do savetmp <- get_tmp
@@ -187,7 +196,10 @@ place.
 >            reg' <- new_tmp
 >            valcode <- ecomp lazy Middle val reg' vs
 >            scopecode <- ecomp lazy tcall scope reg (vs+1)
->            return $ valcode ++ (ASSIGN vs reg'):scopecode
+>            let assigncode = case ty of
+>                               TyUnit -> [ASSIGN vs reg']
+>                               _ -> [ASSIGN vs reg']
+>            return $ valcode ++ assigncode ++ scopecode
 >     ecomp lazy tcall (Error str) reg vs = return [ERROR str]
 >     ecomp lazy tcall Impossible reg vs = return [ERROR "The impossible happened."]
 >     ecomp lazy tcall (ForeignCall ty fn argtypes) reg vs = do
@@ -304,26 +316,39 @@ Compile an application of a function to arguments
 >     ccomp (MkString s) reg = do sreg <- new_string s
 >                                 return [STRING reg sreg]
 >     ccomp (MkUnit) reg = return [UNIT reg]
+>     ccomp MkUnused reg = return [UNUSED reg]
 
 
 
 > peephole :: Bytecode -> Bytecode
+> peephole = peephole' []
 
-> peephole [] = []
-> peephole ((CASE t cases mcs):cs)
->    = CASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
-> peephole ((INTCASE t cases mcs):cs)
->    = INTCASE t (map (\ (x,c) -> (x, peephole c)) cases) (fmap peephole mcs) : peephole cs
-> peephole (c:EVAL v l:xs) | evalled v c = peephole (c:peephole xs)
->                          | otherwise = c:EVAL v l:peephole xs
-> peephole (EVAL v l: EVAL v' l':cs) 
->              | v == v' && l == l' = peephole ((EVAL v l):cs)
-> peephole (x:xs) = x:peephole xs
+> peephole' ev [] = []
+> peephole' ev ((CASE t cases mcs):cs)
+>    = CASE t (map (\ (x,c) -> (x, peephole' ev c)) cases) (fmap (peephole' ev) mcs) : peephole' ev cs
+> peephole' ev ((INTCASE t cases mcs):cs)
+>    = INTCASE t (map (\ (x,c) -> (x, peephole' ev c)) cases) (fmap (peephole' ev) mcs) : peephole' ev cs
+> peephole' ev (c: ASSIGN v1 r1: VAR r2 v2: EVAL r3 b: cs)
+>    | v1 == v2 && r3 == r2 = peephole' ev (c : EVAL r1 b: ASSIGN v1 r1 : TMPASSIGN r3 r1 : cs)
+> peephole' ev ((IF v t e):cs) = IF v (peephole' ev t) (peephole' ev e) : peephole' ev cs
+> peephole' ev ((WHILE t b):cs) = WHILE (peephole' ev t) (peephole' ev b) : peephole' ev cs
+> peephole' ev (EVAL v l: EVAL v' l':cs) 
+>              | v == v' && l == l' = peephole' ev ((EVAL v l):cs)
+> peephole' ev (c:EVAL v l:xs) | evalled ev v c 
+>                                  = peephole' ev (c:xs)
+>                              | otherwise = c:peephole' ev (EVAL v l: xs)
+> peephole' ev (c:ASSIGN v r:cs)
+>              | evalled [] r c = c:ASSIGN v r:peephole' (v:ev) cs
+>              | otherwise = c: peephole' ev (ASSIGN v r: cs)
+> peephole' ev (x:xs) = x:peephole' ev xs
 
-> evalled v (INT x i) = x==v
-> evalled v (OP x _ _ _) = x==v
-> evalled v (CON x _ _) = x==v
-> evalled v (STRING x _) = x==v
-> evalled v (CALL x _ _) = x==v -- functions always eval before return
-> evalled v (FOREIGN _ x _ _) = x==v
-> evalled _ _ = False
+> evalled ev v (INT x i) = x==v
+> evalled ev v (OP x _ _ _) = x==v
+> evalled ev v (CON x _ _) = x==v
+> evalled ev v (STRING x _) = x==v
+> evalled ev v (CALL x _ _) = x==v -- functions always eval before return
+> evalled ev v (FOREIGN _ x _ _) = x==v
+> evalled ev v (VAR x l) = x==v && l `elem` ev
+> evalled ev v (UNIT x) = x==v
+> evalled ev v (UNUSED x) = x==v
+> evalled _ _ _ = False

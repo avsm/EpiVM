@@ -98,6 +98,7 @@
 >       | TokenThen
 >       | TokenElse
 >       | TokenWhile
+>       | TokenUnused
 >       | TokenIn
 >       | TokenLazy
 >       | TokenEffect
@@ -246,6 +247,7 @@
 >       ("inline",rest) -> cont TokenInline rest
 >       ("effect",rest) -> cont TokenEffect rest
 >       ("while",rest) -> cont TokenWhile rest
+>       ("unused", rest) -> cont TokenUnused rest
 >       (thing,rest) -> lexError '%' rest
  
 > mkname :: String -> Token

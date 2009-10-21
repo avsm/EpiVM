@@ -7,6 +7,16 @@
 
 VAL one;
 VAL* zcon;
+void* blob = NULL;
+int blobnext = 0;
+
+void* FASTMALLOC(int size) {
+    if (blob == NULL) { blob = malloc(10001000); }
+    void* newblock = blob+blobnext;
+    blobnext+=((size+4) & 0xfffffffc);
+    if (blobnext>10000000) blobnext=0;
+    return newblock;
+}
 
 void dumpClosureA(Closure* c, int rec);
 
@@ -80,7 +90,7 @@ void assertConR(Closure* c)
     if (!ISCON(c)) { dumpClosure(c); assert(0); }
 }
 
-void assertInt(Closure* c) 
+void assertIntR(Closure* c) 
 {
     if (!ISINT(c)) { dumpClosure(c); assert(0); }
 }
@@ -690,10 +700,15 @@ mpz_t* GETBIGINT(void* x)
 
 void* MKSTR(char* x)
 {
-    VAL c = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1); //MKCLOSURE;
+//    VAL c = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1); //MKCLOSURE;
+    VAL c = EMALLOC(sizeof(Closure));
     SETTY(c, STRING);
-    c->info = ((void*)c)+sizeof(Closure);// (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
-    strcpy(c->info,x);
+//    c->info = ((void*)c)+sizeof(Closure);// (void*)(EMALLOC(strlen(x)*sizeof(char)+1));
+//    strcpy(c->info,x);
+
+// Since MKSTR is used to build strings from foreign calls, the string
+// itself will already have been allocated so we just want the closure.
+    c->info=x;
     return c;
 }
 

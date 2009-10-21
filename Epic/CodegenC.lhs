@@ -122,9 +122,12 @@
 >                                   ++ ";"
 >    cg (VAR t l) = return $ tmp t ++ " = " ++ loc l ++ ";"
 >    cg (ASSIGN l t) = return $ loc l ++ " = " ++ tmp t ++ ";"
+>    cg (TMPASSIGN t1 t2) = return $ tmp t1 ++ " = " ++ tmp t2 ++ ";"
+>    cg (NOASSIGN l t) = return $ "// " ++ loc l ++ " = " ++ tmp t ++ ";"
 >    cg (CON t tag args) = do sizeneeded (length args)
 >                             return $ constructor t tag args
 >    cg (UNIT t) = return $ tmp t ++ " = MKUNIT;"
+>    cg (UNUSED t) = return $ tmp t ++ " = (void*)(1+42424242*2);"
 >    cg (INT t i) = return $ "ASSIGNINT("++tmp t ++ ", " ++show i++");"
 >    cg (BIGINT t i) = return $ tmp t ++ " = NEWBIGINT(\"" ++show i++"\");"
 >    cg (FLOAT t i) = return $ tmp t ++ " = MKFLOAT("++show i++");"
@@ -137,9 +140,15 @@
 >    cg (TMPS n) = return $ declare "void* " tmp 0 n
 >    cg (CONSTS n) = return $ declareconsts n 0
 >    cg (LABEL i) = return $ "lbl" ++ show i ++ ":"
+>    cg (BREAKFALSE t) 
+>           = return $ "assertInt(" ++ tmp t ++ ");\n" ++
+>                      "if (!GETINT(" ++ tmp t ++ ")) break;"
+>    cg (WHILE t b) = do tcode <- cgs t
+>                        bcode <- cgs b
+>                        return $ "while (1) { " ++ tcode ++ "\n" ++ bcode ++ "}"
 >    cg (JUMP i) = return $ "goto lbl" ++ show i ++ ";"
 >    cg (JFALSE t i) 
->           = return $ "assert(ISINT(" ++ tmp t ++ "));\n" ++
+>           = return $ "assertInt(" ++ tmp t ++ ");\n" ++
 >                      "if (!GETINT(" ++ tmp t ++ ")) goto lbl" ++ show i ++ ";"
 >    cg (CASE v alts def) = do
 >        altscode <- cgalts alts def 0
@@ -164,6 +173,7 @@
 >    cg (RETURN t) = return $ "return "++tmp t++";"
 >    cg DRETURN = return $ "return NULL;"
 >    cg (ERROR s) = return $ "ERROR("++show s++");"
+>    cg (COMMENT s) = return $ " // " ++ show s
 >    cg (TRACE s args) = return $ "TRACE {\n\tprintf(\"%s\\n\", " ++ show s ++ ");\n" ++
 >                              concat (map dumpClosure args) ++ " }"
 >        where dumpClosure i 

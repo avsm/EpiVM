@@ -40,6 +40,7 @@ Raw data types. Int, Char, Bool are unboxed.
 >            | MkString String
 >            | MkBool Bool
 >            | MkUnit
+>            | MkUnused
 >   deriving (Show, Eq)
 
 > data Name = UN String  -- user name

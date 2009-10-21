@@ -49,12 +49,13 @@ Also consider creating specialised versions of functions?
 >     s' args d (App f a) = apply d (s' args d f) (map (s' args d) a)
 >     s' args d (Lazy e) = Lazy $ s' args d e
 >     s' args d (Effect e) = Effect $ s' args d e
+>     s' args d (While t e) = While (s' args d t) (s' args d e)
 >     s' args d (Con t a) = Con t (map (s' args d) a)
 >     s' args d (Proj e i) = project (s' args d e) i
 >     s' args d (Case e alts) = runCase (s' args d e) (map (salt args d) alts)
 >     s' args d (If x t e) = runIf (s' args d x) (s' args d t) (s' args d e)
 >     s' args d (Op op l r) = runOp op (s' args d l) (s' args d r)
->     s' args d (Let n ty v sc) = Let n ty (s' args d v) (s' args (d+1) sc)
+>     s' args d (Let n ty v sc) = simplFLet $ Let n ty (s' args d v) (s' args (d+1) sc)
 >     s' args d (ForeignCall ty nm a) 
 >           = ForeignCall ty nm (map (\ (x,y) -> (s' args d x, y)) a)
 >     s' args d (LazyForeignCall ty nm a) 
@@ -81,4 +82,11 @@ Also consider creating specialised versions of functions?
 >     inline :: Int -> Decl -> [Expr] -> Expr
 >     inline d (Decl _ _ (Bind _ _ exp) _ _) args = simplify sctxt (map Just args) d exp
 
+If we do this, we can chop out some pointless assignments to Unit
 
+> simplFLet :: Expr -> Expr
+> simplFLet (Let n _ (ForeignCall ty f args) s) = 
+>                  Let n ty (ForeignCall ty f args) s
+> simplFLet (Let n _ (Effect (ForeignCall ty f args)) s) =
+>                  Let n ty (Effect (ForeignCall ty f args)) s
+> simplFLet x = x

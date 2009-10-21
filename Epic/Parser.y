@@ -49,6 +49,7 @@ import Epic.Lexer
       then            { TokenThen }
       else            { TokenElse }
       while           { TokenWhile }
+      unused          { TokenUnused }
       in              { TokenIn }
       lazy            { TokenLazy }
       effect          { TokenEffect }
@@ -217,6 +218,7 @@ Const : int { MkInt $1 }
       | bigfloat { MkBigFloat $1 }
       | string { MkString $1 }
       | unit { MkUnit }
+      | unused { MkUnused }
 
 Line :: { LineNumber }
      : {- empty -}      {% getLineNo }
