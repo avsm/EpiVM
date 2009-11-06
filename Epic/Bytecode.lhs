@@ -302,8 +302,8 @@ Compile an application of a function to arguments
 >      where tcall Tail = TAILCALL
 >            tcall Middle = CALL
 >     acomp _ lazy f args reg vs
->           = do (argcode, argregs) <- ecomps lazy args vs
->                reg' <- new_tmp
+>           = do reg' <- new_tmp
+>                (argcode, argregs) <- ecomps lazy args vs
 >                fcode <- ecomp lazy Middle f reg' vs
 >                return $ fcode ++ argcode ++ [ADDARGS reg reg' argregs]
 

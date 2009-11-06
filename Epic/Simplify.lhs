@@ -34,7 +34,8 @@ Also consider creating specialised versions of functions?
 > inlinable = elem Inline
 
 > simplify :: SCtxt -> [Maybe Expr] -> Int -> Expr -> Expr
-> simplify sctxt args arity exp = s' args arity exp where
+> simplify sctxt args arity exp = exp -- s' args arity exp where
+>   where
 >     s' args depth (V i) = if i<length args then 
 >                             case args!!i of
 >                               Nothing -> V i
