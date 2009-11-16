@@ -47,6 +47,7 @@ at this stage.
 >             | JFALSE TmpVar Int
 >             | JUMP Int
 >             | EVAL TmpVar Bool -- Bool is True if update required
+>             | EVALINT TmpVar Bool -- Bool is True if update required
 >             -- | LET TmpVar Local TmpVar
 >             | RETURN TmpVar
 >             | DRETURN -- return dummy value
@@ -68,16 +69,18 @@ at this stage.
 >                          next_label :: Int }
 
 > compile :: Context -> Name -> Func -> FunCode
-> compile ctxt fname fn@(Bind args locals def) = 
+> compile ctxt fname fn@(Bind args locals def flags) = 
 >     let cs = (CS (map snd args) (length args) 1 [] 1 0)
 >         code = evalState (scompile ctxt fname fn) cs 
->         opt = peephole code in
+>         opt = peephole' evalled code in
 >               Code (map snd args) opt
+>   where evalled | elem Strict flags = take locals [0..]
+>                 | otherwise = []
 
 > data TailCall = Tail | Middle
 
 > scompile :: Context -> Name -> Func -> State CompileState Bytecode
-> scompile ctxt fname (Bind args locals def) = 
+> scompile ctxt fname (Bind args locals def _) = 
 >     do -- put (CS args (length args) 1)
 >        code <- ecomp (False, True) Tail def 0 (length args)
 >        cs <- get
@@ -177,6 +180,19 @@ place.
 >            bcode <- ecomp lazy Middle b reg vs
 >            set_tmp savetmp
 >            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) bcode]
+
+> {-    ecomp lazy tcall (WhileAcc t acc b) reg vs =
+>         do savetmp <- get_tmp
+>            start <- new_label
+>            end <- new_label
+>            treg <- new_tmp
+>            areg <- new_tmp
+>            tcode <- ecomp lazy Middle t treg vs
+>            acode <- ecomp lazy Middle acc areg vs
+>            bcode <- ecomp lazy Middle b reg vs
+>            set_tmp savetmp
+>            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) bcode]
+> -}
 
 (LABEL start):tcode ++ 
                      (EVAL treg False):(JFALSE treg end):bcode ++
@@ -332,6 +348,8 @@ Compile an application of a function to arguments
 >    | v1 == v2 && r3 == r2 = peephole' ev (c : EVAL r1 b: ASSIGN v1 r1 : TMPASSIGN r3 r1 : cs)
 > peephole' ev ((IF v t e):cs) = IF v (peephole' ev t) (peephole' ev e) : peephole' ev cs
 > peephole' ev ((WHILE t b):cs) = WHILE (peephole' ev t) (peephole' ev b) : peephole' ev cs
+> peephole' ev (VAR t v: EVAL t' True: cs')
+>              | t == t' && (not (elem v ev)) = (VAR t v : EVAL t True : peephole' (v:ev) cs')
 > peephole' ev (EVAL v l: EVAL v' l':cs) 
 >              | v == v' && l == l' = peephole' ev ((EVAL v l):cs)
 > peephole' ev (c:EVAL v l:xs) | evalled ev v c 

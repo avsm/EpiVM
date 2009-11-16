@@ -86,6 +86,7 @@ Get the arity of a definition in the context
 >           | Case Expr [CaseAlt]
 >           | If Expr Expr Expr
 >           | While Expr Expr
+>           | WhileAcc Expr Expr Expr
 >           | Op Op Expr Expr -- Infix operator
 >           | Let Name Type Expr Expr -- Let binding
 >           | Error String -- Exit with error message
@@ -116,7 +117,8 @@ Supercombinator definitions
 
 > data Func = Bind { fun_args :: [(Name, Type)],
 >                    locals :: Int, -- total number of locals
->                    defn :: Expr }
+>                    defn :: Expr,
+>                    flags :: [CGFlag]}
 >   deriving Show
 
 Programs
@@ -135,7 +137,7 @@ Programs
 >           | CType Name
 >   deriving Show
 
-> data CGFlag = Inline
+> data CGFlag = Inline | Strict
 >   deriving (Show, Eq)
 
 > data Result r = Success r

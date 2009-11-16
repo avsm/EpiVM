@@ -25,8 +25,8 @@ Also consider creating specialised versions of functions?
 >                                          Decl fn fr (simplFun fd) fe fl
 >         simplD d = d
 
->         simplFun (Bind args locs def) 
->             = Bind args locs (simplify sctxt (map (\x -> Nothing) args) (length args) def)
+>         simplFun (Bind args locs def fl) 
+>             = Bind args locs (simplify sctxt (map (\x -> Nothing) args) (length args) def) fl
 >         diff fn simpled fd x | defn simpled == defn fd = x
 >                              | otherwise = {- trace (show fn ++ "\n" ++ show simpled ++ "\n" ++
 >                                                   show fd) -} x
@@ -34,7 +34,7 @@ Also consider creating specialised versions of functions?
 > inlinable = elem Inline
 
 > simplify :: SCtxt -> [Maybe Expr] -> Int -> Expr -> Expr
-> simplify sctxt args arity exp = exp -- s' args arity exp where
+> simplify sctxt args arity exp = exp -- s' args arity exp 
 >   where
 >     s' args depth (V i) = if i<length args then 
 >                             case args!!i of
@@ -51,6 +51,7 @@ Also consider creating specialised versions of functions?
 >     s' args d (Lazy e) = Lazy $ s' args d e
 >     s' args d (Effect e) = Effect $ s' args d e
 >     s' args d (While t e) = While (s' args d t) (s' args d e)
+>     s' args d (WhileAcc t a e) = WhileAcc (s' args d t) (s' args d a) (s' args d e)
 >     s' args d (Con t a) = Con t (map (s' args d) a)
 >     s' args d (Proj e i) = project (s' args d e) i
 >     s' args d (Case e alts) = runCase (s' args d e) (map (salt args d) alts)
@@ -81,7 +82,7 @@ Also consider creating specialised versions of functions?
 >     apply d f as = App f as
 
 >     inline :: Int -> Decl -> [Expr] -> Expr
->     inline d (Decl _ _ (Bind _ _ exp) _ _) args = simplify sctxt (map Just args) d exp
+>     inline d (Decl _ _ (Bind _ _ exp _) _ _) args = simplify sctxt (map Just args) d exp
 
 If we do this, we can chop out some pointless assignments to Unit
 

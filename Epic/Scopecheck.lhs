@@ -24,7 +24,7 @@ checking we do (for now).
 >                 return (x:xs')
 
 >          mkContext [] = []
->          mkContext ((Decl nm rt (Bind args _ _) _ _):xs) =
+>          mkContext ((Decl nm rt (Bind args _ _ _) _ _):xs) =
 >              (nm,(map snd args, rt)):(mkContext xs)
 >          mkContext ((Extern nm rt args):xs) =
 >              (nm,(args, rt)):(mkContext xs)
@@ -36,9 +36,9 @@ a new function. Returns the modified function, and a list of new declarations. T
 declarations will *not* have been scopechecked.
 
 > scopecheck :: Monad m => Context -> Name -> Func -> m (Func, [Decl])
-> scopecheck ctxt nm (Bind args locs exp) = do
+> scopecheck ctxt nm (Bind args locs exp fl) = do
 >        (exp', (locs', _, ds)) <- runStateT (tc (v_ise args 0) exp) (length args, 0, [])
->        return $ (Bind args locs' exp', ds)
+>        return $ (Bind args locs' exp' fl, ds)
 >  where
 >    getRoot (UN nm) = nm
 >    getRoot (MN nm i) = "_" ++ nm ++ "_" ++ show i
@@ -70,6 +70,11 @@ declarations will *not* have been scopechecked.
 >                t' <- tc env t
 >                b' <- tc env b
 >                return $ While t' b'
+>    tc env (WhileAcc t a b) = do
+>                t' <- tc env t
+>                a' <- tc env a
+>                b' <- tc env b
+>                return $ WhileAcc t' a' b'
 >    tc env (App f as) = do
 >                f' <- tc env f
 >                as' <- mapM (tc env) as
@@ -84,7 +89,7 @@ Make a new function, with current env as arguments, and add as a decl
 >         do (maxlen, nextn, decls) <- get
 >            let newname = MN (getRoot nm) nextn
 >            let newargs = zip (map fst env) (repeat TyAny)
->            let newfn = Bind newargs 0 e
+>            let newfn = Bind newargs 0 e []
 >            let newd = Decl newname TyAny newfn Nothing []
 >            put (maxlen, nextn+1, newd:decls)
 >            return $ Lazy (App (R newname) (map V (map snd env)))

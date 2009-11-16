@@ -52,6 +52,7 @@ import Epic.Lexer
       unused          { TokenUnused }
       in              { TokenIn }
       lazy            { TokenLazy }
+      strict          { TokenStrict }
       effect          { TokenEffect }
       foreign         { TokenForeign }
       errorcode       { TokenError }
@@ -139,6 +140,7 @@ Flags : { [] }
 
 Flag :: { CGFlag }
      : inline { Inline }
+     | strict { Strict }
 
 Export :: { Maybe String }
 Export : { Nothing }
@@ -163,6 +165,7 @@ Expr : name { R $1 }
      | Expr ';' Expr { Let (MN "unused" 0) TyUnit $1 $3 }
      | if Expr then Expr else Expr %prec IF { If $2 $4 $6 }
      | while '(' Expr ',' Expr ')' { While $3 $5 }
+     | while '(' Expr ',' Expr ',' Expr ')' { WhileAcc $3 $5 $7 }
      | CaseExpr { $1 }
      | MathExpr { $1 }
      | errorcode string { Error $2 }
@@ -229,7 +232,7 @@ File :: { String }
 {
 
 mkBind :: Name -> [Type] -> Type -> [Name] -> Expr -> Maybe String -> [CGFlag] -> Decl
-mkBind n tys ret ns expr export fl = Decl n ret (Bind (zip ns tys) 0 expr) export fl
+mkBind n tys ret ns expr export fl = Decl n ret (Bind (zip ns tys) 0 expr fl) export fl
 
 mkExtern :: Name -> [Type] -> Type -> [Name] -> Decl
 mkExtern n tys ret ns = Extern n ret tys

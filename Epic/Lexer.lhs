@@ -101,6 +101,7 @@
 >       | TokenUnused
 >       | TokenIn
 >       | TokenLazy
+>       | TokenStrict
 >       | TokenEffect
 >       | TokenError
 >       | TokenImpossible
@@ -246,6 +247,7 @@
 >       ("link",rest) -> cont TokenLink rest
 >       ("inline",rest) -> cont TokenInline rest
 >       ("effect",rest) -> cont TokenEffect rest
+>       ("strict",rest) -> cont TokenStrict rest
 >       ("while",rest) -> cont TokenWhile rest
 >       ("unused", rest) -> cont TokenUnused rest
 >       (thing,rest) -> lexError '%' rest

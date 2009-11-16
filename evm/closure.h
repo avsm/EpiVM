@@ -28,6 +28,8 @@
 #define MKUNIT (void*)0
 
 #define INTOP(op,x,y) MKINT((((int)x)>>1) op (((int)y)>>1))
+#define ADD(x,y) (void*)(((int)x)+(((int)y)-1))
+#define MULT(x,y) (MKINT((((int)x)>>1) * (((int)y)>>1)))
 #define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
     || ISFV(x)) return 0;
 
@@ -102,7 +104,8 @@ typedef struct {
 #define ISFUN(x) (GETTY(((Closure*)(x)))==FUN)
 #define ISFV(x) (GETTY(((Closure*)(x)))==FREEVAR)
 
-#define NEEDSEVAL(x) (GETTY((Closure*)(x))<CON)
+#define NEEDSEVAL(x) ((x) && GETTY((Closure*)(x))<CON)
+#define NONEEDSEVAL(x) ((x) && GETTY((Closure*)(x))>=CON)
 
 #ifdef TRACEON
   #define TRACE if(1)
@@ -114,8 +117,10 @@ typedef struct {
 VAL DO_EVAL(VAL x, int update);
 
 //#define EVAL(x) DO_EVAL(x)
-#define EVAL(x) ((x && (NEEDSEVAL(x))) ? DO_EVAL(x, 1) : x)
-#define EVAL_NOUP(x) ((x && (NEEDSEVAL(x))) ? DO_EVAL(x, 0) : x)
+#define EVAL(x) (!ISINT(x) && NEEDSEVAL(x) ? DO_EVAL(x, 1) : x)
+#define EVALINT(x) (!ISINT(x) ? DO_EVAL(x, 1) : x)
+#define EVAL_NOUP(x) (!ISINT(x) && NEEDSEVAL(x) ? DO_EVAL(x, 0) : x)
+#define EVALINT_NOUP(x) (!ISINT(x) ? DO_EVAL(x, 0) : x)
 
 //#define EVAL(x) ((x && (ISFUN(x) || ISTHUNK(x))) ? DO_EVAL(x, 1) : x)
 //#define EVAL_NOUP(x) ((x && (ISFUN(x) || ISTHUNK(x))) ? DO_EVAL(x, 0) : x)
