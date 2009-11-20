@@ -43,6 +43,7 @@ at this stage.
 >             | CONSTS [String] -- declare constants
 >             | LABEL Int
 >             | WHILE Bytecode Bytecode
+>             | WHILEACC Bytecode TmpVar Bytecode
 >             | BREAKFALSE TmpVar
 >             | JFALSE TmpVar Int
 >             | JUMP Int
@@ -74,7 +75,7 @@ at this stage.
 >         code = evalState (scompile ctxt fname fn) cs 
 >         opt = peephole' evalled code in
 >               Code (map snd args) opt
->   where evalled | elem Strict flags = take locals [0..]
+>   where evalled | elem Strict flags = [] --take locals [0..]
 >                 | otherwise = []
 
 > data TailCall = Tail | Middle
@@ -179,9 +180,10 @@ place.
 >            tcode <- ecomp lazy Middle t treg vs
 >            bcode <- ecomp lazy Middle b reg vs
 >            set_tmp savetmp
->            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) bcode]
+>            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) 
+>                            (bcode++[EVAL reg False])]
 
-> {-    ecomp lazy tcall (WhileAcc t acc b) reg vs =
+>     ecomp lazy tcall (WhileAcc t acc b) reg vs =
 >         do savetmp <- get_tmp
 >            start <- new_label
 >            end <- new_label
@@ -191,8 +193,11 @@ place.
 >            acode <- ecomp lazy Middle acc areg vs
 >            bcode <- ecomp lazy Middle b reg vs
 >            set_tmp savetmp
->            return $ [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) bcode]
-> -}
+>            return $ acode ++
+>                     [WHILE (tcode++[EVAL treg False, BREAKFALSE treg]) 
+>                            (bcode++[ADDARGS areg reg [areg], EVAL areg False])]
+>                     ++ [TMPASSIGN reg areg]
+> 
 
 (LABEL start):tcode ++ 
                      (EVAL treg False):(JFALSE treg end):bcode ++
@@ -310,7 +315,8 @@ Compile an application of a function to arguments
 >     acomp tc lazy (R x) args reg vs
 >           | fst lazy == False && arity x ctxt == length args =
 >               do (argcode, argregs) <- ecomps lazy args vs
->                  return $ argcode {- ++ map EVAL argregs -} ++ [(tcall tc) reg x argregs]
+>                  return $ argcode {- ++ map (\x -> EVAL x (snd lazy)) argregs -}
+>                              ++ [(tcall tc) reg x argregs]
 >           | otherwise =
 >               do (argcode, argregs) <- ecomps lazy args vs
 >                  return $ argcode ++ [THUNK reg (arity x ctxt) x argregs] ++ 

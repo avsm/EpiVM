@@ -21,10 +21,13 @@ void printBigInt(mpz_t x);
 
 // dump memory usage (from libgc)
 void epicMemInfo();
+// Force garbage collection
+void epicGC();
 
 int readInt();
 char* readStr();
 int streq(char* x, char* y);
+int strlt(char* x, char* y);
 
 void* fileOpen(char* name, char* mode);
 void fileClose(void* h);

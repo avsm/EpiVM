@@ -146,6 +146,12 @@
 >    cg (WHILE t b) = do tcode <- cgs t
 >                        bcode <- cgs b
 >                        return $ "while (1) { " ++ tcode ++ "\n" ++ bcode ++ "}"
+>    cg (WHILEACC t a b) 
+>           = do tcode <- cgs t
+>                bcode <- cgs b
+>                return $ "whileacc (1) { " ++ tcode ++ "\n" ++
+>                       bcode ++ "}"
+>                             
 >    cg (JUMP i) = return $ "goto lbl" ++ show i ++ ";"
 >    cg (JFALSE t i) 
 >           = return $ "assertInt(" ++ tmp t ++ ");\n" ++
@@ -241,7 +247,7 @@
 
 > declare decl fn start end 
 >     | start == end = ""
->     | otherwise = decl ++ fn start ++";\n" ++
+>     | otherwise = decl ++ fn start ++" = NULL;\n" ++
 >                   declare decl fn (start+1) end
 
 > foreignArgs [] = ""

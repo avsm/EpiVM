@@ -8,6 +8,10 @@ void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
 void printBigInt(mpz_t x) { printf("%s\n",mpz_get_str(NULL,10,x)); }
 
+void epicGC() {
+    GC_gcollect();
+}
+
 void epicMemInfo() {
     GC_gcollect();
     int heap = GC_get_heap_size();
@@ -35,13 +39,19 @@ char* readStr() {
 
 // FIXME: Do this properly!
 void* freadStr(void* h) {
-    VAL c = GC_MALLOC_ATOMIC(sizeof(Closure)+64*sizeof(char)+sizeof(char)+1);
+    static char bufin[128];
+    bufin[0]='\0';
+
+    FILE* f = (FILE*)h;
+    fgets(bufin,128,f);
+    int len = strlen(bufin);
+
+    VAL c = GC_MALLOC_ATOMIC(sizeof(Closure)+len*sizeof(char)+sizeof(char)+1);
     SETTY(c, STRING);
     c->info = ((void*)(c+1));
     char *buf = (char*)(c->info);
-    
-    FILE* f = (FILE*)h;
-    fgets(buf,64,f);
+    strcpy(buf,bufin);
+
     char *loc = strchr(buf,'\n');
     if (loc) *loc = '\0'; else buf[0]='\0';
     return ((void*)c);
@@ -54,6 +64,10 @@ void fputStr(void* h, char* str) {
 
 int streq(char* x, char* y) {
     return !(strcmp(x,y));
+}
+
+int strlt(char* x, char* y) {
+    return strcmp(x,y)<0;
 }
 
 int strToInt(char* str)
