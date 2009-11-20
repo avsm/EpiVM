@@ -23,8 +23,9 @@ int main(int argc, char* argv[]) {
     _do___U__main();
 
     GC_gcollect();
-    fprintf(stderr, "%d\n", GC_gc_no);
+/*    fprintf(stderr, "%d\n", GC_gc_no);
     fprintf(stderr, "Heap: %d\n", GC_get_heap_size());
-    fprintf(stderr, "Total: %d\n", GC_get_total_bytes());
+    fprintf(stderr, "Free: %d\n", GC_get_free_bytes());
+    fprintf(stderr, "Total: %d\n", GC_get_total_bytes());*/
     return 0; 
 }
