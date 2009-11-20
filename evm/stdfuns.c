@@ -91,6 +91,25 @@ int strIndex(char* str, int i)
     return (int)(str[i]);
 }
 
+int strHead(char* str) {
+    if (str[0]=='\0') 
+	ERROR("Can't take the head of an empty string");
+    return (int)(str[0]);
+}
+
+char* strTail(char* str) {
+    if (str[0]=='\0') 
+	ERROR("Can't take the tail of an empty string");
+    return str+1; // I'll need to check the GC will understand this...
+}
+
+char* strCons(int h, char* str) {
+    char* buf = EMALLOC((1+strlen(str))*sizeof(char));
+    buf[0]=(char)h;
+    strcpy(buf+1, str);
+    return buf;
+}
+
 char* append(char* x, char* y) {
     char* buf = EMALLOC((strlen(x)+strlen(y))*sizeof(char));
     strcpy(buf,x);
