@@ -257,47 +257,54 @@ void doUnlock(int lock)
     pthread_mutex_unlock(&(ms[lock]->m_id));
 }
 
-void* runThread(void* proc) {
-    void* v = DO_EVAL(proc, 1);
+struct threadinfo {
+    void* proc;
+    void* result;
+};
+
+void* runThread(void* th_in) {
+    struct threadinfo* th = (struct threadinfo*)th_in;
+    void* v = DO_EVAL(th->proc, 1);
+    th->result = v;
     return v;
 }
 
 void doFork(void* proc)
 {
     pthread_t* t = EMALLOC(sizeof(pthread_t));
-//    printf("CREATING THREAD %d\n", t);
-//    int r = 
-    pthread_create(t, NULL, runThread, proc);
-//    printf("THREAD CREATED %d\n", r);
-}
-
-void withinTimerHandler(int sig) {
+    struct threadinfo th;
+    th.proc = proc;
+    th.result = NULL;
+    pthread_create(t, NULL, runThread, &th);
 }
 
 void* doWithin(int limit, void* proc, void* doOnFail)
 {
     pthread_t* t = EMALLOC(sizeof(pthread_t));
 //    printf("CREATING THREAD %d\n", t);
+    struct threadinfo th;
+    th.proc = proc;
+    th.result = NULL;
 
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int tnow, tthen = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
 
-    pthread_create(t, NULL, runThread, proc);
-    printf("tthen %d\n", tthen);
+    pthread_create(t, NULL, runThread, &th);
+//    printf("tthen %d\n", tthen);
 
     void* ans;
 
     do 
     {
 	// If the answer has been updated, we're done.
-	if (NONEEDSEVAL(proc)) {
+	if (th.result!=NULL) {
 	    pthread_join(*t, &ans);
 	    return ans;
 	}
 	gettimeofday(&tv, NULL);
 	tnow = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
-	printf("tnow %d\n", tnow);
+//	printf("tnow %d\n", tnow);
     }
     while(tnow<(tthen+limit));
     pthread_cancel(*t);
