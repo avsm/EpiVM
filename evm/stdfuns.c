@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <string.h>
+#include <sys/time.h>
 
 void printInt(int x) { printf("%d\n",x); }
 void putStr(char* s) { printf("%s",s); }
@@ -257,8 +258,8 @@ void doUnlock(int lock)
 }
 
 void* runThread(void* proc) {
-    DO_EVAL(proc, 1);
-    return NULL;
+    void* v = DO_EVAL(proc, 1);
+    return v;
 }
 
 void doFork(void* proc)
@@ -268,6 +269,39 @@ void doFork(void* proc)
 //    int r = 
     pthread_create(t, NULL, runThread, proc);
 //    printf("THREAD CREATED %d\n", r);
+}
+
+void withinTimerHandler(int sig) {
+}
+
+void* doWithin(int limit, void* proc, void* doOnFail)
+{
+    pthread_t* t = EMALLOC(sizeof(pthread_t));
+//    printf("CREATING THREAD %d\n", t);
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int tnow, tthen = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
+
+    pthread_create(t, NULL, runThread, proc);
+    printf("tthen %d\n", tthen);
+
+    void* ans;
+
+    do 
+    {
+	// If the answer has been updated, we're done.
+	if (NONEEDSEVAL(proc)) {
+	    pthread_join(*t, &ans);
+	    return ans;
+	}
+	gettimeofday(&tv, NULL);
+	tnow = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
+	printf("tnow %d\n", tnow);
+    }
+    while(tnow<(tthen+limit));
+    pthread_cancel(*t);
+    return DO_EVAL(doOnFail,1);
 }
 
 

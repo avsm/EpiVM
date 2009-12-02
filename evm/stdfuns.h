@@ -46,6 +46,7 @@ int newLock(int sem);
 void doLock(int lock);
 void doUnlock(int lock);
 void doFork(void* proc);
+void* doWithin(int limit, void* proc, void* doOnFail);
 
 int strToInt(char* str);
 char* intToStr(int x);

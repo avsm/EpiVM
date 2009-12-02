@@ -93,7 +93,7 @@ Get the arity of a definition in the context
 >           | Impossible -- Claimed impossible to reach code
 >           | ForeignCall Type String [(Expr, Type)] -- Foreign function call
 >           | LazyForeignCall Type String [(Expr, Type)] -- Foreign function call
->   deriving (Show, Eq)
+>   deriving Eq
 
 > data CaseAlt = Alt { alt_tag :: Tag,
 >                      alt_args :: [(Name, Type)], -- bound arguments
@@ -102,7 +102,7 @@ Get the arity of a definition in the context
 >              | ConstAlt { alt_const :: Int,
 >                           alt_expr :: Expr }
 >              | DefaultCase { alt_expr :: Expr }
->   deriving (Show, Eq)
+>   deriving Eq
 
 > instance Ord CaseAlt where -- only the tag matters
 >    compare (Alt t1 _ _) (Alt t2 _ _) = compare t1 t2
@@ -113,6 +113,35 @@ Get the arity of a definition in the context
 > data Op = Plus | Minus | Times | Divide | OpEQ | OpLT | OpLE | OpGT | OpGE
 >   deriving (Show, Eq)
 
+> instance Show CaseAlt where
+>     show (DefaultCase e) = "default -> " ++ show e
+>     show (ConstAlt i e) = show i ++ " -> " ++ show e
+>     show (Alt t args e) = "Con " ++ show t ++ show args ++ " -> " ++ show e
+
+> instance Show Expr where
+>     show (V i) = "var" ++ show i
+>     show (R n) = show n
+>     show (App f as) = show f ++ show as
+>     show (Lazy e) = "%lazy(" ++ show e ++ ")"
+>     show (Effect e) = "%effect(" ++ show e ++ ")"
+>     show (Con t es) = "Con " ++ show t ++ show es
+>     show (Const c) = show c
+>     show (Proj e i) = show e ++ "!" ++ show i
+>     show (Case e alts) = "case " ++ show e ++ " of " ++ show alts
+>     show (If x t e) = "if " ++ show x ++ " then " ++ show t ++ " else " ++ show e
+>     show (While e b) = "%while(" ++ show e ++ "," ++ show b ++ ")"
+>     show (WhileAcc e b a) = "%while(" ++ show e ++ ", " ++ show b ++ 
+>                             ", " ++ show a ++ ")"
+>     show (Op o l r) = "(" ++ show l ++ " " ++ show o ++ " " ++ show r ++")"
+>     show (Let n t v e) = "let " ++ show n ++ ":" ++ show t ++ " = " ++
+>                          show v ++ " in " ++ show e
+>     show (Error e) = "error(" ++ show e ++ ")"
+>     show Impossible = "Impossible"
+>     show (ForeignCall t s as) = "foreign " ++ show t ++ " " ++
+>                                 show s ++ show as
+>     show (LazyForeignCall t s as) = "lazy foreign " ++ show t ++ " " ++
+>                                     show s ++ show as
+                             
 Supercombinator definitions
 
 > data Func = Bind { fun_args :: [(Name, Type)],
