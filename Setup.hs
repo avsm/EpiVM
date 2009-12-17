@@ -1,4 +1,6 @@
 import Distribution.Simple
+import Distribution.Simple.InstallDirs
+import Distribution.Simple.LocalBuildInfo
 import Distribution.PackageDescription
 
 import System
@@ -21,6 +23,14 @@ postConfLib args flags desc local
     = do exit <- system "make -C evm clean"
          return ()
 
+addPrefix pfx var c = "export " ++ var ++ "=" ++ show pfx ++ "/" ++ c ++ ":$" ++ var
+
+postInstLib args flags desc local
+    = do let pfx = prefix (installDirTemplates local)
+         exit <- system $ "make -C evm install PREFIX=" ++ show pfx
+         return ()
+
 main = defaultMainWithHooks (simpleUserHooks { postBuild = buildLib,
-                                               postConf = postConfLib})
+                                               postConf = postConfLib,
+                                               postInst = postInstLib })
 

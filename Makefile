@@ -16,8 +16,8 @@ rts:
 	$(MAKE) -C evm
 
 install: .PHONY
-	$(MAKE) -C evm install PREFIX=$(PREFIX)
-	$(MAKE) -C lib install PREFIX=$(PREFIX)
+	#$(MAKE) -C evm install PREFIX=$(PREFIX)
+	#$(MAKE) -C lib install PREFIX=$(PREFIX)
 	cabal install $(DB)
 
 unregister:

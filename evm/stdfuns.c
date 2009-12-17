@@ -288,7 +288,7 @@ void* doWithin(int limit, void* proc, void* doOnFail)
 
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    int tnow, tthen = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
+    int tnow, tthen = do_utime();
 
     pthread_create(t, NULL, runThread, &th);
 //    printf("tthen %d\n", tthen);
@@ -303,14 +303,24 @@ void* doWithin(int limit, void* proc, void* doOnFail)
 	    return ans;
 	}
 	gettimeofday(&tv, NULL);
-	tnow = 1000000*(tv.tv_sec & 0xff)+tv.tv_usec;
+	tnow = do_utime();
+	usleep(100);
 //	printf("tnow %d\n", tnow);
     }
-    while(tnow<(tthen+limit));
+    while(tnow<(tthen+(limit*1000)));
     pthread_cancel(*t);
     return DO_EVAL(doOnFail,1);
 }
 
+int do_utime() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    static int start=0;
+    if (start==0) { start = tv.tv_sec; }
+
+    return 1000000*(tv.tv_sec - start)+tv.tv_usec;
+}
 
 // Basic file handling
 

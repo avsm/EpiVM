@@ -48,6 +48,8 @@ void doUnlock(int lock);
 void doFork(void* proc);
 void* doWithin(int limit, void* proc, void* doOnFail);
 
+int do_utime() ;
+
 int strToInt(char* str);
 char* intToStr(int x);
 
