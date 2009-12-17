@@ -3,8 +3,8 @@ files, assuming you are installing epic in the default location in
 your home directory, you will need something like the following in
 your .profile:
 
-export C_INCLUDE_PATH=~/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=~/include:$CPLUS_INCLUDE_PATH
-export LD_LIBRARY_PATH=~/lib:$LD_LIBRARY_PATH
-export INCLUDE_PATH=~/include:$INCLUDE_PATH
-export LIBRARY_PATH=~/lib:$LIBRARY_PATH
+export C_INCLUDE_PATH=~/include:/opt/local/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=~/include:/opt/local/include:$CPLUS_INCLUDE_PATH
+export LD_LIBRARY_PATH=~/lib:/opt/local/lib:$LD_LIBRARY_PATH
+export INCLUDE_PATH=~/include:/opt/local/include:$INCLUDE_PATH
+export LIBRARY_PATH=~/lib:/opt/local/lib:$LIBRARY_PATH
