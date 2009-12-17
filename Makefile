@@ -3,13 +3,13 @@ PREFIX = $(HOME)
 GHCOPTS = 
 
 package:
-	runhaskell Setup.hs build
+	cabal build
 
 cabal-package:
-	runhaskell Setup.hs sdist
+	cabal sdist
 
 configure:
-	runhaskell Setup.hs configure --user --ghc --prefix=$(PREFIX)
+	cabal configure --user --ghc --prefix=$(PREFIX)
 #	cd Epic; echo "module Epic.Prefix where libprefix=\"$(PREFIX)\"" > Prefix.hs
 
 rts:
@@ -18,16 +18,16 @@ rts:
 install: .PHONY
 	$(MAKE) -C evm install PREFIX=$(PREFIX)
 	$(MAKE) -C lib install PREFIX=$(PREFIX)
-	runhaskell Setup.hs install $(DB)
+	cabal install $(DB)
 
 unregister:
-	runhaskell Setup.hs unregister $(DB)
+	cabal unregister $(DB)
 
 doc:
-	runhaskell Setup.hs haddock
+	cabal haddock
 
 clean:
-	runhaskell Setup.hs clean
+	cabal clean
 	$(MAKE) -C evm clean
 	cd compiler; rm -f *.o *.hi epic
 
