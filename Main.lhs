@@ -7,6 +7,7 @@
 > import Monad
 
 > import Epic.Compiler
+> import Paths_epic
 
 > main = do args <- getArgs
 >           (fns, opts) <- getInput args
@@ -60,6 +61,7 @@
 
 > getInput :: [String] -> IO ([FilePath],[Option])
 > getInput args = do let opts = parseArgs args
+>                    processFlags opts False
 >                    fns <- getFile opts
 >                    if (length fns == 0) 
 >                       then do showUsage
@@ -79,6 +81,8 @@
 >             | ExtraInc String -- extra files to inlude
 >             | COpt String -- option to send straight to gcc
 >             | ExtMain -- external main (i.e. in a .o)
+>             | CFlags -- output include flags
+>             | LibFlags -- output linker flags
 >   deriving Eq
 
 > parseArgs :: [String] -> [Option]
@@ -90,6 +94,8 @@
 > parseArgs ("-o":name:args) = (Output name):(parseArgs args)
 > parseArgs ("-h":name:args) = (Header name):(parseArgs args)
 > parseArgs ("-i":inc:args) = (ExtraInc inc):(parseArgs args)
+> parseArgs ("-includedirs":args) = CFlags:(parseArgs args)
+> parseArgs ("-libdirs":args) = LibFlags:(parseArgs args)
 > parseArgs (('$':x):args) = (COpt (x ++ concat (map (" "++) args))):[]
 > parseArgs (('-':x):args) = (COpt x):(parseArgs args)
 > parseArgs (x:args) = (File x):(parseArgs args)
@@ -116,3 +122,14 @@
 >                                 return (x:fns)
 > getExtra (_:xs) = getExtra xs
 > getExtra [] = return []
+
+> processFlags :: [Option] -> Bool -> IO ()
+> processFlags [] True = do putStrLn ""; exitWith ExitSuccess
+> processFlags [] False = return ()
+> processFlags (LibFlags:xs) _ = do datadir <- getDataDir
+>                                   putStr $ "-L"++datadir++"/evm "
+>                                   processFlags xs True
+> processFlags (CFlags:xs) _ = do datadir <- getDataDir
+>                                 putStr $ "-I"++datadir++"/evm "
+>                                 processFlags xs True
+> processFlags (_:xs) quit = processFlags xs quit

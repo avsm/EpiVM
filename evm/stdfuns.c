@@ -1,6 +1,7 @@
 #include "stdfuns.h"
 #include "closure.h"
 #include <stdlib.h>
+#include <unistd.h>
 #include <gmp.h>
 #include <string.h>
 #include <sys/time.h>
