@@ -12,10 +12,13 @@
 #include <gmp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define EMALLOC GC_MALLOC
 #define EREALLOC GC_REALLOC
 #define EFREE GC_FREE
+
+typedef intptr_t eint;
 
 //#define EMALLOC malloc
 //#define EREALLOC realloc
@@ -27,9 +30,9 @@
 #define MKCLOSURE (Closure*)EMALLOC(sizeof(Closure))
 #define MKUNIT (void*)0
 
-#define INTOP(op,x,y) MKINT((((int)x)>>1) op (((int)y)>>1))
-#define ADD(x,y) (void*)(((int)x)+(((int)y)-1))
-#define MULT(x,y) (MKINT((((int)x)>>1) * (((int)y)>>1)))
+#define INTOP(op,x,y) MKINT((((eint)x)>>1) op (((eint)y)>>1))
+#define ADD(x,y) (void*)(((eint)x)+(((eint)y)-1))
+#define MULT(x,y) (MKINT((((eint)x)>>1) * (((eint)y)>>1)))
 #define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
     || ISFV(x)) return 0;
 
@@ -68,7 +71,7 @@ typedef Closure* VAL;
 
 #define GETTY(x) (ISINT(x) ? INT : ((ClosureType)(((x)->ty) >> 24)))
 #define QGETTY(x) ((ClosureType)(((x)->ty) >> 24))
-#define SETTY(x,t) (x)->ty = (((int)t) << 24)
+#define SETTY(x,t) (x)->ty = (((eint)t) << 24)
 
 #define REF(x) x
 #define DEREF(x) 
@@ -99,7 +102,7 @@ typedef struct {
 #define ARITY(x) (((con*)((Closure*)x)->info)->tag >> 16)
 
 #define ISCON(x) (GETTY(((Closure*)(x)))==CON)
-#define ISINT(x) ((((int)x)&1) == 1)
+#define ISINT(x) ((((eint)x)&1) == 1)
 #define ISTHUNK(x) (GETTY(((Closure*)(x)))==THUNK)
 #define ISFUN(x) (GETTY(((Closure*)(x)))==FUN)
 #define ISFV(x) (GETTY(((Closure*)(x)))==FREEVAR)
@@ -167,9 +170,12 @@ VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 extern VAL* zcon;
 
 #define MKINT(x) ((void*)((x)<<1)+1)
-#define GETINT(x) ((int)(x)>>1)
+#define GETINT(x) ((eint)(x)>>1)
 #define GETPTR(x) ((void*)(((VAL)(x))->info))
 #define GETSTR(x) ((char*)(((VAL)(x))->info))
+
+#define INTTOEINT(x) ((eint)(x))
+#define EINTTOINT(x) ((int)(x))
 
 //void* MKINT(int x);
 void* NEWBIGINT(char* bigint);

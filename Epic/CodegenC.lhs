@@ -255,7 +255,7 @@
 > foreignArgs (x:xs) = foreignArg x ++ ", " ++ foreignArgs xs
 
 > cToEpic var TyString = "MKSTR((char*)(" ++ var ++ "))"
-> cToEpic var TyInt = "MKINT((int)(" ++ var ++ "))"
+> cToEpic var TyInt = "MKINT(INTTOEINT(" ++ var ++ "))"
 > cToEpic var TyPtr = "MKPTR(" ++ var ++ ")"
 > cToEpic var TyBigInt = "MKBIGINT((mpz_t*)(" ++ var ++ "))"
 > cToEpic var TyUnit = "NULL"
@@ -272,7 +272,7 @@
  castFrom t TyBigInt rest = tmp t ++ " = MKBIGINT((mpz_t*)(" ++ rest ++ "))"
  castFrom t _ rest = tmp t ++ " = (void*)(" ++ rest ++ ")"
 
-> epicToC t TyInt = "GETINT("++ t ++")"
+> epicToC t TyInt = "EINTTOINT(GETINT("++ t ++"))"
 > epicToC t TyBigInt = "*(GETBIGINT("++ t ++"))"
 > epicToC t TyString = "GETSTR("++ t ++")"
 > epicToC t TyPtr = "GETPTR("++ t ++")"

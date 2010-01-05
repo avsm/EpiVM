@@ -50,7 +50,7 @@ void dumpClosureA(Closure* c, int rec) {
 	dumpCon((con*)c->info, rec);
 	break;
     case INT:
-	if (!rec) { printf("INT[%d", ((int)c)>>1); } else { printf("[%d", ((int)c)>>1); }
+	if (!rec) { printf("INT[%ld", ((eint)c)>>1); } else { printf("[%ld", ((eint)c)>>1); }
 	break;
     case BIGINT:
 	printf("BIGINT[");
@@ -74,7 +74,7 @@ void dumpClosureA(Closure* c, int rec) {
 	printf("FREEVAR[");
 	break;
     default:
-	printf("[%d,%d", GETTY(c), (int)c->info);
+	printf("[%d,%ld", GETTY(c), (eint)c->info);
     }
     printf("]");
 }
@@ -688,7 +688,7 @@ void* MKBIGINT(mpz_t* big)
 /*
 int GETINT(void* x)
 {
-    return ((int)x)>>1;
+    return ((eint)x)>>1;
 }
 */
 
