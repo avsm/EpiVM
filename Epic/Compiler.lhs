@@ -37,6 +37,7 @@ Brings everything together; parsing, checking, code generation
 >                     | ShowParseTree -- ^ Show parse tree
 >                     | MakeHeader FilePath -- ^ Output a .h file too
 >                     | GCCOpt String -- ^ Extra GCC option
+>                     | Debug -- ^ Generate debug info
 >   deriving Eq
 
 > addGCC :: [CompileOptions] -> String
@@ -84,7 +85,8 @@ Chop off everything after the last / - get the directory a file is in
 >                 checked <- compileDecls simplified tmph hdr
 >                 fp <- getDataFileName "evm/closure.h"
 >                 let libdir = trimLast fp
->                 let cmd = "gcc -c -O3 -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
+>                 let dbg = if (elem Debug opts) then "-g" else "-O3"
+>                 let cmd = "gcc -c " ++ dbg ++ " -foptimize-sibling-calls -x c " ++ tmpn ++ " -I" ++ libdir ++ " -o " ++ outf ++ " " ++ addGCC opts ++ doTrace opts
 >                 -- putStrLn $ cmd
 >                 -- putStrLn $ fp
 >                 exit <- system cmd
@@ -121,12 +123,14 @@ Chop off everything after the last / - get the directory a file is in
 >         -> [FilePath] -- ^ Extra include files for main program
 >         -> FilePath -- ^ Executable filename
 >         -> Bool -- ^ Generate a 'main' (False if externally defined)
+>         -> [CompileOptions] -- Keep the C file
 >         -> IO ()
-> link infs extraIncs outf genmain = do
+> link infs extraIncs outf genmain opts = do
 >     mainprog <- if genmain then mkMain extraIncs else return ""
 >     fp <- getDataFileName "evm/closure.h"
 >     let libdir = trimLast fp
->     let cmd = "gcc -x c -O3 -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
+>     let dbg = if (elem Debug opts) then "-g" else "-O3"
+>     let cmd = "gcc -x c " ++ dbg ++ " -foptimize-sibling-calls " ++ mainprog ++ " -x none -L" ++
 >               libdir++" -I"++libdir ++ " " ++
 >               (concat (map (++" ") infs)) ++ 
 >               " -levm -lgc -lpthread -lgmp -o "++outf

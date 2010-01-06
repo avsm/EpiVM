@@ -4,10 +4,17 @@
 > import System.Directory
 > import System.Environment
 > import System.IO
+> import Distribution.Version
 > import Monad
 
 > import Epic.Compiler
 > import Paths_epic
+
+> versionString = showV (versionBranch version)
+>   where
+>     showV [] = ""
+>     showV [a] = show a
+>     showV (x:xs) = show x ++ "." ++ showV xs
 
 > main = do args <- getArgs
 >           (fns, opts) <- getInput args
@@ -16,7 +23,7 @@
 >           copts <- getCOpts opts
 >           extras <- getExtra opts
 >           if ((length ofiles) > 0 && (not (elem Obj opts)))
->              then link (ofiles ++ copts) extras outfile (not (elem ExtMain opts))
+>              then link (ofiles ++ copts) extras outfile (not (elem ExtMain opts)) (mkOpts opts)
 >              else return ()
 >   where mkOpts (KeepInt:xs) = KeepC:(mkOpts xs)
 >         mkOpts (TraceOn:xs) = Trace:(mkOpts xs)
@@ -68,7 +75,7 @@
 >                               return (fns,opts)
 >                       else return (fns,opts)
 
-> showUsage = do putStrLn "Epigram Supercombinator Compiler version 0.1"
+> showUsage = do putStrLn $ "Epigram Supercombinator Compiler version " ++ versionString
 >                putStrLn "Usage:\n\tepic <input file> [options]"
 >                exitWith (ExitFailure 1)
 
@@ -83,6 +90,7 @@
 >             | ExtMain -- external main (i.e. in a .o)
 >             | CFlags -- output include flags
 >             | LibFlags -- output linker flags
+>             | DbgInfo -- generate debug info
 >   deriving Eq
 
 > parseArgs :: [String] -> [Option]
@@ -96,6 +104,7 @@
 > parseArgs ("-i":inc:args) = (ExtraInc inc):(parseArgs args)
 > parseArgs ("-includedirs":args) = CFlags:(parseArgs args)
 > parseArgs ("-libdirs":args) = LibFlags:(parseArgs args)
+> parseArgs ("-g":args) = DbgInfo:(parseArgs args)
 > parseArgs (('$':x):args) = (COpt (x ++ concat (map (" "++) args))):[]
 > parseArgs (('-':x):args) = (COpt x):(parseArgs args)
 > parseArgs (x:args) = (File x):(parseArgs args)
