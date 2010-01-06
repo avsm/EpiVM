@@ -88,7 +88,7 @@ at this stage.
 >        return $ (LOCALS (num_locals cs)):
 >                 (TRACE (show fname) [0..(length args)-1]):
 >                 (TMPS (max_tmp cs)):(CONSTS (string_pool cs)):code ++
->                   [EVAL 0 True, RETURN 0]
+>                   [RETURN 0]
 
 >   where
 
