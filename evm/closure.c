@@ -38,6 +38,7 @@ void dumpRecord(Closure* r) {
 }
 
 void dumpClosureA(Closure* c, int rec) {
+    c = DO_EVAL(c,0);
     switch(GETTY(c)) {
     case FUN:
 	printf("FUN[");
