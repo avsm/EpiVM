@@ -9,11 +9,20 @@
 
 void* _do__U_main();
 
+void** _epic_top_of_stack;
+
 int main(int argc, char* argv[]) {
+    void* stacktop = NULL;
+    _epic_top_of_stack = (void**)&stacktop;
+
     GC_init();
     init_evm();
-//    GC_use_entire_heap = 1;
-//    GC_free_space_divisor = 1;
+    GC_use_entire_heap = 1;
+    GC_free_space_divisor = 2;
+//    GC_enable_incremental();
+//    GC_time_limit = GC_TIME_UNLIMITED;
+
+//    GC_full_freq=15;
 //    fprintf(stderr, "Heap: %d\n", GC_get_heap_size());
     GC_expand_hp(1000000);
 //    fprintf(stderr, "Heap: %d\n", GC_get_heap_size());

@@ -7,16 +7,16 @@
 
 VAL one;
 VAL* zcon;
-void* blob = NULL;
-int blobnext = 0;
+//void* blob = NULL;
+//int blobnext = 0;
 
-void* FASTMALLOC(int size) {
+/*void* FASTMALLOC(int size) {
     if (blob == NULL) { blob = malloc(10001000); }
     void* newblock = blob+blobnext;
     blobnext+=((size+4) & 0xfffffffc);
     if (blobnext>10000000) blobnext=0;
     return newblock;
-}
+    }*/
 
 void dumpClosureA(Closure* c, int rec);
 
@@ -113,6 +113,7 @@ inline VAL CLOSURE(func x, int arity, int args, void** block)
 
     SETTY(c, FUN);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -129,6 +130,7 @@ inline VAL CONSTRUCTORn(int tag, int arity, void** block)
     }
     SETTY(c, CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -141,6 +143,7 @@ inline VAL CONSTRUCTOR1(int tag, VAL a1)
     cn->args[0] = a1;
     SETTY(c,CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -154,6 +157,7 @@ inline VAL CONSTRUCTOR2(int tag, VAL a1, VAL a2)
     cn->args[1] = a2;
     SETTY(c,CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -168,6 +172,7 @@ inline VAL CONSTRUCTOR3(int tag, VAL a1, VAL a2, VAL a3)
     cn->args[2] = a3;
     SETTY(c,CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -183,6 +188,7 @@ inline VAL CONSTRUCTOR4(int tag, VAL a1, VAL a2, VAL a3, VAL a4)
     cn->args[3] = a4;
     SETTY(c,CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -199,6 +205,7 @@ inline VAL CONSTRUCTOR5(int tag, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
     cn->args[4] = a5;
     SETTY(c,CON);
     c->info = (void*)cn;
+    EREADY(c);
     return c;
 }
 
@@ -367,6 +374,7 @@ inline VAL CLOSURE_APPLY(VAL f, int args, void** block)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -386,6 +394,7 @@ inline VAL aux_CLOSURE_APPLY1(VAL f, VAL a1)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -406,6 +415,7 @@ inline VAL aux_CLOSURE_APPLY2(VAL f, VAL a1, VAL a2)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -427,6 +437,7 @@ inline VAL aux_CLOSURE_APPLY3(VAL f, VAL a1, VAL a2, VAL a3)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -449,6 +460,7 @@ inline VAL aux_CLOSURE_APPLY4(VAL f, VAL a1, VAL a2, VAL a3, VAL a4)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -472,6 +484,7 @@ inline VAL aux_CLOSURE_APPLY5(VAL f, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5)
 
     SETTY(c,THUNK);
     c->info = (void*)fn;
+    EREADY(c);
     return c;
 }
 
@@ -639,6 +652,7 @@ VAL DO_EVAL(VAL x, int update) {
     default:
 	assert(0); // Can't happen
     }
+    EREADY(x);
     return x;
 }
 
@@ -670,6 +684,7 @@ void* NEWBIGINT(char* intstr)
 
     SETTY(c, BIGINT);
     c->info = (void*)bigint;
+    EREADY(c);
     return c;
 }
 
@@ -683,6 +698,7 @@ void* MKBIGINT(mpz_t* big)
 
     SETTY(c, BIGINT);
     c->info = (void*)bigint;
+    EREADY(c);
     return c;
 }
 
@@ -710,6 +726,7 @@ void* MKSTR(char* x)
 // Since MKSTR is used to build strings from foreign calls, the string
 // itself will already have been allocated so we just want the closure.
     c->info=x;
+    EREADY(c);
     return c;
 }
 
@@ -718,6 +735,7 @@ void* MKPTR(void* x)
     VAL c = MKCLOSURE;
     SETTY(c, PTR);
     c->info = x;
+    EREADY(c);
     return c;
 }
 
@@ -738,6 +756,7 @@ void* MKFREE(int x)
     VAL c = MKCLOSURE;
     SETTY(c, FREEVAR);
     c->info = (void*)x;
+    EREADY(c);
     return c;
 }
 
@@ -749,4 +768,5 @@ void init_evm()
     for(i=0;i<255;++i) {
 	zcon[i] = CONSTRUCTORn(i,0,0);
     }
+    EREADY(zcon);
 }

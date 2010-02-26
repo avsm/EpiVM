@@ -111,6 +111,7 @@ Get the arity of a definition in the context
 >    compare _ _ = EQ
 
 > data Op = Plus | Minus | Times | Divide | OpEQ | OpLT | OpLE | OpGT | OpGE
+>         | ShL  | ShR
 >   deriving (Show, Eq)
 
 > instance Show CaseAlt where

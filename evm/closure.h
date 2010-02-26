@@ -1,20 +1,14 @@
 #ifndef _CLOSURE_H
 #define _CLOSURE_H
 
-# ifndef WIN32
-#  include <pthread.h>
-#  define GC_THREADS
-# else
-#  define GC_WIN32_THREADS
-# endif
-
-#include <gc/gc.h>
+#include <emalloc.h>
 #include <gmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
 #define EMALLOC GC_MALLOC
+#define EREADY(x) 
 #define EREALLOC GC_REALLOC
 #define EFREE GC_FREE
 
@@ -50,7 +44,8 @@ typedef enum {
     STRING, 
     UNIT, 
     PTR,
-    FREEVAR 
+    FREEVAR,
+    IND
 } ClosureType;
 
 typedef struct {
@@ -206,7 +201,8 @@ void* FASTMALLOC(int size);
     ((con*)((VAL)c+1))->args = (void*)c+sizeof(Closure)+sizeof(con); \
     ((con*)((VAL)c+1))->args[0] = x; \
     SETTY(((VAL)c),CON);	 \
-    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1)); \
+    EREADY(c);
 
 #define CONSTRUCTOR2m(c,t,x,y)		\
     c=EMALLOC(sizeof(Closure)+sizeof(con)+2*sizeof(VAL)); \
@@ -215,7 +211,8 @@ void* FASTMALLOC(int size);
     ((con*)((VAL)c+1))->args[0] = x; \
     ((con*)((VAL)c+1))->args[1] = y; \
     SETTY(((VAL)c),CON);	 \
-    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1)); \
+    EREADY(c);
 
 #define CONSTRUCTOR3m(c,t,x,y,z)		\
     c=EMALLOC(sizeof(Closure)+sizeof(con)+3*sizeof(VAL)); \
@@ -225,7 +222,8 @@ void* FASTMALLOC(int size);
     ((con*)((VAL)c+1))->args[1] = y; \
     ((con*)((VAL)c+1))->args[2] = z; \
     SETTY(((VAL)c),CON);	 \
-    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1)); \
+    EREADY(c);
 
 #define CONSTRUCTOR4m(c,t,x,y,z,w)			  \
     c=EMALLOC(sizeof(Closure)+sizeof(con)+4*sizeof(VAL)); \
@@ -236,7 +234,8 @@ void* FASTMALLOC(int size);
     ((con*)((VAL)c+1))->args[2] = z; \
     ((con*)((VAL)c+1))->args[3] = w; \
     SETTY(((VAL)c),CON);	 \
-    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1)); \
+    EREADY(c);
 
 #define CONSTRUCTOR5m(c,t,x,y,z,w,v)			  \
     c=EMALLOC(sizeof(Closure)+sizeof(con)+5*sizeof(VAL)); \
@@ -248,7 +247,8 @@ void* FASTMALLOC(int size);
     ((con*)((VAL)c+1))->args[3] = w; \
     ((con*)((VAL)c+1))->args[4] = v; \
     SETTY(((VAL)c),CON);	 \
-    ((VAL)c)->info = (void*)((con*)((VAL)c+1));
+    ((VAL)c)->info = (void*)((con*)((VAL)c+1)); \
+    EREADY(c);
 
 //    s = EMALLOC(sizeof(Closure)+strlen(x)+sizeof(char)+1);	
 

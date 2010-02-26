@@ -84,6 +84,8 @@
 >       | TokenLE
 >       | TokenGT
 >       | TokenLT
+>       | TokenShL
+>       | TokenShR
 >       | TokenArrow
 >       | TokenColon
 >       | TokenUnit
@@ -141,6 +143,8 @@
 > lexer cont ('=':'=':cs) = cont TokenEQ cs
 > lexer cont ('>':'=':cs) = cont TokenGE cs
 > lexer cont ('<':'=':cs) = cont TokenLE cs
+> lexer cont ('<':'<':cs) = cont TokenShL cs
+> lexer cont ('>':'>':cs) = cont TokenShR cs
 > lexer cont ('>':cs) = cont TokenGT cs
 > lexer cont ('<':cs) = cont TokenLT cs
 > lexer cont ('=':cs) = cont TokenEquals cs

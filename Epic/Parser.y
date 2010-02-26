@@ -71,6 +71,8 @@ import Epic.Lexer
       eq              { TokenEQ }
       le              { TokenLE }
       ge              { TokenGE }
+      shl             { TokenShL }
+      shr             { TokenShR }
       '<'             { TokenLT }
       '>'             { TokenGT }
       ':'             { TokenColon }
@@ -93,6 +95,7 @@ import Epic.Lexer
 %left eq
 %left ';'
 %left '<' '>' le ge
+%left shl shr
 %left '+' '-'
 %left '*' '/'
 %left NEG
@@ -196,6 +199,8 @@ MathExpr : Expr '+' Expr { Op Plus $1 $3 }
          | '-' Expr %prec NEG { Op Minus (Const (MkInt 0)) $2 }
          | Expr '*' Expr { Op Times $1 $3 }
          | Expr '/' Expr { Op Divide $1 $3 }
+         | Expr shl Expr { Op ShL $1 $3 }
+         | Expr shr Expr { Op ShR $1 $3 }
          | Expr '<' Expr { Op OpLT $1 $3 }
          | Expr '>' Expr { Op OpGT $1 $3 }
          | Expr le Expr { Op OpLE $1 $3 }

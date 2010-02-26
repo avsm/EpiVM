@@ -290,6 +290,8 @@
 > doOp t Minus l r = tmp t ++ " = INTOP(-,"++tmp l ++ ", "++tmp r++");"
 > doOp t Times l r = tmp t ++ " = MULT("++tmp l ++ ", "++tmp r++");"
 > doOp t Divide l r = tmp t ++ " = INTOP(/,"++tmp l ++ ", "++tmp r++");"
+> doOp t ShL l r = tmp t ++ " = INTOP(<<,"++tmp l ++ ", "++tmp r++");"
+> doOp t ShR l r = tmp t ++ " = INTOP(>>,"++tmp l ++ ", "++tmp r++");"
 > doOp t OpEQ l r = tmp t ++ " = INTOP(==,"++tmp l ++ ", "++tmp r++");"
 > doOp t OpGT l r = tmp t ++ " = INTOP(>,"++tmp l ++ ", "++tmp r++");"
 > doOp t OpLT l r = tmp t ++ " = INTOP(<,"++tmp l ++ ", "++tmp r++");"
