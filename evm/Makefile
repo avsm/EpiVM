@@ -1,11 +1,11 @@
 CC = gcc
 #CFLAGS = -Wall -g
 CFLAGS = -Wall -O3
-OBJS = closure.o stdfuns.o emalloc.o
+OBJS = closure.o stdfuns.o
 INSTALLDIR = ${PREFIX}/lib/evm
 
 TARGET = libevm.a
-INSTALLHDRS = closure.h stdfuns.h emalloc.h mainprog.c
+INSTALLHDRS = closure.h stdfuns.h mainprog.c
 
 ${TARGET} : ${OBJS}
 	ar r ${TARGET} ${OBJS}

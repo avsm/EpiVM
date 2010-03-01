@@ -56,7 +56,7 @@
 >     "void* " ++ quickcall fname ++ "(" ++ showargs (zip (names 0) tys) 0 ++ ");\n" ++
 >     headers xs
 >   where names i = (MN "arg" i):(names (i+1))
-> headers ((Include h):xs) = "#include <"++h++">\n" ++ headers xs
+> headers ((Include h):xs) = "#include \""++h++"\"\n" ++ headers xs
 > headers (_:xs) = headers xs
 
 > wrappers [] = ""

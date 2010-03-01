@@ -16,8 +16,8 @@ Description:    Epic is a simple functional language which compiles to
                 (<http://www.cs.st-and.ac.uk/~eb/Idris>).
 	        It can be invoked either as a library or an application.
 
-Data-files:    evm/libevm.a evm/closure.h evm/stdfuns.h evm/emalloc.h evm/stdfuns.c evm/mainprog.c 
-Extra-source-files: evm/closure.c evm/closure.h evm/stdfuns.h evm/mainprog.c evm/stdfuns.c evm/emalloc.h evm/emalloc.c evm/Makefile 
+Data-files:    evm/libevm.a evm/closure.h evm/stdfuns.h evm/stdfuns.c evm/mainprog.c 
+Extra-source-files: evm/closure.c evm/closure.h evm/stdfuns.h evm/mainprog.c evm/stdfuns.c evm/Makefile 
 
 Cabal-Version:  >= 1.2.3
 Build-type:     Custom

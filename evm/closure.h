@@ -1,16 +1,25 @@
 #ifndef _CLOSURE_H
 #define _CLOSURE_H
 
-#include <emalloc.h>
+# ifndef WIN32
+#  include <pthread.h>
+#  define GC_THREADS
+# else
+#  define GC_WIN32_THREADS
+# endif
+
+#include <gc/gc.h>
+
+//#include <emalloc.h>
 #include <gmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#define EMALLOC GC_MALLOC
+#define EMALLOC GC_malloc
 #define EREADY(x) 
-#define EREALLOC GC_REALLOC
-#define EFREE GC_FREE
+#define EREALLOC GC_realloc
+#define EFREE GC_free
 
 typedef intptr_t eint;
 

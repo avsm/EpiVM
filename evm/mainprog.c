@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
 
     GC_init();
     init_evm();
-    GC_use_entire_heap = 1;
-    GC_free_space_divisor = 2;
+//    GC_use_entire_heap = 1;
+//    GC_free_space_divisor = 2;
 //    GC_enable_incremental();
 //    GC_time_limit = GC_TIME_UNLIMITED;
 
