@@ -28,6 +28,7 @@
 >   where mkOpts (KeepInt:xs) = KeepC:(mkOpts xs)
 >         mkOpts (TraceOn:xs) = Trace:(mkOpts xs)
 >         mkOpts (Header f:xs) = MakeHeader f:(mkOpts xs)
+>         mkOpts (DbgInfo:xs) = Debug:(mkOpts xs)
 >         mkOpts (_:xs) = mkOpts xs
 >         mkOpts [] = []
 
