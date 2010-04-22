@@ -65,6 +65,8 @@ int strIndex(char* str, int i);
 int strHead(char* str);
 char* strTail(char* str);
 char* strCons(int h, char* str);
+char* strrev(char* str);
+
 char* append(char* x, char* y);
 
 // Big integer arithmetic

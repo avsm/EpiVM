@@ -112,6 +112,17 @@ char* strCons(int h, char* str) {
     return buf;
 }
 
+char* strrev(char* str) {
+    char* buf = EMALLOC((1+strlen(str))*sizeof(char));
+    int x = strlen(str);
+    buf[x+1]='\0';
+    int y = 0; 
+    while(x>0) {
+	buf[y++] = str[--x];
+    }
+    return buf;
+}
+
 char* append(char* x, char* y) {
     char* buf = EMALLOC((strlen(x)+strlen(y))*sizeof(char));
     strcpy(buf,x);
