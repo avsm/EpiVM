@@ -173,7 +173,7 @@ VAL CLOSURE_APPLY5(VAL x, VAL a1, VAL a2, VAL a3, VAL a4, VAL a5);
 // array of zero arity constructors. We don't need more than one of each...
 extern VAL* zcon;
 
-#define MKINT(x) ((void*)((x)<<1)+1)
+#define MKINT(x) ((void*)(((x)<<1)+1))
 #define GETINT(x) ((eint)(x)>>1)
 #define GETPTR(x) ((void*)(((VAL)(x))->info))
 #define GETSTR(x) ((char*)(((VAL)(x))->info))
