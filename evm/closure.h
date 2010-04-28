@@ -33,7 +33,7 @@ typedef intptr_t eint;
 #define MKCLOSURE (Closure*)EMALLOC(sizeof(Closure))
 #define MKUNIT (void*)0
 
-#define INTOP(op,x,y) MKINT((((eint)x)>>1) op (((eint)y)>>1))
+#define INTOP(op,x,y) MKINT((eint)((((eint)(x))>>1) op (((eint)(y))>>1)))
 #define ADD(x,y) (void*)(((eint)x)+(((eint)y)-1))
 #define MULT(x,y) (MKINT((((eint)x)>>1) * (((eint)y)>>1)))
 #define CHECKEVALUATED(x) if(ISFUN(x) || ISTHUNK(x) \
