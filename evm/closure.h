@@ -194,7 +194,7 @@ void* MKPTR(void* ptr);
 mpz_t* GETBIGINT(void* x);
 //void* GETPTR(void* x);
 
-void* MKFREE(int x);
+void* MKFREE(void *x);
 
 // Exit with fatal error
 void ERROR(char* msg);

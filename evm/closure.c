@@ -751,7 +751,7 @@ void ERROR(char* msg)
     exit(1);
 }
 
-void* MKFREE(int x)
+void* MKFREE(void *x)
 {
     VAL c = MKCLOSURE;
     SETTY(c, FREEVAR);
